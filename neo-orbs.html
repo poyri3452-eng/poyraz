@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neo Düşünme Orb'ları</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff;--card:#faf8f5;--ln:#ece6de;
+  --tx:#141210;--tx2:#6e675f;--tx3:#a39b91;--br:#8b5e3c;
+  --e:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
+main{max-width:1120px;margin:0 auto;padding:56px 16px 120px}
+
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:40px}
+h1{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:clamp(38px,5vw,56px);letter-spacing:-.01em;line-height:1}
+h1 em{color:var(--br)}
+.sub{color:var(--tx2);font-size:14.5px;margin-top:10px;max-width:460px;line-height:1.5}
+
+/* canlı önizleme: gerçek bir sohbetteki gibi adımlar sırayla */
+.live{display:flex;align-items:center;gap:14px;padding:12px 18px 12px 12px;border:1px solid var(--ln);border-radius:16px;background:var(--card);min-width:280px}
+.live canvas{width:56px;height:56px;flex:none}
+.live b{display:block;font-weight:500;font-size:15px}
+.live small{color:var(--tx3);font-size:12.5px}
+.steps{display:flex;gap:4px;margin-top:7px}
+.steps i{width:14px;height:3px;border-radius:9px;background:var(--ln);transition:background .3s}
+.steps i.on{background:var(--br)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:12px}
+.orb{position:relative;border:1px solid var(--ln);border-radius:16px;background:var(--card);padding:18px 14px 14px;display:flex;flex-direction:column;align-items:center;gap:12px;transition:border-color .2s,transform .3s var(--e),background .2s}
+.orb:hover{border-color:#d9cdbf;background:#fff;transform:translateY(-2px)}
+.orb canvas{width:120px;height:120px}
+.orb .n{position:absolute;left:12px;top:10px;font-size:11px;color:var(--tx3);font-variant-numeric:tabular-nums}
+.lbl{text-align:center}
+.lbl b{font-weight:500;font-size:14px;display:inline-block;background:linear-gradient(90deg,var(--tx) 0%,var(--tx) 40%,#b9ab9b 50%,var(--tx) 60%,var(--tx) 100%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shim 2.6s linear infinite}
+.lbl b::after{content:"";display:inline-block;width:1.2em;text-align:left;animation:dots 1.4s steps(4) infinite;-webkit-text-fill-color:var(--tx)}
+.lbl small{display:block;color:var(--tx3);font-size:12px;margin-top:2px}
+@keyframes shim{from{background-position:100% 0}to{background-position:-200% 0}}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+@media (prefers-reduced-motion:reduce){.lbl b,.lbl b::after{animation:none}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Neo <em>düşünürken</em></h1>
+      <p class="sub">50 farklı orb — her biri noktalardan çizildi ve bir düşünme adımını gösteriyor. Hepsi sıfırdan yazılmış canvas animasyonu.</p>
+    </div>
+    <div class="live" aria-live="polite">
+      <canvas id="liveCv" width="112" height="112" aria-hidden="true"></canvas>
+      <div>
+        <b id="liveName">Thinking</b>
+        <small id="liveSub">Düşünüyor</small>
+        <div class="steps" id="steps"></div>
+      </div>
+    </div>
+  </header>
+  <div class="grid" id="grid"></div>
+</main>
+
+<script>
+const TAU = Math.PI*2;
+const INK = '20,18,16', BR = '139,94,60', CR = '196,160,120';
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ── yardımcılar ── */
+function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function fib(n){ const p=[], g=Math.PI*(3-Math.sqrt(5)); for(let i=0;i<n;i++){ const y=1-2*(i+.5)/n, r=Math.sqrt(1-y*y), a=g*i; p.push([Math.cos(a)*r,y,Math.sin(a)*r]); } return p; }
+function rot([x,y,z], ay, ax){ const cy=Math.cos(ay), sy=Math.sin(ay); let x1=x*cy-z*sy, z1=x*sy+z*cy; const cx=Math.cos(ax), sx=Math.sin(ax); return [x1, y*cx-z1*sx, y*sx+z1*cx]; }
+const clamp = (v,a=0,b=1) => Math.max(a,Math.min(b,v));
+const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+const tri = x => 1-Math.abs((x%2+2)%2-1);           // 0→1→0 üçgen dalga
+const lerp = (a,b,t) => a+(b-a)*t;
+const noise = (x,y,t) => (Math.sin(x*2.1+t)*Math.sin(y*1.7-t*.8)+Math.sin((x+y)*1.3+t*1.3))/2;
+
+/* ── 50 orb: [İngilizce adım, Türkçe açıklama, kurulum → çizim(dot, t)] ──
+   Koordinatlar birim çember içinde: x,y ∈ [-1,1]. dot(x, y, yarıçap(px), opaklık, renk) */
+const ORBS = [
+ ['Thinking','Düşünüyor', () => { const P=fib(170); return (d,t)=>{ for(const p of P){ const [x,y,z]=rot(p,t*.6,.45); const k=(z+1)/2; d(x*.92,y*.92,.6+k*1.5,.12+k*.88, k>.82?BR:INK); } }; }],
+ ['Searching','Web\'de arıyor', () => { const R=[.3,.52,.74,.96]; return (d,t)=>{ const sw=(t*1.4)%TAU; for(const r of R){ const n=Math.round(r*34); for(let i=0;i<n;i++){ const a=i/n*TAU; let df=((sw-a)%TAU+TAU)%TAU; const g=Math.exp(-df*1.6); d(Math.cos(a)*r,Math.sin(a)*r,1+g*1.6,.15+g*.85,g>.5?BR:INK); } } d(0,0,2.2,1,BR); }; }],
+ ['Summarizing','Özetliyor', () => { const r=rng(3), P=Array.from({length:90},()=>{ const a=r()*TAU, q=Math.sqrt(r())*.95; return [Math.cos(a)*q,Math.sin(a)*q,r()]; }); return (d,t)=>{ const k=ease(tri(t*.35)); P.forEach(([x,y,s],i)=>{ const row=i%5, col=Math.floor(i/5)%18; const tx=-.6+col/17*1.2*(1-row*.12), ty=-.3+row*.15; d(lerp(x,tx,k),lerp(y,ty,k),1+s,.35+.65*k, row===0&&k>.6?BR:INK); }); }; }],
+ ['Reading','Okuyor', () => (d,t)=>{ const rows=[-.6,-.36,-.12,.12,.36,.6]; const cur=(t*.9)%rows.length; rows.forEach((y,ri)=>{ const w=Math.sqrt(1-y*y)*.9; const n=Math.round(w*22); for(let i=0;i<=n;i++){ const x=-w+i/n*2*w; const pos=(cur-ri)*(n+1); const lit=ri===Math.floor(cur) && i<=pos; const read=ri<Math.floor(cur); d(x,y,1.3,lit?1:read?.55:.2,lit?BR:INK); } }); }],
+ ['Analyzing','Analiz ediyor', () => (d,t)=>{ for(let gx=-9;gx<=9;gx++) for(let gy=-9;gy<=9;gy++){ const x=gx/9.5, y=gy/9.5; if(x*x+y*y>.95) continue; const w=Math.sin((x+y)*4-t*3); d(x,y,.6+Math.max(0,w)*1.8,.2+Math.max(0,w)*.8,w>.7?BR:INK); } }],
+ ['Reasoning','Akıl yürütüyor', () => (d,t)=>{ for(let o=0;o<3;o++){ const tilt=o*TAU/3; for(let i=0;i<40;i++){ const a=i/40*TAU; const x0=Math.cos(a)*.95, y0=Math.sin(a)*.34; const x=x0*Math.cos(tilt)-y0*Math.sin(tilt), y=x0*Math.sin(tilt)+y0*Math.cos(tilt); d(x,y,.7,.25); } const a=t*(1.2+o*.3)+o*2; const x0=Math.cos(a)*.95,y0=Math.sin(a)*.34; d(x0*Math.cos(tilt)-y0*Math.sin(tilt),x0*Math.sin(tilt)+y0*Math.cos(tilt),2.6,1,BR); } d(0,0,3,1); }],
+ ['Planning','Plan yapıyor', () => (d,t)=>{ const N=70, head=(t*22)%(N+25); for(let i=0;i<N;i++){ const a=i*.33, r=.08+i/N*.9; const on=i<head; d(Math.cos(a+t*.3)*r,Math.sin(a+t*.3)*r,on?1.4:.8,on?(i>head-6?1:.6):.12,i>head-6&&on?BR:INK); } }],
+ ['Writing','Yazıyor', () => (d,t)=>{ for(let i=0;i<46;i++){ const x=-.95+i/45*1.9; const y=Math.sin(x*5-t*3)*.28*Math.cos(x*1.4); const edge=1-Math.abs(x); d(x,y,1.2+edge,.2+edge*.8,i%9===0?BR:INK); d(x,y*.35+.5,.6,.15); d(x,y*.35-.5,.6,.15); } }],
+ ['Coding','Kod yazıyor', () => { const r=rng(9); const G=[]; for(let gx=-6;gx<=6;gx++) for(let gy=-6;gy<=6;gy++){ const x=gx/6.6,y=gy/6.6; if(x*x+y*y<.9) G.push([x,y,r()*10,r()]); } return (d,t)=>{ for(const [x,y,ph,s] of G){ const v=(Math.sin(t*2.2+ph*3)+1)/2; const on=v>.8; d(x,y,1+ (on?1.2:0),on?1:.18,on&&s>.6?BR:INK); } }; }],
+ ['Translating','Çeviriyor', () => (d,t)=>{ const k=ease(tri(t*.4)); for(let i=0;i<24;i++){ const a=i/24*TAU; const r=.34; const ax=-.5+Math.cos(a)*r, ay=Math.sin(a)*r, bx=.5+Math.cos(a)*r, by=Math.sin(a)*r; const arc=Math.sin(k*Math.PI)*.35*(i%2?1:-1); d(lerp(ax,bx,k),lerp(ay,by,k)+arc,1.3,.9,INK); d(lerp(bx,ax,k),lerp(by,ay,k)-arc,1.3,.9,BR); } }],
+ ['Browsing','Sayfalarda geziyor', () => { const P=[]; for(let la=-75;la<=75;la+=15){ const n=Math.round(40*Math.cos(la*Math.PI/180)); for(let i=0;i<n;i++){ const lo=i/n*TAU, c=Math.cos(la*Math.PI/180); P.push([c*Math.sin(lo),Math.sin(la*Math.PI/180),c*Math.cos(lo)]); } } return (d,t)=>{ for(const p of P){ const [x,y,z]=rot(p,t*.5,-.35); if(z<0) continue; d(x*.95,y*.95,.6+z,.1+z*.9,Math.abs(y)<.08?BR:INK); } }; }],
+ ['Remembering','Hatırlıyor', () => (d,t)=>{ for(let k=0;k<4;k++){ const ph=((t*.5+k/4)%1); const r=ph*.98; const n=Math.max(6,Math.round(r*40)); for(let i=0;i<n;i++){ const a=i/n*TAU+k; d(Math.cos(a)*r,Math.sin(a)*r,1.3,(1-ph)*.9,k===0?BR:INK); } } d(0,0,2.5,1,BR); }],
+ ['Calculating','Hesaplıyor', () => (d,t)=>{ const N=36; const h=(t*14)%N; for(let i=0;i<N;i++){ const a=i/N*TAU-Math.PI/2; const back=(h-i+N)%N; const g=back<8?1-back/8:0; d(Math.cos(a)*.88,Math.sin(a)*.88,1+g*1.6,.15+g*.85,g>.8?BR:INK); } for(let i=0;i<12;i++){ const a=i/12*TAU; d(Math.cos(a)*.62,Math.sin(a)*.62,.9,.35); } d(0,0,1.8,1); }],
+ ['Connecting','Bağlantı kuruyor', () => { const r=rng(14), N=Array.from({length:9},(_,i)=>{ const a=i/9*TAU+r(); const q=i?.45+r()*.45:0; return [Math.cos(a)*q,Math.sin(a)*q]; }); const E=[[0,1],[0,2],[0,3],[0,4],[1,5],[2,6],[3,7],[4,8],[5,6],[7,8],[0,5],[0,7]]; return (d,t)=>{ E.forEach(([a,b],k)=>{ const [x1,y1]=N[a],[x2,y2]=N[b]; for(let i=1;i<10;i++){ const u=i/10; d(lerp(x1,x2,u),lerp(y1,y2,u),.6,.2); } const u=(t*.7+k*.23)%1; d(lerp(x1,x2,u),lerp(y1,y2,u),1.6,1,BR); }); N.forEach(([x,y],i)=>d(x,y,i?2.2:3.2,1)); }; }],
+ ['Organizing','Düzenliyor', () => { const r=rng(15), P=Array.from({length:64},()=>[r()*1.6-.8,r()*1.6-.8]); return (d,t)=>{ const k=ease(tri(t*.35)); P.forEach(([x,y],i)=>{ const gx=-.62+(i%8)*.177, gy=-.62+Math.floor(i/8)*.177; d(lerp(x,gx,k),lerp(y,gy,k),1.3,.4+k*.6,(i%8+Math.floor(i/8))%7===0?BR:INK); }); }; }],
+ ['Listening','Dinliyor', () => (d,t)=>{ const N=28; for(let i=0;i<N;i++){ const a=i/N*TAU; const h=.35+.5*Math.abs(Math.sin(t*3+i*.9)*Math.sin(t*1.7+i*.4)); for(let s=0;s<6;s++){ const r=.3+s/5*(h); if(r>.3+h) break; d(Math.cos(a)*r,Math.sin(a)*r,1,s===5?1:.35+s*.1,s>3?BR:INK); } } d(0,0,2.4,1); }],
+ ['Speaking','Konuşuyor', () => (d,t)=>{ for(let i=0;i<11;i++){ const x=-.8+i*.16; const h=Math.round(2+5*Math.abs(Math.sin(t*4+i*.7)*Math.cos(t*1.3+i))); for(let s=-h;s<=h;s++){ d(x,s*.09,1.5,1-Math.abs(s)/(h+1)*.7,Math.abs(s)===h?BR:INK); } } }],
+ ['Generating image','Görsel üretiyor', () => { const r=rng(18); const C=[]; for(let gx=-7;gx<=7;gx++) for(let gy=-7;gy<=7;gy++){ const x=gx/7.5,y=gy/7.5; if(x*x+y*y<.92) C.push([x,y,r()]); } return (d,t)=>{ const p=(t*.3)%1.2; for(const [x,y,s] of C){ const show=clamp((p-s*.9)*6); const b=noise(x*2,y*2,1)>0; d(x,y,1.6*show+.4,.15+show*.85,b?BR:INK); } }; }],
+ ['Checking','Kontrol ediyor', () => (d,t)=>{ const N=48, p=(t*.4)%1.25; for(let i=0;i<N;i++){ const a=i/N*TAU-Math.PI/2; const on=i/N<p; d(Math.cos(a)*.9,Math.sin(a)*.9,on?1.7:.9,on?1:.18,on?BR:INK); } const k=clamp((p-1)*5); if(k>0){ const pts=[[-.35,0],[-.1,.25],[.38,-.28]]; for(let i=0;i<=16;i++){ const u=i/16; if(u>k) break; const seg=u<.4?0:1, v=seg?(u-.4)/.6:u/.4; d(lerp(pts[seg][0],pts[seg+1][0],v),lerp(pts[seg][1],pts[seg+1][1],v),1.7,1); } } }],
+ ['Comparing','Karşılaştırıyor', () => (d,t)=>{ const s=.28+.18*Math.sin(t*1.2); for(let i=0;i<40;i++){ const a=i/40*TAU; const x=Math.cos(a)*.52, y=Math.sin(a)*.52; const inB=Math.hypot(x-s-(-s),y)<.52; d(x-s,y,1.2,.85,INK); d(x+s,y,1.2,.85,BR); } for(let gx=-5;gx<=5;gx++) for(let gy=-5;gy<=5;gy++){ const x=gx/10,y=gy/10; if(Math.hypot(x+s,y)<.5&&Math.hypot(x-s,y)<.5) d(x,y,.9,.7,BR); } }],
+ ['Exploring','Keşfediyor', () => (d,t)=>{ for(let i=0;i<120;i++){ const u=i/120*TAU; const x=Math.sin(3*u+t*.4)*.9, y=Math.sin(2*u)*.9; d(x,y,.7,.25); } for(let k=0;k<14;k++){ const u=t*.8-k*.04; d(Math.sin(3*u+t*.4)*.9,Math.sin(2*u)*.9,2.2-k*.13,1-k/14,k<4?BR:INK); } }],
+ ['Focusing','Odaklanıyor', () => (d,t)=>{ const k=(Math.sin(t*1.6)+1)/2; for(let ring=1;ring<=5;ring++){ const r=ring/5*(.95-.55*k); const n=ring*9; for(let i=0;i<n;i++){ const a=i/n*TAU+ring*.3; d(Math.cos(a)*r,Math.sin(a)*r,.8+k*.8,.25+.15*ring*k,ring===1?BR:INK); } } d(0,0,2+k*1.5,1,BR); }],
+ ['Brainstorming','Fikir üretiyor', () => { const r=rng(23), P=Array.from({length:60},()=>[r()*TAU,.4+r()*.6,r()]); return (d,t)=>{ for(const [a,sp,ph] of P){ const u=(t*.45+ph)%1; const q=ease(u)*sp; d(Math.cos(a)*q,Math.sin(a)*q,1.8*(1-u)+.4,1-u,ph>.7?BR:INK); } d(0,0,2.4,1); }; }],
+ ['Learning','Öğreniyor', () => (d,t)=>{ for(let i=0;i<22;i++){ const y=-.9+i/21*1.8; const a=y*4+t*1.6; const x1=Math.sin(a)*.42, z1=Math.cos(a), x2=-x1, z2=-z1; d(x1,y,1+ (z1+1)*.7,.25+(z1+1)*.37,INK); d(x2,y,1+(z2+1)*.7,.25+(z2+1)*.37,BR); if(i%2===0){ for(let s=1;s<5;s++) d(lerp(x1,x2,s/5),y,.6,.25); } } }],
+ ['Scanning files','Dosyaları tarıyor', () => (d,t)=>{ const sx=Math.sin(t*1.3)*.95; for(let gx=-8;gx<=8;gx++) for(let gy=-8;gy<=8;gy++){ const x=gx/8.5,y=gy/8.5; if(x*x+y*y>.93) continue; const g=Math.exp(-Math.pow((x-sx)*9,2)); d(x,y,.8+g*1.4,.15+g*.85,g>.5?BR:INK); } }],
+ ['Fetching','Veri çekiyor', () => (d,t)=>{ const N=12; for(let s=0;s<N;s++){ const a=s/N*TAU; for(let k=0;k<5;k++){ const u=((t*.6+k/5)%1); const r=.95*(1-u); d(Math.cos(a)*r,Math.sin(a)*r,.6+u*1.3,.2+u*.8,k===0?BR:INK); } } d(0,0,2.6,1); }],
+ ['Uploading','Yüklüyor', () => { const r=rng(27), P=Array.from({length:50},()=>[r()*1.4-.7,r(),.6+r()*.8]); return (d,t)=>{ for(const [x0,ph,s] of P){ const u=(t*.35*s+ph)%1; const y=.95-u*1.9; const w=Math.sqrt(Math.max(0,1-y*y))*.8; const x=x0*w; d(x,y,1+s*.6,Math.sin(u*Math.PI),u>.7?BR:INK); } }; }],
+ ['Downloading','İndiriyor', () => (d,t)=>{ for(let c=-3;c<=3;c++){ const x=c*.22; const h=Math.sqrt(Math.max(0,1-x*x))*.9; for(let k=0;k<8;k++){ const u=((t*.5+k/8+c*.07)%1); const y=-h+u*2*h; d(x,y,1.3,Math.sin(u*Math.PI)*.95,k===0?BR:INK); } } }],
+ ['Indexing','Dizinliyor', () => (d,t)=>{ for(let ring=1;ring<=6;ring++){ const r=ring*.155; const n=ring*8; const sp=(ring%2?1:-1)*(1.2/ring); for(let i=0;i<n;i++){ const a=i/n*TAU+t*sp; d(Math.cos(a)*r,Math.sin(a)*r,1.1,i%ring===0?1:.3,i===0?BR:INK); } } }],
+ ['Debugging','Hata ayıklıyor', () => (d,t)=>{ const bx=Math.sin(t*1.1)*.55+Math.sin(t*2.3)*.2, by=Math.cos(t*.9)*.5+Math.sin(t*1.7)*.2; for(let gx=-8;gx<=8;gx++) for(let gy=-8;gy<=8;gy++){ let x=gx/8.5,y=gy/8.5; if(x*x+y*y>.93) continue; const dd=Math.hypot(x-bx,y-by); const push=Math.exp(-dd*dd*30)*.08; x+=(x-bx)/(dd+.01)*push; y+=(y-by)/(dd+.01)*push; d(x,y,.9,.15+Math.exp(-dd*4)*.6); } d(bx,by,3,1,BR); }],
+ ['Drafting','Taslak çıkarıyor', () => (d,t)=>{ const k=5, N=150, head=(t*40)%(N+40); for(let i=0;i<N;i++){ const a=i/N*TAU; const r=Math.cos(k*a/2)*.9; const x=Math.cos(a)*r, y=Math.sin(a)*r; const on=i<head; d(x,y,on?1.1:.6,on?(head-i<10?1:.5):.1,head-i<10&&on?BR:INK); } }],
+ ['Refining','İyileştiriyor', () => (d,t)=>{ const cyc=(t*.3)%1, calm=ease(clamp(cyc*1.4)); for(let i=0;i<64;i++){ const a=i/64*TAU; const n=(Math.sin(a*5+t*2)+Math.sin(a*9-t*3))*.18*(1-calm); const r=.8+n; d(Math.cos(a)*r,Math.sin(a)*r,1.3,.4+calm*.6,calm>.9?BR:INK); } }],
+ ['Evaluating','Değerlendiriyor', () => (d,t)=>{ for(let i=0;i<3;i++){ const b=Math.max(0,Math.sin(t*4-i*.8)); d(-.45+i*.45,-b*.3,5+b*1.5,.35+b*.65,i===1?BR:INK); } for(let i=0;i<30;i++){ const a=i/30*TAU; d(Math.cos(a)*.95,Math.sin(a)*.95,.7,.18); } }],
+ ['Structuring','Yapılandırıyor', () => (d,t)=>{ const shapes=[3,4,6]; const ph=(t*.35)%3; const si=Math.floor(ph), k=ease(clamp((ph-si)*1.6-.3)); const A=shapes[si], B=shapes[(si+1)%3]; const poly=(n,u)=>{ const s=u*n, e=Math.floor(s), f=s-e; const a1=e/n*TAU-Math.PI/2, a2=(e+1)/n*TAU-Math.PI/2; return [lerp(Math.cos(a1),Math.cos(a2),f)*.85,lerp(Math.sin(a1),Math.sin(a2),f)*.85]; }; for(let i=0;i<60;i++){ const u=i/60; const [x1,y1]=poly(A,u),[x2,y2]=poly(B,u); d(lerp(x1,x2,k),lerp(y1,y2,k),1.2,.85,i%10===0?BR:INK); } }],
+ ['Mapping','Haritalıyor', () => { const P=[]; for(let i=0;i<24;i++) for(let j=0;j<10;j++){ const u=i/24*TAU, v=j/10*TAU; P.push([(1+.38*Math.cos(v))*Math.cos(u)*.66,.38*Math.sin(v)*.66,(1+.38*Math.cos(v))*Math.sin(u)*.66]); } return (d,t)=>{ for(const p of P){ const [x,y,z]=rot(p,t*.7,.9); const k=(z+.95)/1.9; d(x,y,.6+k*1.3,.12+k*.88,k>.85?BR:INK); } }; }],
+ ['Querying database','Veritabanını sorguluyor', () => (d,t)=>{ const L=[-.55,-.2,.15,.5]; const hi=Math.floor(t*1.5)%L.length; L.forEach((y,li)=>{ for(let i=0;i<30;i++){ const a=i/30*TAU; const x=Math.cos(a)*.75, yy=y+Math.sin(a)*.16; const front=Math.sin(a)>0; d(x,yy,front?1.2:.8,(front?.8:.3)*(li===hi?1:.6),li===hi?BR:INK); } }); for(const x of [-.75,.75]) for(let y=-.55;y<=.5;y+=.07) d(x,y,.7,.3); }],
+ ['Clustering','Kümeliyor', () => { const r=rng(37), P=Array.from({length:75},(_,i)=>[r()*1.6-.8,r()*1.6-.8,i%3]); return (d,t)=>{ const k=ease(tri(t*.3)); const C=[0,1,2].map(c=>{ const a=c/3*TAU+t*.3; return [Math.cos(a)*.45,Math.sin(a)*.45]; }); for(const [x,y,c] of P){ const [cx,cy]=C[c]; const jx=Math.sin(x*40)*.12, jy=Math.cos(y*40)*.12; d(lerp(x,cx+jx,k),lerp(y,cy+jy,k),1.3,.5+k*.5,c===0?BR:c===1?INK:CR); } }; }],
+ ['Predicting','Tahmin ediyor', () => (d,t)=>{ for(let arm=0;arm<3;arm++) for(let i=0;i<34;i++){ const r=i/34*.95; const a=arm/3*TAU+Math.log(1+r*8)*1.6-t*.7; d(Math.cos(a)*r,Math.sin(a)*r,.5+(1-r)*1.3,.2+(1-r)*.8,arm===0&&i%4===0?BR:INK); } d(0,0,2.6,1,BR); }],
+ ['Imagining','Hayal ediyor', () => (d,t)=>{ for(let gx=-9;gx<=9;gx++) for(let gy=-9;gy<=9;gy++){ const x=gx/9.5,y=gy/9.5; if(x*x+y*y>.93) continue; const v=(noise(x*2.2,y*2.2,t*.9)+1)/2; d(x,y,.3+v*2,.1+v*.9,v>.8?BR:INK); } }],
+ ['Verifying','Doğruluyor', () => (d,t)=>{ const N=16, on=Math.floor(t*6)%(N+6); for(let i=0;i<N;i++){ const a=i/N*TAU-Math.PI/2; const lit=i<on; d(Math.cos(a)*.78,Math.sin(a)*.78,lit?3:2,lit?1:.18,lit?BR:INK); } }],
+ ['Sorting','Sıralıyor', () => { const H=[5,2,7,3,6,1,4,8]; return (d,t)=>{ const k=ease(tri(t*.35)); const S=[...H].sort((a,b)=>a-b); for(let c=0;c<8;c++){ const x=-.7+c*.2; const h=Math.round(lerp(H[c],S[c],k)); for(let s=0;s<h;s++) d(x,.7-s*.18,1.5,s===h-1?1:.45,s===h-1?BR:INK); } }; }],
+ ['Parsing','Ayrıştırıyor', () => (d,t)=>{ const o=Math.sin(t*2)*.08; const ch=(s)=>{ for(let i=-4;i<=4;i++){ const y=i*.13; const x=(.55-Math.abs(i)*.1)*s+o*s; d(-x,y,1.4,.9,INK); d(x,y,1.4,.9,INK); } }; ch(1); for(let i=0;i<5;i++){ const b=Math.max(0,Math.sin(t*3-i*.7)); d(-.24+i*.12,0,1+b*1.2,.3+b*.7,BR); } }],
+ ['Researching','Araştırıyor', () => (d,t)=>{ const mx=Math.cos(t*.8)*.35, my=Math.sin(t*1.1)*.3; for(let gx=-9;gx<=9;gx++) for(let gy=-9;gy<=9;gy++){ let x=gx/9.5,y=gy/9.5; if(x*x+y*y>.93) continue; const dd=Math.hypot(x-mx,y-my); const inL=dd<.38; if(inL){ x=mx+(x-mx)*1.25; y=my+(y-my)*1.25; } d(x,y,inL?1.5:.7,inL?.9:.2,inL?BR:INK); } for(let i=0;i<36;i++){ const a=i/36*TAU; d(mx+Math.cos(a)*.48,my+Math.sin(a)*.48,.8,.8); } }],
+ ['Synthesizing','Sentezliyor', () => (d,t)=>{ for(let i=0;i<44;i++){ const side=i%2?1:-1, u=(t*.35+i/44)%1, k=ease(clamp(u*1.4)); const sy=((i*7)%44/44-.5)*1.4; const a=i/44*TAU+t*.8; const ex=Math.cos(a)*.55, ey=Math.sin(a)*.55; d(lerp(side*1.05,ex,k),lerp(sy,ey,k),1.2,.2+k*.8,side>0?BR:INK); } d(0,0,2,1); }],
+ ['Optimizing','Optimize ediyor', () => { const r=rng(45), P=Array.from({length:30},()=>[r()*TAU,.6+r()*.35,r()]); return (d,t)=>{ for(let ring=1;ring<=4;ring++){ const rr=ring*.24; for(let i=0;i<ring*10;i++){ const a=i/(ring*10)*TAU; d(Math.cos(a)*rr,Math.sin(a)*rr,.6,.14); } } for(const [a0,r0,ph] of P){ const u=(t*.25+ph)%1; const r=r0*Math.pow(1-u,1.6); const a=a0+u*4; d(Math.cos(a)*r,Math.sin(a)*r,1.5,.3+u*.7,u>.8?BR:INK); } }; }],
+ ['Composing','Besteliyor', () => (d,t)=>{ for(let l=0;l<5;l++){ const y=-.4+l*.2; for(let i=0;i<30;i++) d(-.9+i/29*1.8,y,.5,.2); } for(let n=0;n<7;n++){ const x=((n*.3-t*.25)%2.1+2.1)%2.1-1.05; const y=-.4+((n*3)%9)*.1; const e=1-Math.abs(x); d(x,y,2.6,clamp(e*1.6),n%3===0?BR:INK); } }],
+ ['Deep thinking','Derin düşünüyor', () => { const A=fib(90), B=fib(40); return (d,t)=>{ for(const p of A){ const [x,y,z]=rot(p,t*.45,.3); const k=(z+1)/2; d(x*.95,y*.95,.5+k*1.1,.08+k*.5,INK); } for(const p of B){ const [x,y,z]=rot(p,-t*1.1,-.5); const k=(z+1)/2; d(x*.45,y*.45,.7+k*1.3,.3+k*.7,BR); } }; }],
+ ['Waiting for tools','Araçları bekliyor', () => { const r=rng(48), P=Array.from({length:40},()=>[r(),r()]); return (d,t)=>{ const cyc=(t*.3)%1, flip=clamp((cyc-.85)/.15), ang=ease(flip)*Math.PI; const ca=Math.cos(ang), sa=Math.sin(ang); const R=(x,y)=>[x*ca-y*sa,x*sa+y*ca]; const outline=[]; for(let i=0;i<=10;i++){ const y=-.8+i*.08; const w=.08+Math.abs(y)*.6; outline.push([w,y],[-w,y],[w,-y],[-w,-y]); } for(const [x,y] of outline){ const [a,b]=R(x,y); d(a,b,.8,.35); } const k=clamp(cyc/.85); P.forEach(([u,v],i)=>{ const top=i/40>k; const y=top? -.15-u*.55*(1-k) : .7-v*.5*k; const w=(.08+Math.abs(y)*.6)*.8; const x=((top?v:u)*2-1)*w; const [a,b]=R(x,y); d(a,b,1.2,.9,top?INK:BR); }); }; }],
+ ['Collaborating','İş birliği yapıyor', () => (d,t)=>{ d(0,0,3,1); for(let p=0;p<4;p++){ const a=p/4*TAU+t*.4; const px=Math.cos(a)*.62, py=Math.sin(a)*.62; for(let i=0;i<14;i++){ const b=i/14*TAU+t*(1.5+p*.3); d(px+Math.cos(b)*.2,py+Math.sin(b)*.2,.8,.5,p%2?BR:INK); } d(px,py,1.8,1,p%2?BR:INK); for(let i=1;i<6;i++) d(px*i/6,py*i/6,.5,.2); } }],
+ ['Finalizing','Son rötuşlar', () => (d,t)=>{ const cyc=(t*.4)%1; const k=cyc<.5?ease(cyc*2):1-ease((cyc-.5)*2); for(let ring=1;ring<=3;ring++){ const n=ring*14; for(let i=0;i<n;i++){ const a=i/n*TAU+ring; const r=ring*.3*(1-k*.92); d(Math.cos(a)*r,Math.sin(a)*r,1.1+k*.5,.35+k*.65,ring===3?BR:INK); } } d(0,0,1.5+k*3,1,BR); }],
+];
+
+/* ── çizim altyapısı ── */
+function makeOrb(canvas, idx, pad = .1){
+  const ctx = canvas.getContext('2d');
+  const draw = ORBS[idx][2]();
+  let W = 0, dpr = 1;
+  const fit = () => { dpr = Math.min(devicePixelRatio||1, 2); W = canvas.clientWidth; canvas.width = canvas.height = W*dpr; };
+  fit();
+  const scale = W/120;
+  const dot = (x,y,r,a=1,c=INK) => {
+    if(a <= .01 || r <= 0) return;
+    const R = W/2*(1-pad);
+    ctx.fillStyle = `rgba(${c},${Math.min(1,a)})`;
+    ctx.beginPath(); ctx.arc(W/2 + x*R, W/2 + y*R, r*scale, 0, TAU); ctx.fill();
+  };
+  return { render(t){ ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,W); draw(dot, t); }, fit };
+}
+
+/* ── ızgara ── */
+const grid = document.getElementById('grid');
+const cards = ORBS.map(([name, sub], i) => {
+  const el = document.createElement('div'); el.className = 'orb';
+  el.innerHTML = `<span class="n">${String(i+1).padStart(2,'0')}</span><canvas aria-hidden="true"></canvas><div class="lbl"><b></b><small></small></div>`;
+  el.querySelector('b').textContent = name; el.querySelector('small').textContent = sub;
+  el.setAttribute('role','img'); el.setAttribute('aria-label', `${name} — ${sub}`);
+  grid.append(el);
+  return { el, orb: makeOrb(el.querySelector('canvas'), i), visible: false };
+});
+const io = new IntersectionObserver(es => es.forEach(e => { const c = cards.find(c => c.el === e.target); c.visible = e.isIntersecting; }), {rootMargin:'100px'});
+cards.forEach(c => io.observe(c.el));
+
+/* ── canlı önizleme: gerçek bir yanıtın adımları ── */
+const FLOW = [0, 1, 3, 24, 2, 7, 49];
+const steps = document.getElementById('steps');
+FLOW.forEach(() => steps.append(document.createElement('i')));
+let liveIdx = 0, live = makeOrb(document.getElementById('liveCv'), FLOW[0], .04);
+function setLive(k){
+  liveIdx = k; const i = FLOW[k];
+  live = makeOrb(document.getElementById('liveCv'), i, .04);
+  document.getElementById('liveName').textContent = ORBS[i][0] + '…';
+  document.getElementById('liveSub').textContent = ORBS[i][1];
+  [...steps.children].forEach((s,n) => s.classList.toggle('on', n <= k));
+}
+setLive(0);
+if(!REDUCED) setInterval(() => setLive((liveIdx+1) % FLOW.length), 2600);
+
+addEventListener('resize', () => { cards.forEach(c => c.orb.fit()); });
+
+const t0 = performance.now();
+function frame(now){
+  const t = REDUCED ? 3 : (now - t0)/1000;
+  live.render(t);
+  for(const c of cards) if(c.visible) c.orb.render(t);
+  if(!REDUCED) requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+if(REDUCED) setTimeout(() => cards.forEach(c => c.orb.render(3)), 50);
+</script>
+</body>
+</html>
