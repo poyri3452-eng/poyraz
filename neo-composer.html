@@ -11,38 +11,25 @@
 :root{--e:cubic-bezier(.22,1,.36,1)}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
-body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0d0906;color:#fbf6ef;-webkit-font-smoothing:antialiased;overflow:hidden}
+body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0e0b09;color:#fbf6ef;-webkit-font-smoothing:antialiased;overflow:hidden}
 button,textarea{font:inherit;color:inherit}
 
-/* ── arka plan: camın kırdığı sıcak ışıklar ── */
-.bg{position:fixed;inset:0;overflow:hidden;z-index:0}
-.blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.85;will-change:transform}
-.b1{width:46vmax;height:46vmax;background:#c4773b;left:-10vmax;top:-14vmax;animation:f1 22s ease-in-out infinite alternate}
-.b2{width:38vmax;height:38vmax;background:#7a3b2a;right:-8vmax;top:10vmax;animation:f2 26s ease-in-out infinite alternate}
-.b3{width:30vmax;height:30vmax;background:#e9c49a;left:30vw;bottom:-12vmax;animation:f3 19s ease-in-out infinite alternate;opacity:.55}
-.b4{width:22vmax;height:22vmax;background:#8f6fd6;left:62vw;bottom:8vmax;animation:f1 24s ease-in-out infinite alternate-reverse;opacity:.35}
-@keyframes f1{to{transform:translate(12vmax,10vmax) scale(1.1)}}
-@keyframes f2{to{transform:translate(-14vmax,8vmax) scale(.9)}}
-@keyframes f3{to{transform:translate(-10vmax,-12vmax) scale(1.15)}}
-.dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,240,222,.14) 1px,transparent 1.4px);background-size:22px 22px;mask-image:radial-gradient(80% 70% at 50% 60%,#000 30%,transparent 100%)}
-.big{position:absolute;left:50%;top:50%;transform:translate(-50%,-62%);font-family:'Instrument Serif',Georgia,serif;font-size:clamp(56px,11vw,150px);line-height:.95;text-align:center;color:rgba(255,244,230,.9);letter-spacing:-.02em;white-space:nowrap;pointer-events:none;user-select:none}
-.big em{color:#f0c99d}
-
-/* ── sohbet alanı ── */
-.chat{position:fixed;left:0;right:0;top:0;bottom:0;z-index:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:24px 16px calc(var(--dockH,56px) + 48px + env(safe-area-inset-bottom));pointer-events:none}
-.msgs{width:min(680px,100%);display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow:auto;scrollbar-width:none}
-.msgs::-webkit-scrollbar{display:none}
-.m{max-width:80%;padding:11px 15px;border-radius:20px;font-size:14.5px;line-height:1.5;pointer-events:auto;animation:pop .6s var(--e) both}
-.m.me{align-self:flex-end;background:rgba(255,248,240,.16);border-bottom-right-radius:6px;backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.1)}
-.m.neo{align-self:flex-start;background:rgba(20,12,8,.35);border-bottom-left-radius:6px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:rgba(251,246,239,.9)}
-.think{display:inline-flex;gap:5px;align-items:center;color:rgba(251,246,239,.55)}
-.think i{width:6px;height:6px;border-radius:50%;background:currentColor;animation:bob 1s ease-in-out infinite}
-.think i:nth-child(2){animation-delay:.15s}.think i:nth-child(3){animation-delay:.3s}
-@keyframes bob{50%{transform:translateY(-3px);opacity:1}}
-@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.96);filter:blur(6px)}}
-
 /* ═══════════ LIQUID GLASS COMPOSER ═══════════ */
-.dock{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2}
+.voice{appearance:none;border:0;background:none;align-self:flex-end;flex:none;width:40px;height:40px;margin:0 -12px 0 0;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:rgba(255,246,236,.72);transition:color .3s,background .3s,transform .5s var(--e)}
+.voice:hover{color:#fff4e6;background:rgba(255,255,255,.07)}
+.voice:active{transform:scale(.88)}
+.voice svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;overflow:visible}
+.voice .b{transform-box:fill-box;transform-origin:center;animation:idle 2.4s ease-in-out infinite}
+.voice .b1{animation-delay:-.2s}.voice .b2{animation-delay:-.5s}.voice .b3{animation-delay:-.9s}.voice .b4{animation-delay:-1.3s}.voice .b5{animation-delay:-1.6s}
+.voice:hover .b{animation-duration:1.2s}
+.voice[aria-pressed="true"]{color:#f0c99d;background:rgba(240,201,157,.14)}
+.voice[aria-pressed="true"] .b{animation:talk .7s ease-in-out infinite}
+.voice[aria-pressed="true"] .b2{animation-delay:-.15s}.voice[aria-pressed="true"] .b3{animation-delay:-.35s}.voice[aria-pressed="true"] .b4{animation-delay:-.55s}.voice[aria-pressed="true"] .b5{animation-delay:-.25s}
+@keyframes idle{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.55)}}
+@keyframes talk{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1.25)}}
+.open .voice{margin-bottom:2px}
+
+.dock{position:fixed;left:50%;top:50%;z-index:2}
 .composer{
   --w:360px;--h:56px;--r:28px;--s:1;--mx:50%;--my:0%;
   position:relative;width:var(--w);height:var(--h);border-radius:var(--r);transform:translateX(-50%) scale(calc(var(--s)*var(--sx,1)),calc(var(--s)*var(--sy,1)));
@@ -57,11 +44,10 @@ button,textarea{font:inherit;color:inherit}
     inset 0 0 0 .5px rgba(255,255,255,.12),
     inset 0 0 30px rgba(255,255,255,.05),
     0 24px 60px -12px rgba(10,5,2,.45);
-  transform-origin:50% 100%;
+  transform-origin:50% 50%;margin-top:calc(var(--h) / -2);
 }
 /* Chromium: gerçek kırılma (SVG yer değiştirme haritası) */
 .composer.refract{backdrop-filter:url(#liquid) blur(10px) saturate(165%) brightness(1.06)}
-.dock{transform:none;left:50%}
 /* kenardaki parlak ışık + imleci takip eden parıltı */
 .composer::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
   background:linear-gradient(160deg,rgba(255,255,255,.32),rgba(255,255,255,.04) 30%,rgba(255,255,255,0) 60%,rgba(255,255,255,.1));filter:blur(.4px);
@@ -70,7 +56,7 @@ button,textarea{font:inherit;color:inherit}
   background:radial-gradient(220px 120px at var(--mx) var(--my),rgba(255,255,255,.1),transparent 70%);transition:opacity .3s}
 
 .inner{position:absolute;inset:0;display:flex;flex-direction:column;padding:8px 22px;overflow:hidden;border-radius:inherit}
-.top{flex:1;display:flex;align-items:flex-start;gap:10px;min-height:40px}
+.top{flex:1;display:flex;align-items:stretch;gap:8px;min-height:40px}
 textarea{flex:1;resize:none;border:0;outline:none;background:transparent;font-size:15.5px;line-height:22px;padding:9px 0;transition:padding .5s var(--e);max-height:180px;color:#fffaf3;caret-color:#f0c99d;scrollbar-width:none}
 textarea::placeholder{color:rgba(255,246,236,.55)}
 .open textarea{padding-top:14px}
@@ -91,19 +77,16 @@ textarea::placeholder{color:rgba(255,246,236,.55)}
   </filter>
 </svg>
 
-<div class="bg" aria-hidden="true">
-  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
-  <div class="dots"></div>
-  <div class="big">Create the<br><em>Future.</em></div>
-</div>
-
-<div class="chat"><div class="msgs" id="msgs" aria-live="polite"></div></div>
-
 <div class="dock">
   <div class="composer" id="composer">
     <div class="inner">
       <div class="top">
         <textarea id="ta" rows="1" placeholder="Neo'ya bir şey sor…" aria-label="Mesaj"></textarea>
+        <button class="voice" id="voice" type="button" aria-label="Sesli sohbet" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path class="b b1" d="M5 10.5v3"/><path class="b b2" d="M8.5 8v8"/><path class="b b3" d="M12 5v14"/><path class="b b4" d="M15.5 8v8"/><path class="b b5" d="M19 10.5v3"/>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
@@ -139,7 +122,7 @@ function expand(){ if(open) return; open = true; comp.classList.add('open'); ret
 function collapse(){ if(!open || ta.value.trim()) return; open = false; comp.classList.remove('open'); ta.style.height = ''; retarget(); }
 
 /* basınca hafifçe ezilir, bırakınca genişler */
-comp.addEventListener('pointerdown', e => { S.s.to = .965; kick(); if(e.target === comp || e.target.closest('.inner') && !e.target.closest('button')) setTimeout(() => ta.focus(), 0); });
+comp.addEventListener('pointerdown', e => { if(e.target.closest('.voice')) return; S.s.to = .965; kick(); setTimeout(() => ta.focus(), 0); });
 addEventListener('pointerup', () => { S.s.to = 1; kick(); });
 ta.addEventListener('focus', expand);
 document.addEventListener('pointerdown', e => { if(!comp.contains(e.target)) collapse(); });
@@ -153,26 +136,21 @@ ta.addEventListener('input', retarget);
 comp.addEventListener('pointermove', e => { const r = comp.getBoundingClientRect(); comp.style.setProperty('--mx', (e.clientX-r.left)+'px'); comp.style.setProperty('--my', (e.clientY-r.top)+'px'); });
 
 
-/* ── gönder: demo yanıt ── */
-const msgs = $('msgs');
-function bubble(cls, html){ const d = document.createElement('div'); d.className = 'm ' + cls; if(html) d.innerHTML = html; msgs.append(d); msgs.scrollTop = msgs.scrollHeight; return d; }
-const REPLIES = [
-  'Harika bir soru! Bu sadece bir tasarım demosu, ama gerçek Neo burada sana yanıt verecek.',
-  'Sıvı cam kutusu metin uzadıkça esnek şekilde büyür. Boşken dışarı tıklarsan tekrar küçülür.',
-  'Göndermek için Enter, yeni satır için Shift + Enter yeterli.'
-];
-let ri = 0;
-async function submit(){
-  const text = ta.value.trim(); if(!text) return;
-  const me = bubble('me'); me.textContent = text;
+/* ── gönder: kutu bir an sıkışıp esner, metin temizlenir (demo) ── */
+function submit(){
+  if(!ta.value.trim()) return;
   ta.value = ''; retarget();
-  // basınç: gönderirken kutu bir an sıkışıp geri esner
   S.s.to = .94; kick(); setTimeout(() => { S.s.to = 1; kick(); }, 140);
-  const n = bubble('neo', '<span class="think"><i></i><i></i><i></i></span>');
-  await new Promise(r => setTimeout(r, 1100));
-  n.textContent = ''; const words = REPLIES[ri++ % REPLIES.length].split(' ');
-  for(const w of words){ n.textContent += (n.textContent ? ' ' : '') + w; msgs.scrollTop = msgs.scrollHeight; await new Promise(r => setTimeout(r, 45)); }
 }
+
+/* ── sesli sohbet ikonu ── */
+const voice = $('voice');
+voice.addEventListener('click', () => {
+  const on = voice.getAttribute('aria-pressed') !== 'true';
+  voice.setAttribute('aria-pressed', on);
+  ta.placeholder = on ? 'Dinliyorum…' : "Neo'ya bir şey sor…";
+  S.s.to = .97; kick(); setTimeout(() => { S.s.to = 1; kick(); }, 110);
+});
 
 /* ── kırılma haritası: kenara yaklaştıkça içe doğru büken yer değiştirme ── */
 const REFRACT = CSS.supports('backdrop-filter','url(#liquid)') && /Chrome|Chromium|Edg\//.test(navigator.userAgent) && !/Firefox/.test(navigator.userAgent);
@@ -216,7 +194,6 @@ function tick(now){
   comp.style.setProperty('--r', Math.min(r, h/2)+'px'); comp.style.setProperty('--s', s);
   const jig = Math.max(-.06, Math.min(.06, S.h.v*.00035 - S.w.v*.0001));
   comp.style.setProperty('--sy', 1 + jig); comp.style.setProperty('--sx', 1 - jig*.6);
-  document.documentElement.style.setProperty('--dockH', S.h.to+'px');
   if(REFRACT) updateMap(w, h, Math.min(r, h/2));
   if(Object.values(S).every(sp => sp.rest)){ comp.style.setProperty('--sx',1); comp.style.setProperty('--sy',1); running = false; return; }
   requestAnimationFrame(tick);
