@@ -6,140 +6,242 @@
 <title>Neo Uyarıları</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#08090e;--s1:#0d0f14;--s2:#13151d;--s3:#191c27;
-  --b1:rgba(255,255,255,.055);--b2:rgba(255,255,255,.1);--b3:rgba(255,255,255,.18);
-  --ac:#a78bfa;--ac2:#7c3aed;--pi:#f472b6;--cy:#67e8f9;
-  --go:#fbbf24;--er:#f87171;--gr:#4ade80;
-  --tx:#f0f0f8;--tx2:#b8b8cc;--mu:#6b7280;
-  --ease:cubic-bezier(.22,1,.36,1);
+  --bg:#08090e;
+  --sf:#111216;          /* uyarı yüzeyi */
+  --sf2:#17181d;
+  --ln:rgba(255,255,255,.08);
+  --ln2:rgba(255,255,255,.14);
+  --tx:#ededf0;
+  --tx2:#8e8f99;
+  --tx3:#5d5e66;
+  --ok:#3fb950;--info:#58a6ff;--warn:#d29922;--err:#f85149;--ai:#a78bfa;
+  --e:cubic-bezier(.22,1,.36,1);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{-webkit-font-smoothing:antialiased}
-body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+button{font:inherit;color:inherit}
 
-/* arka plan ışıkları */
-.orb{position:fixed;border-radius:50%;filter:blur(110px);pointer-events:none;z-index:0}
-.orb.a{width:min(760px,170vw);height:min(760px,170vw);background:#7c3aed22;top:-30%;right:-20%;animation:float 22s ease-in-out infinite}
-.orb.b{width:min(560px,140vw);height:min(560px,140vw);background:#67e8f910;bottom:-25%;left:-20%;animation:float 26s ease-in-out infinite reverse}
-@keyframes float{50%{transform:translate(-40px,30px) scale(1.06)}}
+main{max-width:1120px;margin:0 auto;padding:56px 16px 140px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:28px}
+h1{font-size:26px;font-weight:600;letter-spacing:-.02em}
+.sub{color:var(--tx2);font-size:14px;margin-top:4px}
+.btn{appearance:none;border:1px solid var(--ln2);background:var(--sf);border-radius:10px;padding:9px 14px;font-size:13.5px;font-weight:500;cursor:pointer;transition:background .15s,border-color .15s}
+.btn:hover{background:var(--sf2)}
 
-main{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:56px 16px 120px}
-
-/* başlık */
-.hero{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:28px}
-.brand{display:flex;align-items:center;gap:14px}
-.logo{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,#a78bfa,#7c3aed);display:grid;place-items:center;font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:#fff;box-shadow:0 0 40px rgba(167,139,250,.35)}
-h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(28px,4vw,40px);letter-spacing:-.02em;line-height:1.05}
-h1 span{background:linear-gradient(135deg,#a78bfa 0%,#7c3aed 45%,#ec4899 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{color:var(--tx2);font-size:14px;margin-top:6px}
-.play{appearance:none;border:1px solid var(--b2);background:linear-gradient(135deg,rgba(167,139,250,.18),rgba(124,58,237,.12));color:var(--tx);font:600 14px 'DM Sans',sans-serif;padding:11px 18px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .2s var(--ease),border-color .2s}
-.play:hover{transform:translateY(-1px);border-color:var(--b3)}
-.play svg{width:16px;height:16px}
-
-/* filtreler */
-.bar{margin:0 0 28px;display:flex;flex-direction:column;gap:10px}
-.search{width:100%;max-width:420px;background:var(--s2);border:1px solid var(--b2);border-radius:12px;padding:11px 14px;color:var(--tx);font:500 14px 'DM Sans',sans-serif;outline:none;transition:border-color .2s}
-.search:focus{border-color:rgba(167,139,250,.5)}
-.search::placeholder{color:var(--mu)}
-.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.filters{display:flex;flex-direction:column;gap:10px;margin-bottom:32px}
+.search{width:100%;max-width:380px;background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:10px 13px;color:var(--tx);font:14px 'DM Sans',sans-serif;outline:none}
+.search:focus{border-color:var(--ln2)}
+.search::placeholder{color:var(--tx3)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex:none;appearance:none;border:1px solid var(--b1);background:var(--s1);color:var(--tx2);font:500 13px 'DM Sans',sans-serif;padding:7px 12px;border-radius:99px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
-.chip:hover{color:var(--tx);border-color:var(--b2)}
-.chip[aria-pressed="true"]{background:var(--s3);color:var(--tx);border-color:var(--b3)}
-.chip i{width:7px;height:7px;border-radius:50%;background:var(--c,var(--mu))}
+.chip{flex:none;appearance:none;border:1px solid transparent;background:none;color:var(--tx2);font-size:13px;padding:6px 11px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip:hover{color:var(--tx)}
+.chip[aria-pressed="true"]{background:var(--sf);border-color:var(--ln);color:var(--tx)}
+.chip i{width:6px;height:6px;border-radius:50%;background:var(--c)}
 
-/* bölümler */
-section{margin-bottom:36px}
-section h2{font:600 12px 'DM Sans',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin-bottom:12px;display:flex;align-items:center;gap:10px}
-section h2::after{content:"";flex:1;height:1px;background:var(--b1)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px}
-.empty{color:var(--mu);text-align:center;padding:60px 0;display:none}
+section{margin-bottom:40px}
+h2{font-size:12px;font-weight:500;color:var(--tx3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:12px;align-items:start}
+.empty{color:var(--tx3);text-align:center;padding:60px 0;display:none}
 
-/* ─── UYARI ─── */
-.na{
-  --c:var(--ac);
-  position:relative;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;
-  padding:14px 14px 14px 14px;border-radius:16px;
-  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012)),rgba(13,15,20,.82);
-  border:1px solid var(--b1);
-  box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 10px 30px -12px rgba(0,0,0,.6);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  overflow:hidden;text-align:left;
-}
-.na::before{content:"";position:absolute;inset:0 auto 0 0;width:2px;background:var(--c);opacity:.9;box-shadow:0 0 18px 1px var(--c)}
-.na::after{content:"";position:absolute;inset:-40% auto auto -10%;width:160px;height:120px;background:radial-gradient(closest-side,var(--c),transparent);opacity:.08;pointer-events:none}
-.na.ok{--c:var(--gr)}.na.info{--c:var(--cy)}.na.warn{--c:var(--go)}.na.err{--c:var(--er)}.na.ai{--c:var(--ac)}
-.na-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);border:1px solid color-mix(in srgb,var(--c) 26%,transparent)}
-.na-ic svg{width:17px;height:17px}
-.na-t{font-weight:600;font-size:14.5px;line-height:1.3;color:var(--tx);padding-top:1px}
-.na-d{font-size:13px;line-height:1.5;color:var(--tx2);margin-top:3px}
-.na-a{margin-top:9px;appearance:none;border:1px solid color-mix(in srgb,var(--c) 35%,transparent);background:color-mix(in srgb,var(--c) 12%,transparent);color:var(--c);font:600 12.5px 'DM Sans',sans-serif;padding:5px 11px;border-radius:8px;cursor:pointer;transition:background .15s}
-.na-a:hover{background:color-mix(in srgb,var(--c) 22%,transparent)}
-.na-x{appearance:none;border:0;background:none;color:var(--mu);width:26px;height:26px;border-radius:8px;display:grid;place-items:center;cursor:pointer;transition:all .15s}
-.na-x:hover{background:var(--b1);color:var(--tx)}
-.na-x svg{width:14px;height:14px}
-.na-p{position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--c);transform-origin:left;opacity:.7}
+/* ═══════════ UYARI ═══════════ */
+.n{--c:var(--tx);position:relative;background:var(--sf);border:1px solid var(--ln);border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.25);font-size:13px;color:var(--tx2);line-height:1.45;text-align:left}
+.n.ok{--c:var(--ok)}.n.info{--c:var(--info)}.n.warn{--c:var(--warn)}.n.err{--c:var(--err)}.n.ai{--c:var(--ai)}
+.row{display:flex;gap:11px;align-items:flex-start;padding:13px 13px 13px 14px}
+.ic{flex:none;width:20px;height:20px;color:var(--c);margin-top:1px}
+.ic svg{width:20px;height:20px;overflow:visible}
+.tx{flex:1;min-width:0}
+.t{color:var(--tx);font-size:13.5px;font-weight:500}
+.d{margin-top:2px}
+.x{flex:none;appearance:none;border:0;background:none;color:var(--tx3);width:22px;height:22px;margin:-2px -3px 0 0;border-radius:6px;display:grid;place-items:center;cursor:pointer}
+.x:hover{color:var(--tx);background:rgba(255,255,255,.06)}
+.x svg{width:13px;height:13px}
 
-/* yapay zeka türü: dönen gradyan kenar */
-.na.ai{border-color:transparent;background:
-  linear-gradient(rgba(13,15,20,.92),rgba(13,15,20,.92)) padding-box,
-  conic-gradient(from var(--ang,0deg),#a78bfa,#ec4899,#67e8f9,#7c3aed,#a78bfa) border-box;
-  animation:spin 6s linear infinite}
-.na.ai .na-ic{background:linear-gradient(135deg,rgba(167,139,250,.25),rgba(236,72,153,.18))}
-@property --ang{syntax:"<angle>";initial-value:0deg;inherits:false}
-@keyframes spin{to{--ang:360deg}}
+/* pill */
+.n.pill{border-radius:99px;display:inline-flex;justify-self:start}
+.n.pill .row{padding:9px 16px 9px 12px;align-items:center;gap:9px}
+.n.pill .ic,.n.pill .ic svg{width:18px;height:18px}
+.n.pill .ic{margin:0}
+
+/* aksiyon */
+.acts{display:flex;justify-content:flex-end;gap:8px;padding:0 13px 12px}
+.b{appearance:none;border:1px solid var(--ln2);background:none;color:var(--tx);font-size:12.5px;font-weight:500;padding:6px 11px;border-radius:8px;cursor:pointer;transition:background .15s}
+.b:hover{background:rgba(255,255,255,.06)}
+.b.p{background:var(--tx);color:#0b0b0e;border-color:var(--tx)}
+.b.p:hover{background:#fff}
+.lnk{appearance:none;border:0;background:none;color:var(--tx);font-size:13px;font-weight:500;cursor:pointer;text-decoration:underline;text-decoration-color:var(--ln2);text-underline-offset:3px;white-space:nowrap}
+.lnk:hover{text-decoration-color:var(--tx)}
+
+/* ilerleme */
+.bar{height:4px;border-radius:99px;background:rgba(255,255,255,.07);margin-top:10px;overflow:hidden}
+.bar span{display:block;height:100%;width:var(--v);background:var(--c);border-radius:inherit;transform-origin:left}
+.play .bar span{animation:barIn 1s var(--e) .15s both}
+.pv{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--tx3);font-variant-numeric:tabular-nums}
+
+/* meta */
+.meta{margin-top:7px;font-size:12px;color:var(--tx3);display:flex;align-items:center;gap:6px}
+.meta i{width:3px;height:3px;border-radius:50%;background:var(--tx3)}
+
+/* geri al */
+.n.undo .row{align-items:center}
+.ring{flex:none;width:18px;height:18px;color:var(--tx3)}
+.ring circle{stroke-dasharray:1;stroke-dashoffset:0}
+.play .ring .rg{animation:ring 5s linear both}
+
+/* dosya çipi */
+.file{margin-top:9px;display:flex;align-items:center;gap:9px;padding:7px 9px;border:1px solid var(--ln);border-radius:8px;background:rgba(255,255,255,.02)}
+.file b{font-weight:500;color:var(--tx);font-size:12.5px}
+.file span{font-size:12px;color:var(--tx3);margin-left:auto}
+.file .fi{width:22px;height:26px;border-radius:4px;background:rgba(255,255,255,.06);display:grid;place-items:center;font-size:8px;font-weight:600;color:var(--tx2);letter-spacing:.02em}
+
+/* afiş */
+.n.banner{grid-column:1/-1}
+.n.banner .row{align-items:center}
+.n.banner .tx{display:flex;flex-wrap:wrap;gap:0 8px;align-items:baseline}
+.n.banner .d{margin:0}
+
+/* klavye */
+.keys{display:flex;gap:5px;margin-top:9px;align-items:center;font-size:12px;color:var(--tx3)}
+kbd{font:500 12px 'DM Sans',sans-serif;color:var(--tx);min-width:24px;padding:3px 7px;text-align:center;border-radius:6px;background:var(--sf2);border:1px solid var(--ln2);border-bottom-width:2px}
+.play kbd{animation:press .5s ease both}
+.play kbd:nth-of-type(2){animation-delay:.25s}
+
+/* dalga */
+.wave{display:flex;align-items:center;gap:3px;height:26px;margin-top:9px}
+.wave i{flex:1;max-width:4px;height:100%;border-radius:2px;background:var(--c);opacity:.8;transform:scaleY(.25)}
+.play .wave i{animation:wv 1.1s ease-in-out infinite}
+
+/* güç göstergesi */
+.str{display:flex;gap:4px;margin-top:10px}
+.str i{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.07)}
+.str i.on{background:var(--c)}
+.play .str i.on{animation:barIn .6s var(--e) .2s both}
+
+/* yükleniyor */
+.shim{background:linear-gradient(90deg,var(--tx) 0%,var(--tx2) 40%,var(--tx) 60%,var(--tx) 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shim 2.2s linear infinite}
+
+.badge{font-size:10.5px;font-weight:600;color:var(--c);border:1px solid color-mix(in srgb,var(--c) 35%,transparent);border-radius:5px;padding:1px 5px;margin-left:6px;vertical-align:1px}
+
+/* ═══════════ SVG ANİMASYONLARI ═══════════ */
+.ic *{transform-box:fill-box;transform-origin:center}
+.ic .vb{transform-box:view-box}
+.ic .ob{transform-origin:bottom}
+.ic .ol{transform-origin:left}
+.play .dr{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .7s var(--e) var(--dl,0s) both}
+.play .pop{animation:pop .5s var(--e) var(--dl,0s) both}
+.play .spin{animation:spin .9s var(--e) var(--dl,0s) both}
+.play .spinr{animation:spinr .9s var(--e) var(--dl,0s) both}
+.play .swing{animation:swing .9s ease-in-out var(--dl,0s) both}
+.play .shake{animation:shake .5s ease-in-out var(--dl,0s) both}
+.play .rise{animation:rise .6s var(--e) var(--dl,0s) both}
+.play .fall{animation:fall .6s var(--e) var(--dl,0s) both}
+.play .drop{animation:drop .7s var(--e) var(--dl,0s) both}
+.play .blink{animation:blink .6s ease var(--dl,0s) 3 both}
+.play .grow{animation:grow .6s var(--e) var(--dl,0s) both}
+.play .gx{animation:gx .6s var(--e) var(--dl,0s) both}
+.play .tilt{animation:tilt .8s var(--e) var(--dl,0s) both}
+.play .tilt2{animation:tilt2 .8s var(--e) var(--dl,0s) both}
+.play .beat{animation:beat .6s ease var(--dl,0s) 2 both}
+.play .sl{animation:sl .6s var(--e) var(--dl,0s) both}
+.play .sr{animation:sr .6s var(--e) var(--dl,0s) both}
+.play .in1{animation:in1 .6s var(--e) var(--dl,0s) both}
+.play .in2{animation:in2 .6s var(--e) var(--dl,0s) both}
+.play .turn{animation:turn .7s var(--e) var(--dl,0s) both}
+.play .fade{animation:fade .5s ease var(--dl,0s) both}
+.play .fout{animation:fout .6s ease var(--dl,0s) both}
+.play .needle{animation:needle 1s var(--e) var(--dl,0s) both}
+.play .tick{animation:tick 1.1s var(--e) var(--dl,0s) both}
+.play .flip{animation:flip .9s var(--e) var(--dl,0s) both}
+.play .lock{animation:lock .6s var(--e) var(--dl,0s) both}
+.play .knob{animation:knob .6s var(--e) var(--dl,0s) both}
+.play .k1{animation:k1 .8s var(--e) var(--dl,0s) both}
+.play .k2{animation:k2 .8s var(--e) var(--dl,0s) both}
+.play .k3{animation:k3 .8s var(--e) var(--dl,0s) both}
+.play .press{animation:press .4s ease var(--dl,0s) both}
+.play .rock{animation:rock .8s ease-in-out var(--dl,0s) both}
+.play .bob{animation:bob .7s ease-in-out var(--dl,0s) 2 both}
+.play .orbit{animation:orbit 1.6s linear infinite}
+.play .scan{animation:scan 1.6s ease-in-out infinite}
+.play .ping{animation:ping 1.4s ease-out var(--dl,0s) infinite}
+.play .bobl{animation:bob .9s ease-in-out infinite}
+.play .wv{animation:wvs .9s ease-in-out var(--dl,0s) infinite}
+
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.2);opacity:1}100%{transform:scale(1)}}
+@keyframes spin{from{transform:rotate(-360deg)}}
+@keyframes spinr{from{transform:rotate(360deg)}}
+@keyframes swing{20%{transform:rotate(16deg)}40%{transform:rotate(-11deg)}60%{transform:rotate(6deg)}80%{transform:rotate(-3deg)}100%{transform:rotate(0)}}
+@keyframes shake{20%,60%{transform:translateX(-1.6px)}40%,80%{transform:translateX(1.6px)}100%{transform:none}}
+@keyframes rise{from{transform:translateY(6px);opacity:0}}
+@keyframes fall{from{transform:translateY(-6px);opacity:0}}
+@keyframes drop{0%{transform:translateY(-9px);opacity:0}65%{transform:translateY(1.2px);opacity:1}100%{transform:none}}
+@keyframes blink{50%{opacity:.15}}
+@keyframes grow{from{transform:scaleY(0)}}
+@keyframes gx{from{transform:scaleX(0)}}
+@keyframes tilt{40%{transform:rotate(-28deg)}100%{transform:rotate(0)}}
+@keyframes tilt2{from{transform:rotate(30deg);opacity:0}}
+@keyframes beat{50%{transform:scale(1.14)}}
+@keyframes sl{from{transform:translateX(-6px);opacity:0}}
+@keyframes sr{from{transform:translateX(6px);opacity:0}}
+@keyframes in1{from{transform:translate(-3px,-3px);opacity:0}}
+@keyframes in2{from{transform:translate(3px,3px);opacity:0}}
+@keyframes turn{from{transform:rotate(-70deg)}}
+@keyframes fade{from{opacity:0}}
+@keyframes fout{to{opacity:.2}}
+@keyframes needle{from{transform:rotate(-95deg)}}
+@keyframes tick{from{transform:rotate(-300deg)}}
+@keyframes flip{from{transform:rotate(-180deg)}}
+@keyframes lock{from{transform:translateY(-3.5px)}}
+@keyframes knob{from{transform:translateX(-9px)}}
+@keyframes k1{from{transform:translateX(7px)}}
+@keyframes k2{from{transform:translateX(-7px)}}
+@keyframes k3{from{transform:translateX(5px)}}
+@keyframes press{50%{transform:translateY(1.5px)}}
+@keyframes rock{25%{transform:rotate(-9deg)}75%{transform:rotate(7deg)}100%{transform:rotate(0)}}
+@keyframes bob{50%{transform:translateY(-2.5px)}}
+@keyframes orbit{to{transform:rotate(360deg)}}
+@keyframes scan{0%,100%{transform:translateY(-5px)}50%{transform:translateY(5px)}}
+@keyframes ping{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+@keyframes wvs{0%,100%{transform:scaleY(.45)}50%{transform:scaleY(1)}}
+@keyframes wv{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+@keyframes barIn{from{transform:scaleX(0)}}
+@keyframes ring{to{stroke-dashoffset:1}}
+@keyframes shim{from{background-position:100% 0}to{background-position:-150% 0}}
 
 /* önizleme kartı */
-.card{cursor:pointer;transition:transform .25s var(--ease),border-color .2s}
-.card:hover{transform:translateY(-2px)}
-.card:not(.ai):hover{border-color:var(--b2)}
-.card:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
-.card .na-x{pointer-events:none}
-.tag{position:absolute;right:44px;top:16px;font-size:10.5px;color:var(--mu);letter-spacing:.04em}
+.card{cursor:pointer;transition:border-color .2s,transform .25s var(--e)}
+.card:hover{border-color:var(--ln2);transform:translateY(-1px)}
+.card:focus-visible{outline:2px solid var(--tx2);outline-offset:3px}
+.card .x{pointer-events:none}
 
-/* canlı bildirim yığını */
-.stack{position:fixed;z-index:50;right:20px;bottom:20px;display:flex;flex-direction:column-reverse;gap:10px;width:min(380px,calc(100vw - 32px));pointer-events:none}
-.stack .na{pointer-events:auto;animation:in .45s var(--ease) both;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015)),rgba(13,15,20,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 18px 50px -10px rgba(0,0,0,.8)}
-.stack .na.ai{background:linear-gradient(#0d0f14,#0d0f14) padding-box,conic-gradient(from var(--ang,0deg),#a78bfa,#ec4899,#67e8f9,#7c3aed,#a78bfa) border-box}
-.stack .na.ai{animation:in .45s var(--ease) both,spin 6s linear infinite}
-.stack .na.out{animation:out .3s ease forwards}
-@keyframes in{from{opacity:0;transform:translateY(16px) scale(.96);filter:blur(4px)}}
-@keyframes out{to{opacity:0;transform:translateX(24px) scale(.97)}}
-.stack .na-p{animation:prog var(--dur,5s) linear forwards}
-.stack .na:hover .na-p{animation-play-state:paused}
-@keyframes prog{to{transform:scaleX(0)}}
-@media (max-width:560px){.stack{left:16px;right:16px;bottom:16px;width:auto}}
+/* canlı yığın */
+.stack{position:fixed;z-index:50;right:20px;bottom:20px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;width:min(370px,calc(100vw - 32px));pointer-events:none}
+.stack .n{pointer-events:auto;width:100%;box-shadow:0 12px 32px rgba(0,0,0,.5);animation:tin .45s var(--e) both}
+.stack .n.pill,.stack .n.banner{width:auto;max-width:100%}
+.stack .n.out{animation:tout .25s ease forwards}
+@keyframes tin{from{opacity:0;transform:translateY(12px) scale(.97)}}
+@keyframes tout{to{opacity:0;transform:translateY(6px) scale(.97)}}
+@media (max-width:560px){.stack{left:16px;right:16px;bottom:16px;width:auto;align-items:stretch}.stack .n.pill{align-self:center}}
 
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}
-}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="orb a"></div><div class="orb b"></div>
-
 <main>
-  <header class="hero">
+  <header>
     <div>
-      <div class="brand">
-        <div class="logo">N</div>
-        <div>
-          <h1>Neo <span>Uyarıları</span></h1>
-          <p class="sub"><b id="count">100</b> hazır bildirim · denemek için birine tıkla</p>
-        </div>
-      </div>
+      <h1>Neo Uyarıları</h1>
+      <p class="sub"><span id="count">100</span> bildirim · her birinin kendi animasyonlu ikonu var · denemek için tıkla</p>
     </div>
-    <button class="play" id="playBtn" type="button">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>
-      Rastgele 3 tane oynat
-    </button>
+    <button class="btn" id="playBtn" type="button">Rastgele 3 tane göster</button>
   </header>
 
-  <div class="bar">
-    <input class="search" id="search" type="search" placeholder="Uyarı ara… (ör. ödeme, mikrofon)" autocomplete="off">
+  <div class="filters">
+    <input class="search" id="search" type="search" placeholder="Ara… (ör. ödeme, mikrofon)" autocomplete="off">
     <div class="chips" id="typeChips"></div>
     <div class="chips" id="catChips"></div>
   </div>
@@ -151,265 +253,365 @@ section h2::after{content:"";flex:1;height:1px;background:var(--b1)}
 <div class="stack" id="stack" aria-live="polite"></div>
 
 <script>
-/* ══════════════════════════════════════════
-   Neo uyarı bileşeni — sıfırdan yazıldı.
-   Kullanım: neoAlert({type:'ok', title:'…', desc:'…', action:'…', onAction(){}, duration:5000})
-   Türler: ok · info · warn · err · ai
-   ══════════════════════════════════════════ */
-const ICONS = {
-  ok:   '<path d="M20 6 9 17l-5-5"/>',
-  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
-  warn: '<path d="M12 3.5 2.8 19.5h18.4L12 3.5z"/><path d="M12 10v4M12 17h.01"/>',
-  err:  '<circle cx="12" cy="12" r="9"/><path d="m15 9-6 6M9 9l6 6"/>',
-  ai:   '<path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><path d="M12 7.5 13.4 10.6 16.5 12 13.4 13.4 12 16.5 10.6 13.4 7.5 12 10.6 10.6z"/>'
-};
-const CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
-const TYPE_NAMES = {ok:'Başarılı',info:'Bilgi',warn:'Uyarı',err:'Hata',ai:'Neo'};
+/* ════════════════════════════════════════════════════
+   Neo uyarıları — ikonlar ve bileşen sıfırdan yazıldı.
+   neoAlert({type, variant, icon, title, desc, ...}) ile çağır.
+   ════════════════════════════════════════════════════ */
 
-function svgIcon(type){
-  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICONS[type]+'</svg>';
-}
+// ── 100 animasyonlu ikon (24×24, çizgi) ──
+const DOC = '<path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3.5V8h4.5"/>';
+const CLOUD = '<path d="M7 18.5h10.5a4 4 0 0 0 .5-8A6 6 0 0 0 6.4 9.5a4.5 4.5 0 0 0 .6 9z"/>';
+const SHIELD = '<path d="M12 3l7.5 3v5.5c0 4.5-3.2 8.2-7.5 9.5-4.3-1.3-7.5-5-7.5-9.5V6z"/>';
+const SPK = '<path d="M4 9.5h3l4.5-4v13L7 14.5H4z"/>';
+const TRAY = '<path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15"/>';
+const P = 'pathLength="1"';
+
+const ICONS = {
+  save:`<path class="dr" ${P} d="M7 3.5h10a1 1 0 0 1 1 1V20l-6-4-6 4V4.5a1 1 0 0 1 1-1z"/><path class="dr" ${P} style="--dl:.35s" d="M9.5 9.5l2 2 3-3.5"/>`,
+  copy:`<path d="M15.5 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"/><rect class="in2" x="8.5" y="8.5" width="11.5" height="11.5" rx="2"/>`,
+  chatDots:`<path d="M12 4.5c4.4 0 8 3 8 6.8s-3.6 6.7-8 6.7c-1 0-2-.1-2.9-.4L5 19.5l1-3.4C4.8 14.9 4 13.2 4 11.3 4 7.5 7.6 4.5 12 4.5z"/><circle class="blink" cx="8.5" cy="11.3" r=".6" fill="currentColor"/><circle class="blink" style="--dl:.15s" cx="12" cy="11.3" r=".6" fill="currentColor"/><circle class="blink" style="--dl:.3s" cx="15.5" cy="11.3" r=".6" fill="currentColor"/>`,
+  trash:`<path class="tilt vb" style="transform-origin:4.5px 7px" d="M4 7h16M9.5 7V4.5h5V7"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v5M14 11v5"/>`,
+  lines:`<path class="gx ol" d="M4 6h16"/><path class="gx ol" style="--dl:.1s" d="M4 10h16"/><path class="gx ol" style="--dl:.2s" d="M4 14h16"/><path class="gx ol" style="--dl:.3s" d="M4 18h9"/><circle class="pop" style="--dl:.55s" cx="18.5" cy="18" r=".6" fill="currentColor"/>`,
+  cursor:`<rect x="3" y="6.5" width="18" height="11" rx="3"/><path class="blink" d="M8 9.5v5"/>`,
+  planeFail:`<g class="shake"><path d="M21 3.5 3.5 10.5l7 3 3 7z"/><path d="M10.5 13.5 21 3.5"/></g>`,
+  sparkle:`<path class="pop" d="M12 3.5c.6 3.7 2.8 5.9 6.5 6.5-3.7.6-5.9 2.8-6.5 6.5-.6-3.7-2.8-5.9-6.5-6.5 3.7-.6 5.9-2.8 6.5-6.5z"/><path class="pop" style="--dl:.25s" d="M18.5 16.5v4M16.5 18.5h4"/>`,
+  historyClear:`<g class="spinr"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5V8H8"/></g>`,
+  link:`<path class="sl" d="M10 14a4 4 0 0 1 0-5.7l2.3-2.3a4 4 0 0 1 5.7 5.7l-1.2 1.2"/><path class="sr" d="M14 10a4 4 0 0 1 0 5.7L11.7 18a4 4 0 0 1-5.7-5.7l1.2-1.2"/>`,
+
+  swap:`<path class="sl" d="M4 8.5h15m0 0-3.5-3.5M19 8.5l-3.5 3.5"/><path class="sr" style="--dl:.15s" d="M20 15.5H5m0 0 3.5-3.5M5 15.5 8.5 19"/>`,
+  orbit:`<circle cx="12" cy="12" r="2.6"/><g class="orbit vb" style="transform-origin:12px 12px"><circle cx="12" cy="12" r="8" stroke-dasharray="1.5 3.5" opacity=".5"/><circle cx="20" cy="12" r="1.4" fill="currentColor" stroke="none"/></g>`,
+  gauge:`<path d="M4 17.5a8 8 0 1 1 16 0"/><path class="needle vb" style="transform-origin:12px 17.5px" d="M12 17.5l4.2-4.8"/><circle cx="12" cy="17.5" r=".8" fill="currentColor"/>`,
+  server:`<rect x="4" y="4" width="16" height="7" rx="1.5"/><rect x="4" y="13" width="16" height="7" rx="1.5"/><circle class="blink" cx="7.5" cy="7.5" r=".6" fill="currentColor"/><circle cx="7.5" cy="16.5" r=".6" fill="currentColor"/><path d="M11 7.5h5.5M11 16.5h5.5" opacity=".45"/>`,
+  hourglass:`<g class="flip"><path d="M7 3.5h10M7 20.5h10"/><path d="M8 3.5c0 4 4 5 4 8.5s-4 4.5-4 8.5M16 3.5c0 4-4 5-4 8.5s4 4.5 4 8.5"/></g>`,
+  regen:`<g class="spin"><path d="M19.5 13a7.5 7.5 0 0 1-13.6 3.6"/><path d="M4.5 11a7.5 7.5 0 0 1 13.6-3.6"/><path d="M18.5 3.5v4h-4M5.5 20.5v-4h4"/></g>`,
+  stop:`<circle cx="12" cy="12" r="8.5"/><rect class="pop" x="9.2" y="9.2" width="5.6" height="5.6" rx="1" fill="currentColor" stroke="none"/>`,
+  chip:`<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9.5 3v3M14.5 3v3M9.5 18v3M14.5 18v3M3 9.5h3M3 14.5h3M18 9.5h3M18 14.5h3" opacity=".5"/><path class="pop" style="--dl:.2s" d="M12 9c.3 1.6 1.4 2.7 3 3-1.6.3-2.7 1.4-3 3-.3-1.6-1.4-2.7-3-3 1.6-.3 2.7-1.4 3-3z"/>`,
+  ban:`<circle cx="12" cy="12" r="8.5"/><path class="dr" ${P} style="--dl:.1s" d="M6 18 18 6"/>`,
+  docCheck:`${DOC}<path class="dr" ${P} style="--dl:.2s" d="M9 14.5l2 2 4-4.5"/>`,
+
+  keyTurn:`<g class="turn"><circle cx="8" cy="15.5" r="4"/><path d="M11 12.5l8.5-8.5M16.5 7l2 2M14.5 9l1.5 1.5"/></g>`,
+  keyShake:`<g class="shake"><circle cx="7.5" cy="12" r="4"/><path d="M11.5 12H21M18 12v3M15 12v2"/></g><path class="pop" style="--dl:.3s" d="M17 4l3 3M20 4l-3 3"/>`,
+  plusDash:`<circle cx="12" cy="12" r="8.5" stroke-dasharray="2.6 2.4"/><path class="pop" d="M12 8.5v7M8.5 12h7"/>`,
+  stopwatch:`<circle cx="12" cy="13.5" r="7"/><path d="M10 3h4M12 3v3.5M18 7.5l1.5-1.5"/><path class="tick vb" style="transform-origin:12px 13.5px" d="M12 13.5V9.5"/>`,
+  battLow:`<rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 10.5v3"/><rect class="gx ol" x="5.5" y="9.5" width="3.2" height="5" rx=".6" fill="currentColor" stroke="none"/>`,
+  battEmpty:`<rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 10.5v3"/><path class="blink" d="M11 9.5v3M11 14.5h.01"/>`,
+  keyDrop:`<g class="drop"><path d="M14.5 4a5.5 5.5 0 0 0-5.2 7.3L4 16.6V20h3.4v-2h2v-2h2l1.3-1.3A5.5 5.5 0 1 0 14.5 4z"/><circle cx="16" cy="8" r=".8" fill="currentColor"/></g>`,
+  plug:`<g class="sl"><path d="M2.5 12H6"/><path d="M6 8h2a4 4 0 0 1 0 8H6z"/></g><g class="sr"><path d="M21.5 12H18"/><path d="M18 8h-2a4 4 0 0 0 0 8h2z"/></g>`,
+  pulse:`<path class="dr" ${P} d="M3 12h4l2-5 4 10 2-5h6"/>`,
+  serverBolt:`<rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M4 8.5h16" opacity=".4"/><path class="blink" d="M13 11l-3 4h4l-3 4"/>`,
+
+  smile:`<circle cx="12" cy="12" r="8.5"/><path class="dr" ${P} style="--dl:.15s" d="M8.5 14c.9 1.3 2.1 2 3.5 2s2.6-.7 3.5-2"/><path class="pop" style="--dl:.4s" d="M9 9.5h.01M15 9.5h.01" stroke-width="2.4"/>`,
+  logout:`<path d="M13.5 4h-7A1.5 1.5 0 0 0 5 5.5v13A1.5 1.5 0 0 0 6.5 20h7"/><g class="sl"><path d="M10 12h10M17 9l3 3-3 3"/></g>`,
+  guest:`<circle cx="10" cy="8" r="3.5" stroke-dasharray="2.2 1.8"/><path d="M3.5 19.5c.8-3.3 3.3-5 6.5-5" stroke-dasharray="2.2 1.8"/><path class="pop" style="--dl:.2s" d="M17.5 14v6M14.5 17h6"/>`,
+  clock:`<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12"/><path class="tick vb" style="transform-origin:12px 12px" d="M12 12l3.5 2"/>`,
+  lock:`<rect x="5" y="10.5" width="14" height="10" rx="2"/><path class="lock" d="M8 10.5v-3a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2"/>`,
+  userCheck:`<circle cx="10" cy="8" r="3.5"/><path d="M3.5 19.5c.8-3.3 3.3-5 6.5-5 1.2 0 2.3.2 3.2.7"/><path class="dr" ${P} style="--dl:.25s" d="M15 18l2 2 4-4.5"/>`,
+  userX:`<g class="shake"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 19.5c.8-3.3 3.3-5 6.5-5"/><path d="M16 15l4 4M20 15l-4 4"/></g>`,
+  seal:`<path class="spin" d="M12 3l2.3 1.7 2.9-.1.9 2.7 2.3 1.7-.9 2.7.9 2.7-2.3 1.7-.9 2.7-2.9-.1L12 21l-2.3-1.7-2.9.1-.9-2.7L3.6 15l.9-2.7-.9-2.7 2.3-1.7.9-2.7 2.9.1z"/><path class="dr" ${P} style="--dl:.45s" d="M8.8 12.2l2.2 2.2 4.3-4.6"/>`,
+  mail:`<g class="rise"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path class="dr" ${P} style="--dl:.25s" d="M3.5 7l8.5 6 8.5-6"/></g>`,
+  pass:`<rect x="2.5" y="7" width="19" height="10" rx="3"/><path class="pop" d="M7.5 12h.01" stroke-width="2.6"/><path class="pop" style="--dl:.12s" d="M12 12h.01" stroke-width="2.6"/><path class="pop" style="--dl:.24s" d="M16.5 12h.01" stroke-width="2.6"/>`,
+
+  crown:`<path class="dr" ${P} d="M4 17.5 3 7.5l5 4 4-6 4 6 5-4-1 10z"/><path class="gx" style="--dl:.5s" d="M5 20.5h14"/>`,
+  receipt:`<path d="M6 3.5h12v17l-2-1.3-2 1.3-2-1.3-2 1.3-2-1.3-2 1.3z"/><path class="gx ol" style="--dl:.1s" d="M9 8h6"/><path class="gx ol" style="--dl:.2s" d="M9 11.5h6"/><path class="gx ol" style="--dl:.3s" d="M9 15h3"/>`,
+  card:`<g class="shake"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 9.5h19M6 15h4"/></g>`,
+  bars:`<path d="M4 20.5h16" opacity=".4"/><rect class="grow ob" x="5" y="13" width="3" height="5.5" rx=".8"/><rect class="grow ob" style="--dl:.1s" x="10.5" y="9" width="3" height="9.5" rx=".8"/><rect class="grow ob" style="--dl:.2s" x="16" y="4.5" width="3" height="14" rx=".8"/>`,
+  calX:`<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><path class="pop" style="--dl:.2s" d="M10 13l4 4M14 13l-4 4"/>`,
+  calDots:`<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><path class="pop" d="M8 15h.01" stroke-width="2.4"/><path class="pop" style="--dl:.15s" d="M12 15h.01" stroke-width="2.4"/><path class="pop" style="--dl:.3s" d="M16 15h.01" stroke-width="2.4"/>`,
+  repeat:`<path class="dr" ${P} d="M4 11.5v-1a4 4 0 0 1 4-4h12"/><path class="dr" ${P} d="M17 3.5l3 3-3 3"/><path class="dr" ${P} style="--dl:.3s" d="M20 12.5v1a4 4 0 0 1-4 4H4"/><path class="dr" ${P} style="--dl:.3s" d="M7 20.5l-3-3 3-3"/>`,
+  minusCircle:`<circle class="dr" ${P} cx="12" cy="12" r="8.5"/><path class="gx" style="--dl:.5s" d="M8 12h8"/>`,
+  ticket:`<g class="pop"><path d="M3.5 8.5v-2a1 1 0 0 1 1-1h15a1 1 0 0 1 1 1v2a2.5 2.5 0 0 0 0 5v2a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1v-2a2.5 2.5 0 0 0 0-5z"/><path d="M9.5 13.5l5-5M9.5 8.5h.01M14.5 13.5h.01"/></g>`,
+  tagX:`<path d="M3.5 12.5v-8a1 1 0 0 1 1-1h8l8 8-9 9z"/><circle cx="8" cy="8" r="1.2"/><path class="dr" ${P} style="--dl:.2s" d="M3 21 21 3"/>`,
+
+  upload:`${TRAY}<g class="rise"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/></g>`,
+  docScan:`${DOC}<path class="scan" d="M3.5 12.5h17"/>`,
+  docBig:`${DOC}<g class="beat"><path d="M9.5 11.5h5v5M9.5 16.5l5-5"/></g>`,
+  docQ:`${DOC}<path class="pop" style="--dl:.15s" d="M10.3 12a1.8 1.8 0 1 1 2.5 1.6c-.5.3-.8.7-.8 1.2M12 17h.01"/>`,
+  compress:`<path class="in1" d="M4 10h6V4"/><path class="in2" d="M20 14h-6v6"/><path d="M10 10 3.5 3.5M14 14l6.5 6.5" opacity=".45"/>`,
+  image:`<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle class="pop" style="--dl:.35s" cx="9" cy="9.5" r="1.6"/><path class="dr" ${P} d="M3.5 17l5-4.5 4 3.5 3-2.5 5 4"/>`,
+  cloudAlert:`${CLOUD}<path class="blink" d="M12 11v3M12 16.2h.01"/>`,
+  download:`${TRAY}<g class="fall"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/></g>`,
+  clip:`<path class="tilt2" d="M20 11.5l-7.8 7.8a5 5 0 0 1-7.1-7.1l7.8-7.8a3.3 3.3 0 0 1 4.7 4.7l-7.8 7.8a1.7 1.7 0 0 1-2.4-2.4l7.1-7.1"/>`,
+  files:`<rect x="4" y="7.5" width="11" height="13" rx="1.5"/><path class="sr" style="--dl:.1s" d="M7.5 4.5h8A1.5 1.5 0 0 1 17 6v10.5"/><path class="sr" style="--dl:.2s" d="M11 2h7.5A1.5 1.5 0 0 1 20 3.5v9"/>`,
+
+  wave:`<path class="wv" d="M4 10v4"/><path class="wv" style="--dl:.12s" d="M8 7v10"/><path class="wv" style="--dl:.24s" d="M12 4v16"/><path class="wv" style="--dl:.36s" d="M16 7v10"/><path class="wv" style="--dl:.48s" d="M20 10v4"/>`,
+  micOff:`<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/><path class="dr" ${P} style="--dl:.15s" d="M4 4l16 16"/>`,
+  micQ:`<rect x="5" y="3" width="6" height="11" rx="3"/><path d="M2.5 11a5.5 5.5 0 0 0 11 0M8 16.5V21"/><path class="pop" style="--dl:.2s" d="M16.2 9.5a2.3 2.3 0 1 1 3.2 2.1c-.6.3-1.1.8-1.1 1.5M18.3 16h.01"/>`,
+  recDone:`<path class="grow" d="M3.5 10v4"/><path class="grow" style="--dl:.08s" d="M7 7.5v9"/><path class="grow" style="--dl:.16s" d="M10.5 5v14"/><path class="grow" style="--dl:.24s" d="M14 9v6"/><path class="dr" ${P} style="--dl:.4s" d="M16.5 13l2 2 3.5-4"/>`,
+  spkLow:`${SPK}<path class="blink" d="M15.5 10a3 3 0 0 1 0 4"/>`,
+  spkWaves:`${SPK}<path class="ping" d="M15.5 9.5a3.5 3.5 0 0 1 0 5"/><path class="ping" style="--dl:.35s" d="M18.5 7a7 7 0 0 1 0 10"/>`,
+  pause:`<circle cx="12" cy="12" r="8.5"/><path class="pop" d="M10 9v6"/><path class="pop" style="--dl:.1s" d="M14 9v6"/>`,
+  sliders:`<path d="M4 7h16M4 12h16M4 17h16" opacity=".3"/><circle class="k1" cx="9" cy="7" r="1.9" fill="var(--sf)"/><circle class="k2" cx="15" cy="12" r="1.9" fill="var(--sf)"/><circle class="k3" cx="7.5" cy="17" r="1.9" fill="var(--sf)"/>`,
+  timerRing:`<circle cx="12" cy="12" r="8.5" opacity=".25"/><circle class="dr vb" ${P} cx="12" cy="12" r="8.5" style="transform:rotate(-90deg);transform-origin:12px 12px"/><path d="M12 8.5V12l2.5 1.5M10 1.5h4"/>`,
+  bubbleQ:`<path d="M4 5.5h16v10.5H10l-4.5 3.5V16H4z"/><path class="pop" style="--dl:.15s" d="M10.3 9.3a1.8 1.8 0 1 1 2.5 1.6c-.5.3-.8.6-.8 1.1M12 13.8h.01"/>`,
+
+  wifiOff:`<path class="fout" d="M2.5 8.5a14 14 0 0 1 19 0"/><path class="fout" style="--dl:.15s" d="M5.5 12a9.5 9.5 0 0 1 13 0"/><path d="M8.8 15.3a5 5 0 0 1 6.4 0M12 19h.01"/><path class="dr" ${P} style="--dl:.35s" d="M3 3l18 18"/>`,
+  wifiOn:`<path d="M12 19h.01"/><path class="fade" d="M8.8 15.3a5 5 0 0 1 6.4 0"/><path class="fade" style="--dl:.15s" d="M5.5 12a9.5 9.5 0 0 1 13 0"/><path class="fade" style="--dl:.3s" d="M2.5 8.5a14 14 0 0 1 19 0"/>`,
+  signal:`<path d="M10 19v-5M14 19v-8M18 19V6" opacity=".22"/><path class="blink" d="M6 19v-2.5"/>`,
+  globe:`<g class="shake"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.3 3.5 5.2 3.5 8.5s-1 6.2-3.5 8.5c-2.5-2.3-3.5-5.2-3.5-8.5s1-6.2 3.5-8.5z"/></g>`,
+  reconnect:`<g class="orbit vb" style="transform-origin:12px 12px"><path d="M12 3.5a8.5 8.5 0 0 1 8.5 8.5"/><path d="M12 20.5A8.5 8.5 0 0 1 3.5 12"/></g><circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none"/>`,
+  alarm:`<circle cx="12" cy="13" r="7.5"/><path class="shake" d="M4 5 6.5 2.8M20 5l-2.5-2.2"/><path d="M12 9.5v4M12 16h.01"/>`,
+  cloudCheck:`${CLOUD}<path class="dr" ${P} style="--dl:.2s" d="M9.5 13.5l2 2 3.5-3.5"/>`,
+  cloudUp:`${CLOUD}<g class="bob"><path d="M12 16v-5M9.8 13 12 10.8l2.2 2.2"/></g>`,
+  airplane:`<path class="rise" d="M10.5 21l1.5-5.5-6.5 2v-2l6.5-4V5a1.5 1.5 0 0 1 3 0v6.5l6.5 4v2l-6.5-2 1.5 5.5z"/>`,
+  bolt:`<path class="dr" ${P} d="M13 3 5 13.5h6L10 21l8-10.5h-6z"/>`,
+
+  eyeClosed:`<path d="M3 10c2.5 3 5.5 4.5 9 4.5s6.5-1.5 9-4.5"/><path class="fade" d="M6.2 13.2 4.8 15.3"/><path class="fade" style="--dl:.1s" d="M12 14.5v2.6"/><path class="fade" style="--dl:.2s" d="M17.8 13.2l1.4 2.1"/>`,
+  shieldAlert:`<g class="beat">${SHIELD}</g><path d="M12 8.5v4M12 15.5h.01"/>`,
+  shieldCheck:`${SHIELD}<path class="dr" ${P} style="--dl:.2s" d="M8.8 12l2.2 2.2 4.3-4.5"/>`,
+  devicePin:`<rect x="4" y="5" width="16" height="10.5" rx="1.5"/><path d="M2.5 19h19"/><path class="drop" d="M12 13s-2.6-2.3-2.6-4.3a2.6 2.6 0 0 1 5.2 0C14.6 10.7 12 13 12 13z"/>`,
+  db:`<ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v12c0 1.4 3.1 2.5 7 2.5M19 6v6M5 12c0 1.4 3.1 2.5 7 2.5"/><path class="gx" style="--dl:.2s" d="M15.5 18h6"/>`,
+  archive:`<rect x="3.5" y="4" width="17" height="4.5" rx="1"/><path d="M5 8.5v10A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-10"/><g class="bobl"><path d="M12 11v5.5M9.5 14l2.5 2.5 2.5-2.5"/></g>`,
+  finger:`<path class="dr" ${P} d="M7 8.5A6 6 0 0 1 18 11.5V13"/><path class="dr" ${P} style="--dl:.1s" d="M9 12a3 3 0 0 1 6 0v2.5a8 8 0 0 1-1.5 4.5"/><path class="dr" ${P} style="--dl:.2s" d="M12 12v3a5 5 0 0 1-1.8 3.9"/><path class="dr" ${P} style="--dl:.3s" d="M6 12.5v1a9 9 0 0 0 1.5 5"/>`,
+  eraser:`<g class="rock"><path d="M8.5 19.5 3.8 14.8a1.5 1.5 0 0 1 0-2.1L13.4 3a1.5 1.5 0 0 1 2.1 0l4.7 4.7a1.5 1.5 0 0 1 0 2.1L10.5 19.5z"/><path d="M7 10.5l6.5 6.5"/></g><path d="M8.5 19.5h11" opacity=".5"/>`,
+  toggle:`<rect x="2.5" y="7" width="19" height="10" rx="5"/><circle class="knob" cx="16.5" cy="12" r="2.8" fill="currentColor" stroke="none"/>`,
+  lockSmall:`<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/><path class="blink" d="M12 14.5v2"/>`,
+
+  arrowUp:`<circle cx="12" cy="12" r="8.5"/><g class="rise"><path d="M12 16V8M8.5 11.5 12 8l3.5 3.5"/></g>`,
+  box:`<g class="pop"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9" opacity=".5"/></g>`,
+  wrench:`<path class="swing vb" style="transform-origin:6px 18px" d="M15 4.5a4.5 4.5 0 0 0-4.2 6.1l-6.3 6.3a1.8 1.8 0 0 0 2.6 2.6l6.3-6.3A4.5 4.5 0 0 0 19.5 9l-2.8 2.8-2.9-.6-.6-2.9L16 5.6a4.5 4.5 0 0 0-1-1.1z"/>`,
+  moon:`<path class="turn" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><path class="pop" style="--dl:.35s" d="M17 3.5v3M15.5 5h3"/>`,
+  gear:`<g class="spin"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="6.5"/><path d="M12 2.5V5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></g>`,
+  keyboard:`<rect x="2.5" y="6" width="19" height="12" rx="2"/><path class="press" d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01" stroke-width="2"/><path d="M8 14.5h8"/>`,
+  phone:`<rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><g class="fall"><path d="M12 7v6.5M9.5 11 12 13.5l2.5-2.5"/></g><path d="M11 18.5h2"/>`,
+  pie:`<circle cx="12" cy="12" r="8.5"/><path class="turn vb" style="transform-origin:12px 12px" d="M12 12V3.5A8.5 8.5 0 1 1 4.6 16.2z" fill="currentColor" fill-opacity=".18"/>`,
+  triangle:`<g class="shake"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4M12 17h.01"/></g>`,
+  panel:`<rect x="3" y="4.5" width="18" height="15" rx="2"/><path class="sr" d="M14 4.5v15"/><path class="gx ol" style="--dl:.3s" d="M16.5 8.5h2M16.5 11.5h2"/>`,
+};
+
+const CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+const svg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
+
+// ── 100 uyarı: [kategori, tür, düzen, ikon, başlık, açıklama, ekstra] ──
+const ALERTS = [
+  ['Sohbet','ok','card','save','Sohbet kaydedildi','Konuşman geçmişe eklendi, istediğin zaman devam edebilirsin.'],
+  ['Sohbet','ok','pill','copy','Mesaj kopyalandı'],
+  ['Sohbet','info','meta','chatDots','Sohbet yüklendi','Kaldığın yerden devam ediyorsun.',{meta:'42 mesaj · 2 gün önce'}],
+  ['Sohbet','info','undo','trash','Sohbet silindi',null,{action:'Geri al'}],
+  ['Sohbet','warn','card','lines','Mesaj çok uzun','Yaklaşık 12.400 token. Modelin sınırını aşabilir, bölmeyi dene.'],
+  ['Sohbet','warn','pill','cursor','Önce bir şeyler yaz'],
+  ['Sohbet','err','action','planeFail','Mesaj gönderilemedi','Bir şeyler ters gitti. Tekrar denemek ister misin?',{action:'Tekrar dene'}],
+  ['Sohbet','ai','card','sparkle','Yanıt hazır','Neo düşünmeyi bitirdi, yanıtın ekranda.'],
+  ['Sohbet','ok','pill','historyClear','Geçmiş temizlendi'],
+  ['Sohbet','info','meta','link','Paylaşım bağlantısı kopyalandı','Bağlantıya sahip herkes bu sohbeti okuyabilir.',{meta:'neoai.com.tr/s/k3x9'}],
+
+  ['Yapay Zeka','ai','card','swap','Model değiştirildi','Artık Neo Pro ile konuşuyorsun.'],
+  ['Yapay Zeka','ai','loading','orbit','Neo düşünüyor','Karmaşık bir soru, birkaç saniye sürebilir.'],
+  ['Yapay Zeka','warn','action','gauge','Bağlam dolmak üzere','Yeni bir sohbet başlatmak yanıt kalitesini artırır.',{action:'Yeni sohbet'}],
+  ['Yapay Zeka','err','action','server','Model yanıt vermedi','Model şu an çok yoğun. Birazdan tekrar dene.',{action:'Tekrar dene'}],
+  ['Yapay Zeka','warn','pill','hourglass','Model yoğun, yanıtlar gecikebilir'],
+  ['Yapay Zeka','ok','pill','regen','Yanıt yeniden oluşturuldu'],
+  ['Yapay Zeka','info','action','stop','Yanıt durduruldu','Kaldığı yerden devam ettirebilirsin.',{action:'Devam et'}],
+  ['Yapay Zeka','ai','card','chip','Hafıza güncellendi','Neo bu tercihini bundan sonra hatırlayacak.'],
+  ['Yapay Zeka','err','card','ban','Bu model kullanılamıyor','Seçtiğin model planında yok ya da geçici olarak kapalı.'],
+  ['Yapay Zeka','ok','pill','docCheck','Sistem talimatı kaydedildi'],
+
+  ['API','ok','card','keyTurn','API anahtarı eklendi','Anahtar güvenli şekilde cihazına kaydedildi.'],
+  ['API','err','card','keyShake','Geçersiz API anahtarı','Anahtar doğrulanamadı. Kopyalarken boşluk kalmış olabilir.'],
+  ['API','warn','action','plusDash','API anahtarı eksik','Bu sağlayıcıyı kullanmak için önce bir anahtar ekle.',{action:'Anahtar ekle'}],
+  ['API','err','meta','stopwatch','Hız sınırına ulaşıldı','Kısa sürede çok fazla istek gönderildi.',{meta:'30 saniye sonra tekrar dene'}],
+  ['API','warn','progress','battLow','Kota azalıyor','Sağlayıcı kotanın büyük kısmını kullandın.',{value:85,label:'85.000 / 100.000 token'}],
+  ['API','err','action','battEmpty','Kota doldu','Sağlayıcı panelinden planını kontrol et.',{action:'Panele git'}],
+  ['API','ok','undo','keyDrop','Anahtar silindi',null,{action:'Geri al'}],
+  ['API','info','pill','plug','Sağlayıcı değiştirildi'],
+  ['API','ok','meta','pulse','Bağlantı test edildi','Sağlayıcı yanıt veriyor, her şey yolunda.',{meta:'Gecikme 184 ms'}],
+  ['API','err','card','serverBolt','Sağlayıcı hatası','Sağlayıcı 500 hatası döndürdü. Sorun onların tarafında görünüyor.'],
+
+  ['Hesap','ok','card','smile','Hoş geldin!','Giriş başarılı. Seni tekrar görmek güzel.'],
+  ['Hesap','info','pill','logout','Çıkış yapıldı, görüşmek üzere'],
+  ['Hesap','warn','action','guest','Misafir modundasın','Tüm özelliklere erişmek için giriş yap.',{action:'Giriş yap'}],
+  ['Hesap','warn','action','clock','Oturum sona ermek üzere','5 dakika içinde oturumun kapanacak.',{action:'Oturumu uzat'}],
+  ['Hesap','err','action','lock','Oturum sona erdi','Güvenliğin için tekrar giriş yapman gerekiyor.',{action:'Giriş yap'}],
+  ['Hesap','ok','pill','userCheck','Profil güncellendi'],
+  ['Hesap','err','card','userX','Giriş başarısız','E-posta ya da şifre hatalı.'],
+  ['Hesap','ok','card','seal','E-posta doğrulandı','Hesabın artık tamamen aktif.'],
+  ['Hesap','info','meta','mail','Doğrulama e-postası gönderildi','Gelen kutunu ve spam klasörünü kontrol et.',{meta:'a•••@ornek.com'}],
+  ['Hesap','ok','pill','pass','Şifre değiştirildi'],
+
+  ['Plan & Ödeme','ai','card','crown','Pro\'ya hoş geldin','Tüm modeller ve sınırsız sohbet artık senin.'],
+  ['Plan & Ödeme','ok','meta','receipt','Ödeme alındı','Faturan e-posta adresine gönderildi.',{meta:'₺249,00 · Neo Pro aylık'}],
+  ['Plan & Ödeme','err','action','card','Ödeme başarısız','Kartın işlenemedi. Kart bilgilerini güncelle.',{action:'Kartı güncelle'}],
+  ['Plan & Ödeme','warn','progress','bars','Kullanım sınırına yaklaştın','Aylık mesaj hakkının çoğunu kullandın.',{value:90,label:'900 / 1000 mesaj'}],
+  ['Plan & Ödeme','err','action','calX','Günlük sınır doldu','Hakkın yarın sıfırlanacak. Beklemek istemezsen planını yükselt.',{action:'Yükselt'}],
+  ['Plan & Ödeme','info','meta','calDots','Deneme süren bitiyor','Pro denemen yakında sona erecek.',{meta:'3 gün kaldı'}],
+  ['Plan & Ödeme','ok','pill','repeat','Abonelik yenilendi'],
+  ['Plan & Ödeme','info','card','minusCircle','Abonelik iptal edildi','Dönem sonuna kadar Pro özelliklerini kullanmaya devam edebilirsin.'],
+  ['Plan & Ödeme','ok','pill','ticket','Kupon uygulandı: %20 indirim'],
+  ['Plan & Ödeme','err','card','tagX','Kupon geçersiz','Bu kodun süresi dolmuş ya da hatalı yazılmış.'],
+
+  ['Dosya','ok','file','upload','Dosya yüklendi','Analiz için hazır.',{file:['PDF','rapor.pdf','2,4 MB']}],
+  ['Dosya','ai','loading','docScan','Belge okunuyor','Neo 24 sayfalık belgeni inceliyor.'],
+  ['Dosya','err','card','docBig','Dosya çok büyük','En fazla 20 MB yükleyebilirsin.'],
+  ['Dosya','err','card','docQ','Desteklenmeyen dosya türü','PDF, TXT, DOCX, PNG veya JPG yükleyebilirsin.'],
+  ['Dosya','warn','pill','compress','Görsel hızlı yükleme için küçültüldü'],
+  ['Dosya','ok','file','image','Görsel analiz edildi','Artık görsel hakkında soru sorabilirsin.',{file:['PNG','ekran-goruntusu.png','860 KB']}],
+  ['Dosya','err','action','cloudAlert','Yükleme başarısız','Bağlantı kesildi. Dosyayı tekrar yükle.',{action:'Tekrar yükle'}],
+  ['Dosya','ok','pill','download','Sohbet Markdown olarak indirildi'],
+  ['Dosya','info','undo','clip','Ek kaldırıldı',null,{action:'Geri al'}],
+  ['Dosya','warn','card','files','Çok fazla dosya','Bir mesaja en fazla 5 dosya ekleyebilirsin.'],
+
+  ['Ses','info','wave','wave','Dinliyorum…','Konuşmaya başla, Neo seni dinliyor.'],
+  ['Ses','err','action','micOff','Mikrofon izni reddedildi','Tarayıcı ayarlarından mikrofon iznini açman gerekiyor.',{action:'Nasıl açılır?'}],
+  ['Ses','err','card','micQ','Mikrofon bulunamadı','Cihazına bağlı bir mikrofon göremedim.'],
+  ['Ses','ok','pill','recDone','Konuşman yazıya döküldü'],
+  ['Ses','warn','card','spkLow','Sesini duyamıyorum','Mikrofon kapalı ya da sesin çok kısık olabilir.'],
+  ['Ses','ai','loading','spkWaves','Sesli yanıt hazırlanıyor','Neo yanıtını seslendirmeye hazırlanıyor.'],
+  ['Ses','info','pill','pause','Sesli yanıt durduruldu'],
+  ['Ses','ok','meta','sliders','Ses değiştirildi','Neo artık yeni sesiyle konuşuyor.',{meta:'Ses: Deniz · Hız 1.1×'}],
+  ['Ses','warn','progress','timerRing','Kayıt çok uzun','Sesli mesajlar en fazla 2 dakika olabilir.',{value:100,label:'2:00 / 2:00'}],
+  ['Ses','err','action','bubbleQ','Ses anlaşılamadı','Söylediklerini anlayamadım. Tekrar dener misin?',{action:'Tekrar konuş'}],
+
+  ['Bağlantı','err','banner','wifiOff','Çevrimdışısın','Mesajların bağlantı gelince gönderilecek.'],
+  ['Bağlantı','ok','pill','wifiOn','Tekrar çevrimiçisin'],
+  ['Bağlantı','warn','card','signal','Bağlantı yavaş','Yanıtlar biraz gecikebilir.'],
+  ['Bağlantı','err','action','globe','Sunucuya ulaşılamıyor','Neo sunucuları şu an yanıt vermiyor.',{action:'Tekrar dene'}],
+  ['Bağlantı','info','loading','reconnect','Yeniden bağlanılıyor','Bağlantı tekrar kuruluyor.'],
+  ['Bağlantı','err','action','alarm','İstek zaman aşımına uğradı','Yanıt çok uzun sürdü.',{action:'Tekrar dene'}],
+  ['Bağlantı','ok','pill','cloudCheck','Tüm cihazlarda senkronize'],
+  ['Bağlantı','warn','meta','cloudUp','Senkronizasyon bekliyor','Değişiklikler bağlantı gelince yüklenecek.',{meta:'3 değişiklik sırada'}],
+  ['Bağlantı','info','card','airplane','Çevrimdışı mod açık','İnternet gelene kadar kayıtlı yanıtlar kullanılıyor.'],
+  ['Bağlantı','ok','pill','bolt','Önbellek temizlendi'],
+
+  ['Güvenlik','info','banner','eyeClosed','Gizli sohbet açık','Bu sohbet kaydedilmeyecek ve hafızaya eklenmeyecek.'],
+  ['Güvenlik','warn','action','shieldAlert','Hassas bilgi algılandı','Mesajında kart numarasına benzeyen bir şey var.',{action:'Yine de gönder'}],
+  ['Güvenlik','ok','card','shieldCheck','İki adımlı doğrulama açık','Hesabın artık çok daha güvende.'],
+  ['Güvenlik','warn','meta','devicePin','Yeni cihazdan giriş','Sen değilsen hemen şifreni değiştir.',{meta:'İstanbul · Chrome · şimdi'}],
+  ['Güvenlik','ok','card','db','Veriler silindi','Tüm kişisel verilerin kalıcı olarak silindi.'],
+  ['Güvenlik','info','loading','archive','Veri dışa aktarma hazırlanıyor','Hazır olunca e-posta ile indirme bağlantısı göndereceğiz.'],
+  ['Güvenlik','err','action','finger','Güvenlik kontrolü başarısız','İstek engellendi. Sayfayı yenileyip tekrar dene.',{action:'Yenile'}],
+  ['Güvenlik','ok','card','eraser','Hafıza temizlendi','Neo senin hakkında hatırladığı her şeyi unuttu.'],
+  ['Güvenlik','info','pill','toggle','Sohbetlerin eğitimde kullanılmayacak'],
+  ['Güvenlik','warn','strength','lockSmall','Zayıf şifre','Harf, rakam ve sembolleri karıştırarak güçlendir.',{level:1}],
+
+  ['Sistem','ai','action','arrowUp','Yeni sürüm hazır','Yeni özellikleri görmek için sayfayı yenile.',{action:'Yenile'}],
+  ['Sistem','ok','pill','box','Neo en son sürümde'],
+  ['Sistem','info','meta','wrench','Planlı bakım','Kısa bir süre Neo\'ya erişilemeyecek.',{meta:'Bu gece 03:00 · ~15 dk'}],
+  ['Sistem','ok','pill','moon','Karanlık tema açık'],
+  ['Sistem','ok','pill','gear','Ayarlar kaydedildi'],
+  ['Sistem','info','kbd','keyboard','İpucu','Yeni sohbeti klavyeden aç.',{keys:['Ctrl','K']}],
+  ['Sistem','ok','card','phone','Uygulama yüklendi','Neo artık ana ekranında, tek dokunuşla aç.'],
+  ['Sistem','warn','progress','pie','Depolama dolmak üzere','Eski sohbetleri silerek yer açabilirsin.',{value:92,label:'4,6 / 5 MB'}],
+  ['Sistem','err','action','triangle','Beklenmeyen hata','Bir şeyler ters gitti. Sayfayı yenilemeyi dene.',{action:'Yenile'}],
+  ['Sistem','ai','card','panel','Canvas','Kod ve metinleri artık yan panelde düzenleyebilirsin.',{badge:'Yeni'}],
+].map(([cat,type,variant,icon,title,desc,x]) => ({cat,type,variant,icon,title,desc,...(x||{})}));
+
+// ── bileşen ──
+function el(tag, cls, text){ const e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
 
 function buildAlert(a){
-  const el = document.createElement('div');
-  el.className = 'na '+a.type;
-  el.setAttribute('role', a.type==='err'||a.type==='warn' ? 'alert' : 'status');
+  const n = el('div', 'n '+a.type+' '+a.variant);
+  n.setAttribute('role', a.type==='err'||a.type==='warn' ? 'alert' : 'status');
+  const row = el('div','row');
+  const ic = el('div','ic'); ic.innerHTML = svg(a.icon);
+  const tx = el('div','tx');
+  const t = el('div', a.variant==='loading' ? 't shim' : 't', a.title);
+  if(a.badge) t.append(el('span','badge',a.badge));
+  tx.append(t);
+  if(a.desc && a.variant!=='pill') tx.append(el('div','d',a.desc));
 
-  const ic = document.createElement('div');
-  ic.className = 'na-ic';
-  ic.innerHTML = svgIcon(a.type);
-
-  const body = document.createElement('div');
-  const t = document.createElement('div'); t.className='na-t'; t.textContent=a.title;
-  const d = document.createElement('div'); d.className='na-d'; d.textContent=a.desc;
-  body.append(t,d);
-  if(a.action){
-    const btn = document.createElement('button');
-    btn.type='button'; btn.className='na-a'; btn.textContent=a.action;
-    body.append(btn);
+  if(a.variant==='meta'){ const m=el('div','meta'); m.append('şimdi', el('i'), a.meta); tx.append(m); }
+  if(a.variant==='progress'){
+    const b=el('div','bar'); const s=el('span'); s.style.setProperty('--v',a.value+'%'); b.append(s);
+    const pv=el('div','pv'); pv.append(el('span',null,a.label), el('span',null,'%'+a.value));
+    tx.append(b,pv);
+  }
+  if(a.variant==='file'){
+    const f=el('div','file'); f.append(el('div','fi',a.file[0]), el('b',null,a.file[1]), el('span',null,a.file[2])); tx.append(f);
+  }
+  if(a.variant==='kbd'){
+    const k=el('div','keys'); k.append(el('kbd',null,a.keys[0]), '+', el('kbd',null,a.keys[1])); tx.append(k);
+  }
+  if(a.variant==='wave'){
+    const w=el('div','wave');
+    for(let i=0;i<28;i++){ const b=el('i'); b.style.animationDelay=(-(i*.13)%1.1).toFixed(2)+'s'; b.style.height=(40+Math.abs(Math.sin(i*1.7))*60)+'%'; w.append(b); }
+    tx.append(w);
+  }
+  if(a.variant==='strength'){
+    const s=el('div','str'); for(let i=0;i<4;i++) s.append(el('i', i<a.level?'on':null)); tx.append(s);
   }
 
-  const x = document.createElement('button');
-  x.type='button'; x.className='na-x'; x.setAttribute('aria-label','Kapat'); x.innerHTML=CLOSE;
+  row.append(ic, tx);
+  if(a.variant==='undo'){
+    const u=el('button','lnk',a.action); u.type='button'; row.append(u);
+    const r=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    r.setAttribute('viewBox','0 0 20 20'); r.setAttribute('class','ring');
+    r.innerHTML='<circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/><circle class="rg" cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2" pathLength="1" transform="rotate(-90 10 10)"/>';
+    row.append(r);
+  } else if(a.variant==='banner'){
+    if(a.action){ const u=el('button','lnk',a.action); u.type='button'; row.append(u); }
+  }
+  if(a.variant!=='pill' && a.variant!=='undo'){
+    const x=el('button','x'); x.type='button'; x.setAttribute('aria-label','Kapat'); x.innerHTML=CLOSE; row.append(x);
+  }
+  n.append(row);
 
-  el.append(ic,body,x);
-  return el;
+  if(a.variant==='action'){
+    const acts=el('div','acts');
+    const c=el('button','b','Kapat'); c.type='button'; c.dataset.close='';
+    const p=el('button','b p',a.action); p.type='button'; p.dataset.act='';
+    acts.append(c,p); n.append(acts);
+  }
+  return n;
 }
 
+function play(n){ n.classList.remove('play'); void n.offsetWidth; n.classList.add('play'); }
+
 function neoAlert(a){
-  const stack = document.getElementById('stack');
-  const el = buildAlert(a);
-  const dur = a.duration ?? 5000;
-  const bar = document.createElement('div'); bar.className='na-p';
-  el.style.setProperty('--dur', dur+'ms');
-  el.append(bar);
-
-  const close = () => {
-    if(el.classList.contains('out')) return;
-    el.classList.add('out');
-    el.addEventListener('animationend', () => el.remove(), {once:true});
-  };
-  el.querySelector('.na-x').addEventListener('click', close);
-  const act = el.querySelector('.na-a');
-  if(act) act.addEventListener('click', () => { a.onAction && a.onAction(); close(); });
-  bar.addEventListener('animationend', close);
-
-  stack.append(el);
-  const max = matchMedia('(max-width:560px)').matches ? 2 : 4;
-  while(stack.children.length > max) stack.firstElementChild.remove();
+  const stack=document.getElementById('stack');
+  const n=buildAlert(a);
+  const close=()=>{ if(n.classList.contains('out')) return; n.classList.add('out'); setTimeout(()=>n.remove(),260); };
+  n.querySelectorAll('.x,[data-close],[data-act],.lnk').forEach(b=>b.addEventListener('click',()=>{ if(b.matches('[data-act],.lnk')&&a.onAction) a.onAction(); close(); }));
+  let timer=setTimeout(close, a.variant==='loading'||a.variant==='wave' ? 6000 : 5000);
+  n.addEventListener('mouseenter',()=>clearTimeout(timer));
+  n.addEventListener('mouseleave',()=>{ timer=setTimeout(close,2500); });
+  stack.prepend(n);
+  requestAnimationFrame(()=>play(n));
+  const max = matchMedia('(max-width:560px)').matches ? 2 : 3;
+  while(stack.children.length>max) stack.lastElementChild.remove();
   return close;
 }
 
-/* ══════════════════════════════════════════
-   100 uyarı — [kategori, tür, başlık, açıklama, buton?]
-   ══════════════════════════════════════════ */
-const ALERTS = [
-  // Sohbet
-  ['Sohbet','ok','Sohbet kaydedildi','Konuşman geçmişe eklendi, istediğin zaman devam edebilirsin.'],
-  ['Sohbet','ok','Mesaj kopyalandı','Yanıt panoya kopyalandı.'],
-  ['Sohbet','info','Sohbet yüklendi','Kaldığın yerden devam ediyorsun.'],
-  ['Sohbet','info','Sohbet silindi','Bu sohbet geçmişten kaldırıldı.','Geri al'],
-  ['Sohbet','warn','Mesaj çok uzun','Yaklaşık 12.400 token. Modelin sınırını aşabilir, bölmeyi dene.'],
-  ['Sohbet','warn','Boş mesaj','Göndermeden önce bir şeyler yaz.'],
-  ['Sohbet','err','Mesaj gönderilemedi','Bir şeyler ters gitti. Tekrar denemek ister misin?','Tekrar dene'],
-  ['Sohbet','ai','Yanıt hazır','Neo düşünmeyi bitirdi, yanıtın ekranda.'],
-  ['Sohbet','ok','Geçmiş temizlendi','Tüm sohbetler silindi. Tertemiz bir sayfa!'],
-  ['Sohbet','info','Sohbet paylaşıldı','Bağlantı panoya kopyalandı, bağlantıya sahip herkes okuyabilir.'],
+// ── galeri ──
+const state={type:'all',cat:'all',q:''};
+const $=id=>document.getElementById(id);
+const TYPES={ok:['Başarılı','var(--ok)'],info:['Bilgi','var(--info)'],warn:['Uyarı','var(--warn)'],err:['Hata','var(--err)'],ai:['Neo','var(--ai)']};
 
-  // Yapay zeka & model
-  ['Yapay Zeka','ai','Model değiştirildi','Artık Neo Pro ile konuşuyorsun.'],
-  ['Yapay Zeka','ai','Neo düşünüyor','Karmaşık bir soru. Birkaç saniye sürebilir.'],
-  ['Yapay Zeka','warn','Bağlam dolmak üzere','Sohbet uzadı. Yeni bir sohbet başlatmak yanıt kalitesini artırır.','Yeni sohbet'],
-  ['Yapay Zeka','err','Model yanıt vermedi','Model şu an çok yoğun. Birazdan tekrar dene.','Tekrar dene'],
-  ['Yapay Zeka','warn','Model yoğun','Yanıtlar normalden biraz yavaş gelebilir.'],
-  ['Yapay Zeka','ok','Yanıt yeniden oluşturuldu','Yeni bir versiyon hazır.'],
-  ['Yapay Zeka','info','Yanıt durduruldu','Yanıt yarıda kesildi. Kaldığı yerden devam ettirebilirsin.','Devam et'],
-  ['Yapay Zeka','ai','Hafıza güncellendi','Neo bu tercihini bundan sonra hatırlayacak.'],
-  ['Yapay Zeka','err','Bu model kullanılamıyor','Seçtiğin model planında yok ya da geçici olarak kapalı.'],
-  ['Yapay Zeka','ok','Sistem talimatı kaydedildi','Neo artık bu talimata göre yanıt verecek.'],
+const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ play(e.target); io.unobserve(e.target); } }),{threshold:.6});
 
-  // API & anahtarlar
-  ['API','ok','API anahtarı eklendi','Anahtar güvenli şekilde cihazına kaydedildi.'],
-  ['API','err','Geçersiz API anahtarı','Anahtar doğrulanamadı. Kopyalarken boşluk kalmış olabilir.'],
-  ['API','warn','API anahtarı eksik','Bu sağlayıcıyı kullanmak için önce anahtar eklemelisin.','Anahtar ekle'],
-  ['API','err','Hız sınırına ulaşıldı','Kısa sürede çok fazla istek gönderildi. 30 saniye sonra tekrar dene.'],
-  ['API','warn','Kota azalıyor','Sağlayıcı kotanın %85\'ini kullandın.'],
-  ['API','err','Kota doldu','Sağlayıcı kotası bitti. Sağlayıcı panelinden planını kontrol et.'],
-  ['API','ok','Anahtar silindi','API anahtarı bu cihazdan kaldırıldı.'],
-  ['API','info','Sağlayıcı değiştirildi','İstekler artık seçtiğin yeni sağlayıcı üzerinden gidiyor.'],
-  ['API','ok','Bağlantı test edildi','Sağlayıcı yanıt veriyor, her şey yolunda.'],
-  ['API','err','Sağlayıcı hatası','Sağlayıcı 500 hatası döndürdü. Sorun onların tarafında görünüyor.'],
-
-  // Hesap & oturum
-  ['Hesap','ok','Hoş geldin!','Giriş başarılı. Seni tekrar görmek güzel.'],
-  ['Hesap','info','Çıkış yapıldı','Görüşmek üzere!'],
-  ['Hesap','warn','Misafir modundasın','Tüm özelliklere erişmek için giriş yap.','Giriş yap'],
-  ['Hesap','warn','Oturum sona ermek üzere','5 dakika içinde oturumun kapanacak.','Uzat'],
-  ['Hesap','err','Oturum sona erdi','Güvenliğin için tekrar giriş yapman gerekiyor.','Giriş yap'],
-  ['Hesap','ok','Profil güncellendi','Değişikliklerin kaydedildi.'],
-  ['Hesap','err','Giriş başarısız','E-posta ya da şifre hatalı.'],
-  ['Hesap','ok','E-posta doğrulandı','Hesabın artık tamamen aktif.'],
-  ['Hesap','info','Doğrulama e-postası gönderildi','Gelen kutunu (ve spam klasörünü) kontrol et.'],
-  ['Hesap','ok','Şifre değiştirildi','Yeni şifren hemen geçerli.'],
-
-  // Plan & ödeme
-  ['Plan & Ödeme','ai','Pro\'ya hoş geldin','Tüm modeller ve sınırsız sohbet artık senin.'],
-  ['Plan & Ödeme','ok','Ödeme alındı','Faturan e-posta adresine gönderildi.'],
-  ['Plan & Ödeme','err','Ödeme başarısız','Kartın işlenemedi. Kart bilgilerini güncelle.','Güncelle'],
-  ['Plan & Ödeme','warn','Kullanım sınırına yaklaştın','Aylık mesaj hakkının %90\'ını kullandın.','Yükselt'],
-  ['Plan & Ödeme','err','Günlük sınır doldu','Hakkın yarın sıfırlanacak. Beklemek istemezsen planını yükselt.','Yükselt'],
-  ['Plan & Ödeme','info','Deneme süren bitiyor','Pro denemen 3 gün içinde sona erecek.'],
-  ['Plan & Ödeme','ok','Abonelik yenilendi','Aboneliğin bir ay daha uzatıldı.'],
-  ['Plan & Ödeme','info','Abonelik iptal edildi','Dönem sonuna kadar Pro özelliklerini kullanmaya devam edebilirsin.'],
-  ['Plan & Ödeme','ok','Kupon uygulandı','%20 indirim hesabına tanımlandı.'],
-  ['Plan & Ödeme','err','Kupon geçersiz','Bu kodun süresi dolmuş ya da hatalı yazılmış.'],
-
-  // Dosya & yükleme
-  ['Dosya','ok','Dosya yüklendi','rapor.pdf analiz için hazır.'],
-  ['Dosya','ai','Belge okunuyor','Neo 24 sayfalık belgeni inceliyor.'],
-  ['Dosya','err','Dosya çok büyük','En fazla 20 MB yükleyebilirsin.'],
-  ['Dosya','err','Desteklenmeyen dosya türü','PDF, TXT, DOCX, PNG veya JPG yükleyebilirsin.'],
-  ['Dosya','warn','Görsel sıkıştırıldı','Hızlı yükleme için görselin boyutu küçültüldü.'],
-  ['Dosya','ok','Görsel analiz edildi','Neo görselini inceledi, şimdi soru sorabilirsin.'],
-  ['Dosya','err','Yükleme başarısız','Bağlantı kesildi. Dosyayı tekrar yükle.','Tekrar dene'],
-  ['Dosya','ok','Dışa aktarıldı','Sohbet Markdown dosyası olarak indirildi.'],
-  ['Dosya','info','Dosya kaldırıldı','Ek bu mesajdan çıkarıldı.'],
-  ['Dosya','warn','Çok fazla dosya','Bir mesaja en fazla 5 dosya ekleyebilirsin.'],
-
-  // Ses & mikrofon
-  ['Ses','info','Dinliyorum','Konuşmaya başla, Neo seni dinliyor.'],
-  ['Ses','err','Mikrofon izni reddedildi','Tarayıcı ayarlarından mikrofon iznini açman gerekiyor.'],
-  ['Ses','err','Mikrofon bulunamadı','Cihazına bağlı bir mikrofon göremedim.'],
-  ['Ses','ok','Ses kaydı tamamlandı','Konuşman yazıya döküldü.'],
-  ['Ses','warn','Sesini duyamıyorum','Mikrofon kapalı ya da sesin çok kısık olabilir.'],
-  ['Ses','ai','Sesli yanıt hazırlanıyor','Neo yanıtını seslendirmeye hazırlanıyor.'],
-  ['Ses','info','Sesli yanıt durduruldu','Okuma yarıda kesildi.'],
-  ['Ses','ok','Ses değiştirildi','Neo artık yeni sesiyle konuşuyor.'],
-  ['Ses','warn','Kayıt çok uzun','Sesli mesajlar en fazla 2 dakika olabilir.'],
-  ['Ses','err','Ses anlaşılamadı','Söylediklerini anlayamadım. Tekrar dener misin?','Tekrar dene'],
-
-  // Bağlantı & ağ
-  ['Bağlantı','err','Çevrimdışısın','İnternet bağlantın kesildi. Mesajların bağlantı gelince gönderilecek.'],
-  ['Bağlantı','ok','Tekrar çevrimiçisin','Bağlantı geri geldi, kaldığın yerden devam.'],
-  ['Bağlantı','warn','Bağlantı yavaş','Yanıtlar biraz gecikebilir.'],
-  ['Bağlantı','err','Sunucuya ulaşılamıyor','Neo sunucuları şu an yanıt vermiyor.','Tekrar dene'],
-  ['Bağlantı','info','Yeniden bağlanılıyor','Bağlantı tekrar kuruluyor…'],
-  ['Bağlantı','err','İstek zaman aşımına uğradı','Yanıt çok uzun sürdü. Tekrar dene.','Tekrar dene'],
-  ['Bağlantı','ok','Senkronize edildi','Sohbetlerin tüm cihazlarında güncel.'],
-  ['Bağlantı','warn','Senkronizasyon bekliyor','3 değişiklik bağlantı gelince yüklenecek.'],
-  ['Bağlantı','info','Çevrimdışı mod açık','İnternet gelene kadar kayıtlı yanıtlar kullanılıyor.'],
-  ['Bağlantı','ok','Önbellek temizlendi','Uygulama artık daha hızlı açılacak.'],
-
-  // Güvenlik & gizlilik
-  ['Güvenlik','info','Gizli sohbet açık','Bu sohbet kaydedilmeyecek ve hafızaya eklenmeyecek.'],
-  ['Güvenlik','warn','Hassas bilgi algılandı','Mesajında kart numarasına benzeyen bir şey var. Emin misin?','Yine de gönder'],
-  ['Güvenlik','ok','İki adımlı doğrulama açık','Hesabın artık çok daha güvende.'],
-  ['Güvenlik','warn','Yeni cihazdan giriş','Hesabına yeni bir cihaz bağlandı. Sen değilsen şifreni değiştir.','İncele'],
-  ['Güvenlik','ok','Veriler silindi','Tüm kişisel verilerin kalıcı olarak silindi.'],
-  ['Güvenlik','info','Veri dışa aktarma hazırlanıyor','Hazır olunca e-posta ile indirme bağlantısı göndereceğiz.'],
-  ['Güvenlik','err','Güvenlik kontrolü başarısız','İstek engellendi. Sayfayı yenileyip tekrar dene.','Yenile'],
-  ['Güvenlik','ok','Hafıza temizlendi','Neo senin hakkında hatırladığı her şeyi unuttu.'],
-  ['Güvenlik','info','Gizlilik ayarları güncellendi','Sohbetlerin model eğitimi için kullanılmayacak.'],
-  ['Güvenlik','warn','Zayıf şifre','Daha güçlü bir şifre için harf, rakam ve sembolleri karıştır.'],
-
-  // Sistem & güncelleme
-  ['Sistem','ai','Yeni sürüm hazır','Neo\'nun yeni sürümü yayında. Yeni özellikleri görmek için yenile.','Yenile'],
-  ['Sistem','ok','Güncelleme tamamlandı','Neo en son sürümde.'],
-  ['Sistem','info','Planlı bakım','Bu gece 03:00\'te yaklaşık 15 dakikalık bakım yapılacak.'],
-  ['Sistem','ok','Tema değiştirildi','Karanlık tema etkin.'],
-  ['Sistem','ok','Ayarlar kaydedildi','Tercihlerin uygulandı.'],
-  ['Sistem','info','Kısayol ipucu','Yeni sohbet için Ctrl + K\'ye basabilirsin.'],
-  ['Sistem','ok','Uygulama yüklendi','Neo artık ana ekranında, tek dokunuşla aç.'],
-  ['Sistem','warn','Depolama dolmak üzere','Tarayıcı depolamasının %90\'ı dolu. Eski sohbetleri silebilirsin.','Temizle'],
-  ['Sistem','err','Beklenmeyen hata','Bir şeyler ters gitti. Sayfayı yenilemeyi dene.','Yenile'],
-  ['Sistem','ai','Yeni özellik: Canvas','Kod ve metinleri artık yan panelde düzenleyebilirsin.','Dene'],
-].map(([cat,type,title,desc,action]) => ({cat,type,title,desc,action}));
-
-/* ══════════════════════════════════════════
-   Galeri
-   ══════════════════════════════════════════ */
-const state = {type:'all', cat:'all', q:''};
-const $ = id => document.getElementById(id);
-const TYPE_COLORS = {ok:'var(--gr)',info:'var(--cy)',warn:'var(--go)',err:'var(--er)',ai:'var(--ac)'};
-
-function chip(label, value, key, color){
-  const b = document.createElement('button');
-  b.type='button'; b.className='chip';
-  b.setAttribute('aria-pressed', state[key]===value);
-  if(color){ const i=document.createElement('i'); i.style.setProperty('--c',color); b.append(i); }
+function chip(label,value,key,color){
+  const b=el('button','chip'); b.type='button'; b.setAttribute('aria-pressed',state[key]===value);
+  if(color){ const i=el('i'); i.style.setProperty('--c',color); b.append(i); }
   b.append(label);
-  b.addEventListener('click', () => { state[key]=value; renderChips(); render(); });
+  b.addEventListener('click',()=>{ state[key]=value; renderChips(); render(); });
   return b;
 }
-
 function renderChips(){
-  const tc = $('typeChips'); tc.replaceChildren(chip('Tüm türler','all','type'));
-  for(const t of Object.keys(TYPE_NAMES)) tc.append(chip(TYPE_NAMES[t], t, 'type', TYPE_COLORS[t]));
-  const cc = $('catChips'); cc.replaceChildren(chip('Tüm kategoriler','all','cat'));
-  for(const c of [...new Set(ALERTS.map(a=>a.cat))]) cc.append(chip(c, c, 'cat'));
+  $('typeChips').replaceChildren(chip('Tümü','all','type'), ...Object.entries(TYPES).map(([k,[l,c]])=>chip(l,k,'type',c)));
+  $('catChips').replaceChildren(chip('Tüm kategoriler','all','cat'), ...[...new Set(ALERTS.map(a=>a.cat))].map(c=>chip(c,c,'cat')));
 }
-
 function render(){
-  const q = state.q.toLocaleLowerCase('tr');
-  const shown = ALERTS.filter(a =>
-    (state.type==='all' || a.type===state.type) &&
-    (state.cat==='all' || a.cat===state.cat) &&
-    (!q || (a.title+' '+a.desc+' '+a.cat).toLocaleLowerCase('tr').includes(q))
-  );
-  const list = $('list'); list.replaceChildren();
-  const groups = {};
-  shown.forEach(a => (groups[a.cat] ||= []).push(a));
-  for(const [cat, items] of Object.entries(groups)){
-    const sec = document.createElement('section');
-    const h = document.createElement('h2'); h.textContent = cat+' · '+items.length;
-    const grid = document.createElement('div'); grid.className='grid';
-    for(const a of items){
-      const card = buildAlert(a);
-      card.classList.add('card');
-      card.tabIndex = 0;
-      card.removeAttribute('role');
-      card.setAttribute('aria-label', a.title+' — önizlemek için tıkla');
-      const fire = () => neoAlert(a);
-      card.addEventListener('click', fire);
-      card.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fire(); } });
-      grid.append(card);
-    }
-    sec.append(h, grid);
-    list.append(sec);
-  }
-  $('count').textContent = shown.length;
-  $('empty').style.display = shown.length ? 'none' : 'block';
+  const q=state.q.toLocaleLowerCase('tr');
+  const shown=ALERTS.filter(a=>(state.type==='all'||a.type===state.type)&&(state.cat==='all'||a.cat===state.cat)&&(!q||(a.title+' '+(a.desc||'')+' '+a.cat).toLocaleLowerCase('tr').includes(q)));
+  const groups={}; shown.forEach(a=>(groups[a.cat]||=[]).push(a));
+  $('list').replaceChildren(...Object.entries(groups).map(([cat,items])=>{
+    const s=el('section'); const g=el('div','grid');
+    items.forEach(a=>{
+      const n=buildAlert(a); n.classList.add('card'); n.tabIndex=0; n.removeAttribute('role');
+      n.setAttribute('aria-label',a.title+' — göstermek için tıkla');
+      n.querySelectorAll('button').forEach(b=>b.tabIndex=-1);
+      n.addEventListener('click',()=>neoAlert(a));
+      n.addEventListener('mouseenter',()=>play(n));
+      n.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); neoAlert(a); } });
+      io.observe(n); g.append(n);
+    });
+    s.append(el('h2',null,cat), g); return s;
+  }));
+  $('count').textContent=shown.length;
+  $('empty').style.display=shown.length?'none':'block';
 }
 
-$('search').addEventListener('input', e => { state.q = e.target.value.trim(); render(); });
-$('playBtn').addEventListener('click', () => {
-  const pick = [...ALERTS].sort(() => Math.random() - .5).slice(0,3);
-  pick.forEach((a,i) => setTimeout(() => neoAlert(a), i*350));
-});
-
-renderChips();
-render();
-setTimeout(() => neoAlert(ALERTS.find(a => a.title==='Yeni sürüm hazır')), 600);
+$('search').addEventListener('input',e=>{ state.q=e.target.value.trim(); render(); });
+$('playBtn').addEventListener('click',()=>{ [...ALERTS].sort(()=>Math.random()-.5).slice(0,3).forEach((a,i)=>setTimeout(()=>neoAlert(a),i*400)); });
+renderChips(); render();
 </script>
 </body>
 </html>
