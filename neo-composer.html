@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Neo Liquid Glass Composer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--e:cubic-bezier(.22,1,.36,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0d0906;color:#fbf6ef;-webkit-font-smoothing:antialiased;overflow:hidden}
+button,textarea{font:inherit;color:inherit}
+
+/* ── arka plan: camın kırdığı sıcak ışıklar ── */
+.bg{position:fixed;inset:0;overflow:hidden;z-index:0}
+.blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.85;will-change:transform}
+.b1{width:46vmax;height:46vmax;background:#c4773b;left:-10vmax;top:-14vmax;animation:f1 22s ease-in-out infinite alternate}
+.b2{width:38vmax;height:38vmax;background:#7a3b2a;right:-8vmax;top:10vmax;animation:f2 26s ease-in-out infinite alternate}
+.b3{width:30vmax;height:30vmax;background:#e9c49a;left:30vw;bottom:-12vmax;animation:f3 19s ease-in-out infinite alternate;opacity:.55}
+.b4{width:22vmax;height:22vmax;background:#8f6fd6;left:62vw;bottom:8vmax;animation:f1 24s ease-in-out infinite alternate-reverse;opacity:.35}
+@keyframes f1{to{transform:translate(12vmax,10vmax) scale(1.1)}}
+@keyframes f2{to{transform:translate(-14vmax,8vmax) scale(.9)}}
+@keyframes f3{to{transform:translate(-10vmax,-12vmax) scale(1.15)}}
+.dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,240,222,.14) 1px,transparent 1.4px);background-size:22px 22px;mask-image:radial-gradient(80% 70% at 50% 60%,#000 30%,transparent 100%)}
+.big{position:absolute;left:50%;top:50%;transform:translate(-50%,-62%);font-family:'Instrument Serif',Georgia,serif;font-size:clamp(56px,11vw,150px);line-height:.95;text-align:center;color:rgba(255,244,230,.9);letter-spacing:-.02em;white-space:nowrap;pointer-events:none;user-select:none}
+.big em{color:#f0c99d}
+
+/* ── sohbet alanı ── */
+.chat{position:fixed;left:0;right:0;top:0;bottom:0;z-index:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:24px 16px calc(var(--dockH,56px) + 48px + env(safe-area-inset-bottom));pointer-events:none}
+.msgs{width:min(680px,100%);display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow:auto;scrollbar-width:none}
+.msgs::-webkit-scrollbar{display:none}
+.m{max-width:80%;padding:11px 15px;border-radius:20px;font-size:14.5px;line-height:1.5;pointer-events:auto;animation:pop .6s var(--e) both}
+.m.me{align-self:flex-end;background:rgba(255,248,240,.16);border-bottom-right-radius:6px;backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.1)}
+.m.neo{align-self:flex-start;background:rgba(20,12,8,.35);border-bottom-left-radius:6px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:rgba(251,246,239,.9)}
+.think{display:inline-flex;gap:5px;align-items:center;color:rgba(251,246,239,.55)}
+.think i{width:6px;height:6px;border-radius:50%;background:currentColor;animation:bob 1s ease-in-out infinite}
+.think i:nth-child(2){animation-delay:.15s}.think i:nth-child(3){animation-delay:.3s}
+@keyframes bob{50%{transform:translateY(-3px);opacity:1}}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.96);filter:blur(6px)}}
+
+/* ═══════════ LIQUID GLASS COMPOSER ═══════════ */
+.dock{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2}
+.composer{
+  --w:360px;--h:56px;--r:28px;--s:1;--mx:50%;--my:0%;
+  position:relative;width:var(--w);height:var(--h);border-radius:var(--r);transform:translateX(-50%) scale(var(--s));
+  left:0;margin-left:0;cursor:text;isolation:isolate;
+  /* yedek: tüm tarayıcılarda buzlu cam */
+  -webkit-backdrop-filter:blur(14px) saturate(170%) brightness(1.06);
+  backdrop-filter:blur(14px) saturate(170%) brightness(1.06);
+  background:linear-gradient(180deg,rgba(255,250,244,.14),rgba(255,250,244,.05));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.45),
+    inset 0 -1px 0 rgba(255,255,255,.1),
+    inset 0 0 0 1px rgba(255,255,255,.14),
+    inset 0 0 22px rgba(255,255,255,.06),
+    0 18px 50px rgba(10,5,2,.45),
+    0 2px 6px rgba(10,5,2,.25);
+}
+/* Chromium: gerçek kırılma (SVG yer değiştirme haritası) */
+.composer.refract{backdrop-filter:url(#liquid) blur(6px) saturate(175%) brightness(1.07)}
+.dock{transform:none;left:50%}
+/* kenardaki parlak ışık + imleci takip eden parıltı */
+.composer::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.7),rgba(255,255,255,.08) 35%,rgba(255,255,255,0) 60%,rgba(255,255,255,.25));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.composer::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.7;
+  background:radial-gradient(160px 80px at var(--mx) var(--my),rgba(255,255,255,.18),transparent 70%);transition:opacity .3s}
+
+.inner{position:absolute;inset:0;display:flex;flex-direction:column;padding:8px 8px 8px 18px;overflow:hidden;border-radius:inherit}
+.top{flex:1;display:flex;align-items:flex-start;gap:10px;min-height:40px}
+textarea{flex:1;resize:none;border:0;outline:none;background:transparent;font-size:15.5px;line-height:22px;padding:9px 0;max-height:180px;color:#fffaf3;caret-color:#f0c99d;scrollbar-width:none}
+textarea::placeholder{color:rgba(255,246,236,.55)}
+.tools{display:flex;align-items:center;gap:6px;height:40px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .25s,transform .45s var(--e);margin-left:-10px}
+.open .tools{opacity:1;transform:none;pointer-events:auto;transition-delay:.08s}
+
+.ib{appearance:none;border:0;background:rgba(255,255,255,.08);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;flex:none;color:rgba(255,248,240,.85);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 0 0 1px rgba(255,255,255,.08);transition:background .2s,transform .3s var(--e)}
+.ib:hover{background:rgba(255,255,255,.14)}
+.ib:active{transform:scale(.9)}
+.ib svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chip{appearance:none;border:0;height:32px;border-radius:999px;padding:0 12px 0 10px;display:inline-flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;background:rgba(255,255,255,.07);color:rgba(255,248,240,.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);transition:background .2s,color .2s,box-shadow .2s}
+.chip svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chip[aria-pressed="true"]{background:rgba(240,201,157,.22);color:#ffe7cb;box-shadow:inset 0 0 0 1px rgba(240,201,157,.45)}
+.chip[aria-pressed="true"] .spin{animation:rot 6s linear infinite;transform-origin:center;transform-box:fill-box}
+@keyframes rot{to{transform:rotate(360deg)}}
+.grow{flex:1}
+
+.send{background:#fff4e6;color:#2a1a10;box-shadow:0 4px 14px rgba(240,201,157,.35)}
+.send:hover{background:#fff}
+.send:disabled{background:rgba(255,255,255,.1);color:rgba(255,248,240,.45);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);cursor:default}
+.send .arrow{transition:transform .45s var(--e)}
+.send:not(:disabled) .arrow{animation:lift .5s var(--e)}
+@keyframes lift{from{transform:translateY(5px);opacity:0}}
+.mic .w{animation:wv 1.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.mic .w:nth-of-type(2){animation-delay:.2s}
+@keyframes wv{50%{transform:scaleY(.4)}}
+
+.kbd{font-size:11.5px;color:rgba(255,246,236,.4);margin-right:4px;white-space:nowrap}
+
+@media (max-width:520px){.kbd,.chip .t{display:none}.chip{padding:0 9px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- sıvı cam için kırılma filtresi (harita JS ile üretilir) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="liquid" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feImage id="lqMap" x="0" y="0" width="360" height="56" preserveAspectRatio="none" result="map"/>
+    <feDisplacementMap in="SourceGraphic" in2="map" scale="-38" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<div class="bg" aria-hidden="true">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+  <div class="dots"></div>
+  <div class="big">Create the<br><em>Future.</em></div>
+</div>
+
+<div class="chat"><div class="msgs" id="msgs" aria-live="polite"></div></div>
+
+<div class="dock">
+  <div class="composer" id="composer">
+    <div class="inner">
+      <div class="top">
+        <textarea id="ta" rows="1" placeholder="Neo'ya bir şey sor…" aria-label="Mesaj"></textarea>
+        <button class="ib mic" id="mic" type="button" aria-label="Sesle yaz">
+          <svg viewBox="0 0 24 24"><path class="w" d="M6.5 9.5v5"/><path class="w" d="M12 5v14"/><path class="w" d="M17.5 9.5v5"/></svg>
+        </button>
+      </div>
+      <div class="tools">
+        <button class="ib" type="button" aria-label="Dosya ekle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button class="chip" id="web" type="button" aria-pressed="false"><svg viewBox="0 0 24 24"><g class="spin"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.3 3.4 5.2 3.4 8.5s-1 6.2-3.4 8.5c-2.4-2.3-3.4-5.2-3.4-8.5s1-6.2 3.4-8.5z"/></g></svg><span class="t">Web'de ara</span></button>
+        <button class="chip" id="think" type="button" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3.5c.6 3.7 2.8 5.9 6.5 6.5-3.7.6-5.9 2.8-6.5 6.5-.6-3.7-2.8-5.9-6.5-6.5 3.7-.6 5.9-2.8 6.5-6.5z"/></svg><span class="t">Derin düşün</span></button>
+        <span class="grow"></span>
+        <span class="kbd">⇧ + Enter yeni satır</span>
+        <button class="ib send" id="send" type="button" aria-label="Gönder" disabled><svg viewBox="0 0 24 24"><g class="arrow"><path d="M12 19V5M6 11l6-6 6 6"/></g></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const comp = $('composer'), ta = $('ta'), send = $('send');
+
+/* ── yay (spring): hafif esnek, küçük bir taşma ile oturur ── */
+class Spring{
+  constructor(x, k=210, c=19){ this.x=x; this.v=0; this.to=x; this.k=k; this.c=c; }
+  step(dt){ if(REDUCED){ this.x=this.to; return this.x; } const a=this.k*(this.to-this.x)-this.c*this.v; this.v+=a*dt; this.x+=this.v*dt; return this.x; }
+  get rest(){ return Math.abs(this.to-this.x)<.05 && Math.abs(this.v)<.05; }
+}
+const S = { w:new Spring(360), h:new Spring(56), r:new Spring(28), s:new Spring(1,420,22) };
+
+let open = false;
+function sizes(){
+  const vw = innerWidth;
+  const closedW = Math.min(360, vw-32), openW = Math.min(680, vw-24);
+  if(!open) return {w:closedW, h:56, r:28};
+  // metin kadar uzar: textarea + araç çubuğu
+  ta.style.height = 'auto';
+  const th = Math.min(180, Math.max(44, ta.scrollHeight));
+  ta.style.height = th + 'px';
+  return {w:openW, h:th + 16 + 40 + 6, r:26};
+}
+function retarget(){ const z = sizes(); S.w.to = z.w; S.h.to = z.h; S.r.to = z.r; kick(); }
+
+function expand(){ if(open) return; open = true; comp.classList.add('open'); retarget(); }
+function collapse(){ if(!open || ta.value.trim()) return; open = false; comp.classList.remove('open'); ta.style.height = ''; retarget(); }
+
+/* basınca hafifçe ezilir, bırakınca genişler */
+comp.addEventListener('pointerdown', e => { S.s.to = .965; kick(); if(e.target === comp || e.target.closest('.inner') && !e.target.closest('button')) setTimeout(() => ta.focus(), 0); });
+addEventListener('pointerup', () => { S.s.to = 1; kick(); });
+ta.addEventListener('focus', expand);
+document.addEventListener('pointerdown', e => { if(!comp.contains(e.target)) collapse(); });
+ta.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ ta.blur(); collapse(); }
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); submit(); }
+});
+ta.addEventListener('input', () => { send.disabled = !ta.value.trim(); retarget(); });
+
+/* imleci takip eden parıltı */
+comp.addEventListener('pointermove', e => { const r = comp.getBoundingClientRect(); comp.style.setProperty('--mx', (e.clientX-r.left)+'px'); comp.style.setProperty('--my', (e.clientY-r.top)+'px'); });
+
+/* araç düğmeleri */
+['web','think'].forEach(id => $(id).addEventListener('click', () => { const b = $(id); b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true'); }));
+$('mic').addEventListener('click', () => { ta.focus(); ta.placeholder = 'Dinliyorum… (demo)'; setTimeout(() => ta.placeholder = "Neo'ya bir şey sor…", 2200); });
+send.addEventListener('click', submit);
+
+/* ── gönder: demo yanıt ── */
+const msgs = $('msgs');
+function bubble(cls, html){ const d = document.createElement('div'); d.className = 'm ' + cls; if(html) d.innerHTML = html; msgs.append(d); msgs.scrollTop = msgs.scrollHeight; return d; }
+const REPLIES = [
+  'Harika bir soru! Bu sadece bir tasarım demosu, ama gerçek Neo burada sana yanıt verecek.',
+  'Sıvı cam kutusu metin uzadıkça esnek şekilde büyür. Boşken dışarı tıklarsan tekrar küçülür.',
+  'Web araması ve derin düşünme düğmeleri de burada, tek dokunuşla açılıp kapanıyor.'
+];
+let ri = 0;
+async function submit(){
+  const text = ta.value.trim(); if(!text) return;
+  const me = bubble('me'); me.textContent = text;
+  ta.value = ''; send.disabled = true; retarget();
+  // basınç: gönderirken kutu bir an sıkışıp geri esner
+  S.s.to = .95; kick(); setTimeout(() => { S.s.to = 1; kick(); }, 120);
+  const n = bubble('neo', '<span class="think"><i></i><i></i><i></i></span>');
+  await new Promise(r => setTimeout(r, 1100));
+  n.textContent = ''; const words = REPLIES[ri++ % REPLIES.length].split(' ');
+  for(const w of words){ n.textContent += (n.textContent ? ' ' : '') + w; msgs.scrollTop = msgs.scrollHeight; await new Promise(r => setTimeout(r, 45)); }
+}
+
+/* ── kırılma haritası: kenara yaklaştıkça içe doğru büken yer değiştirme ── */
+const REFRACT = CSS.supports('backdrop-filter','url(#liquid)') && /Chrome|Chromium|Edg\//.test(navigator.userAgent) && !/Firefox/.test(navigator.userAgent);
+function buildMap(W, H, R, bezel){
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d'), img = x.createImageData(W, H), d = img.data;
+  const hw = W/2, hh = H/2;
+  const sdf = (px,py) => { const qx = Math.abs(px-hw)-(hw-R), qy = Math.abs(py-hh)-(hh-R); return Math.hypot(Math.max(qx,0),Math.max(qy,0)) + Math.min(Math.max(qx,qy),0) - R; };
+  for(let j=0;j<H;j++) for(let i=0;i<W;i++){
+    const px = i+.5, py = j+.5, s = sdf(px,py);
+    let dx = 0, dy = 0;
+    if(s < 0 && s > -bezel){
+      const gx = sdf(px+1,py)-sdf(px-1,py), gy = sdf(px,py+1)-sdf(px,py-1), gl = Math.hypot(gx,gy)||1;
+      const t = 1 + s/bezel;                 // 1 = kenarda, 0 = kenarlıktan içeride
+      const m = t*t*(3-2*t);                 // yumuşak geçiş
+      dx = gx/gl*m; dy = gy/gl*m;
+    }
+    const k = (j*W+i)*4;
+    d[k] = 128 + dx*127; d[k+1] = 128 + dy*127; d[k+2] = 128; d[k+3] = 255;
+  }
+  x.putImageData(img, 0, 0);
+  return c.toDataURL();
+}
+const lqMap = $('lqMap');
+let mapKey = '';
+function updateMap(w, h, r){
+  // boyut belirgin değişince yeniden üret (ucuz: küçük tuval)
+  const key = [Math.round(w/40), Math.round(h/12), Math.round(r)].join('x');
+  if(key !== mapKey){ mapKey = key; lqMap.setAttribute('href', buildMap(Math.round(w/2), Math.round(h/2), r/2, Math.min(14, h/4))); }
+  lqMap.setAttribute('width', w); lqMap.setAttribute('height', h);
+}
+if(REFRACT) comp.classList.add('refract');
+
+/* ── animasyon döngüsü (yalnızca hareket varken çalışır) ── */
+let running = false, last = 0;
+function kick(){ if(!running){ running = true; last = performance.now(); requestAnimationFrame(tick); } }
+function tick(now){
+  const dt = Math.min(.032, (now-last)/1000); last = now;
+  const w = S.w.step(dt), h = S.h.step(dt), r = S.r.step(dt), s = S.s.step(dt);
+  comp.style.setProperty('--w', w+'px'); comp.style.setProperty('--h', h+'px');
+  comp.style.setProperty('--r', Math.min(r, h/2)+'px'); comp.style.setProperty('--s', s);
+  document.documentElement.style.setProperty('--dockH', S.h.to+'px');
+  if(REFRACT) updateMap(w, h, Math.min(r, h/2));
+  if(Object.values(S).every(sp => sp.rest)){ running = false; return; }
+  requestAnimationFrame(tick);
+}
+addEventListener('resize', retarget);
+retarget();
+</script>
+</body>
+</html>
