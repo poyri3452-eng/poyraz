@@ -3,346 +3,140 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Neo Düşünme Durumları</title>
+<title>Neo Thinking Orbs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#070707;--pill:rgba(29,29,29,.42);--ring:rgba(44,47,54,.31);
-  --tx:#fbfbfb;--tx2:rgba(251,251,251,.5);--tx3:rgba(251,251,251,.3);
-  --br:#deb080;--ln:rgba(255,255,255,.07);
-  --e:cubic-bezier(.22,1,.36,1);
-}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
-button,input{font:inherit;color:inherit}
-main{max-width:1100px;margin:0 auto;padding:56px 16px 120px}
-header{margin-bottom:36px}
-h1{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:clamp(36px,5vw,54px);line-height:1}
-h1 em{color:var(--br)}
-.sub{color:var(--tx2);font-size:14.5px;margin-top:10px;max-width:520px;line-height:1.5}
+body{background:#070707;color:#fbfbfb;font-family:Inter,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:1080px;margin:0 auto;padding:72px 16px 120px}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:14px}
-.cell{border:1px solid var(--ln);border-radius:20px;background:#0c0c0c;min-height:240px;display:flex;flex-direction:column}
-.cell .stage{flex:1;display:grid;place-items:center;padding:28px 18px}
-.cell .cap{display:flex;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--ln);font-size:12px;color:var(--tx3)}
-.cell .cap b{color:var(--tx2);font-weight:500}
-.cell.light{background:#fff;border-color:#ece6de}
-.cell.light .cap{border-color:#ece6de;color:#a39b91}.cell.light .cap b{color:#6e675f}
-.cell.warm{background:radial-gradient(120% 90% at 30% 20%,#3a2415 0%,#160d07 60%,#0c0805 100%)}
-.cell.wide{grid-column:1/-1}
+/* ana sahne: tek hap */
+.hero{min-height:360px;display:flex;align-items:center;justify-content:center}
 
-/* ortak hap */
-.pill{display:inline-flex;align-items:center;gap:12px;border-radius:999px;background:var(--pill);box-shadow:inset 0 0 0 1px var(--ring),inset 0 0 50px rgba(255,255,255,.012)}
-canvas.orb{display:block;flex:none}
-.shim{background:linear-gradient(90deg,var(--c1,rgba(251,251,251,.5)) 0%,var(--c1,rgba(251,251,251,.5)) 35%,var(--c2,#fff) 50%,var(--c1,rgba(251,251,251,.5)) 65%,var(--c1,rgba(251,251,251,.5)) 100%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shim 2.4s linear infinite}
-@keyframes shim{from{background-position:100% 0}to{background-position:-200% 0}}
-.swap{display:inline-block;transition:opacity .25s,transform .35s var(--e),filter .25s}
-.swap.out{opacity:0;transform:translateY(-6px);filter:blur(3px)}
-.swap.in{opacity:0;transform:translateY(6px);filter:blur(3px);transition:none}
+/* hap — koyu cam, ince iç kenar */
+.pill{display:inline-flex;align-items:center;gap:12px;height:74px;border-radius:999px;padding:0 32px 0 9px;
+  background:rgba(29,29,29,.42);box-shadow:inset 0 0 0 1px rgba(44,47,54,.31),inset 0 0 50px 0 rgba(255,255,255,.012)}
+.pill canvas{width:56px;height:56px;flex:none;display:block}
+.pill span{white-space:nowrap;font-size:18px;line-height:24px;color:rgba(251,251,251,.5)}
 
-/* 1 · klasik hap, metin değişir */
-.p1{height:74px;padding:0 30px 0 9px;font-size:18px}
-.p1 .t{color:var(--tx2)}
-.p1 .sec{font:500 13px 'JetBrains Mono',monospace;color:var(--tx3);margin-left:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:1px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.05);border-radius:20px;overflow:hidden}
+.cell{background:#070707;min-height:190px;display:flex;align-items:center;justify-content:center;padding:24px 12px}
 
-/* 2 · açık tema */
-.p2{height:56px;padding:0 22px 0 7px;background:#f6f3ef;box-shadow:inset 0 0 0 1px #e8e2da;color:#141210;font-size:15px}
-.p2 .shim{--c1:#6e675f;--c2:#141210}
+/* 20px satır içi */
+.inline{margin-top:48px;display:flex;flex-direction:column;gap:14px;align-items:flex-start;padding:0 8px}
+.inline p{display:flex;align-items:center;gap:8px;font-size:15px;color:rgba(251,251,251,.5)}
+.inline canvas{width:20px;height:20px;flex:none}
 
-/* 3 · satır içi */
-.inline{max-width:300px;font-size:15px;line-height:1.7;color:rgba(251,251,251,.75)}
-.inline canvas{display:inline-block;vertical-align:-4px;margin:0 4px}
-
-/* 4 · açılır akıl yürütme */
-.p4{flex-direction:column;align-items:stretch;gap:0;border-radius:22px;padding:6px;min-width:280px;cursor:pointer;transition:border-radius .3s}
-.p4 .head{display:flex;align-items:center;gap:10px;padding-right:16px}
-.p4 .chev{margin-left:auto;width:16px;height:16px;color:var(--tx3);transition:transform .35s var(--e)}
-.p4.open .chev{transform:rotate(180deg)}
-.p4 ol{list-style:none;display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s var(--e)}
-.p4.open ol{grid-template-rows:1fr}
-.p4 ol>div{overflow:hidden}
-.p4 li{display:flex;align-items:center;gap:10px;padding:7px 12px 7px 14px;font-size:13.5px;color:var(--tx2)}
-.p4 li:first-child{margin-top:4px}
-.p4 li.done{color:var(--tx3)}
-.p4 li svg{width:14px;height:14px;color:var(--br)}
-.p4 li .tick{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .4s var(--e)}
-.p4 li.done .tick{stroke-dashoffset:0}
-
-/* 5 · buton → hap */
-.send{height:48px;border:0;border-radius:999px;background:#fbfbfb;color:#0b0b0b;font-weight:500;font-size:15px;padding:0 24px;display:inline-flex;align-items:center;gap:10px;cursor:pointer;transition:background .35s,color .35s,padding .45s var(--e),box-shadow .35s}
-.send canvas{width:0!important;opacity:0;transition:width .45s var(--e),opacity .3s}
-.send.busy{background:var(--pill);color:var(--tx2);box-shadow:inset 0 0 0 1px var(--ring);padding:0 22px 0 6px;cursor:default}
-.send.busy canvas{width:36px!important;opacity:1}
-
-/* 6 · çoklu ajan */
-.p6{height:60px;padding:0 22px 0 8px}
-.stack{display:flex}
-.stack canvas{border-radius:50%;background:#0c0c0c;box-shadow:0 0 0 3px #111}
-.stack canvas+canvas{margin-left:-12px}
-.p6 small{display:block;color:var(--tx3);font-size:12px}
-
-/* 7 · mesaj iskeleti */
-.msg{display:flex;gap:12px;width:100%;max-width:320px}
-.msg .lines{flex:1;padding-top:6px}
-.msg .lines i{display:block;height:9px;border-radius:9px;margin-bottom:9px;background:linear-gradient(90deg,#1a1a1a 0%,#262626 50%,#1a1a1a 100%);background-size:200% 100%;animation:sk 1.6s linear infinite}
-@keyframes sk{from{background-position:100% 0}to{background-position:-100% 0}}
-
-/* 8 · büyük kart */
-.big{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
-.big .lbl{font-size:16px}
-.bar{display:flex;gap:5px}
-.bar i{width:22px;height:3px;border-radius:9px;background:rgba(255,255,255,.1);transition:background .3s}
-.bar i.on{background:var(--br)}
-
-/* 9 · minimal */
-.mini{display:flex;align-items:center;gap:10px;font:500 13px 'JetBrains Mono',monospace;color:var(--tx3)}
-
-/* 10 · toast */
-.toast{display:flex;align-items:center;gap:12px;padding:8px 8px 8px 8px;border-radius:16px;background:#141414;box-shadow:inset 0 0 0 1px var(--ring),0 20px 40px rgba(0,0,0,.4);min-width:290px}
-.toast .tx{flex:1;font-size:14px}
-.toast .tx small{display:block;color:var(--tx3);font-size:12px}
-.toast button{border:0;background:rgba(255,255,255,.06);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--tx2);cursor:pointer}
-.toast button:hover{background:rgba(255,255,255,.1);color:var(--tx)}
-
-/* 11 · komut çubuğu */
-.bar2{display:flex;align-items:center;gap:10px;width:100%;max-width:420px;height:56px;border-radius:16px;background:#111;box-shadow:inset 0 0 0 1px var(--ring);padding:0 8px 0 8px}
-.bar2 .ph{flex:1;font-size:14.5px}
-.stop{width:36px;height:36px;border-radius:10px;border:0;background:#fbfbfb;display:grid;place-items:center;cursor:pointer}
-.stop i{width:11px;height:11px;border-radius:2.5px;background:#0b0b0b}
-
-/* 12 · sıcak cam */
-.p12{height:66px;padding:0 26px 0 8px;background:rgba(255,236,214,.07);box-shadow:inset 0 0 0 1px rgba(222,176,128,.22),0 10px 40px rgba(222,176,128,.08);backdrop-filter:blur(10px);font-size:16px}
-.p12 .shim{--c1:rgba(246,226,204,.55);--c2:#fff4e8}
+@media (max-width:420px){.pill{height:64px;padding-right:24px}.pill canvas{width:48px;height:48px}.pill span{font-size:16px}}
 </style>
 </head>
 <body>
 <main>
-  <header>
-    <h1>Neo <em>düşünürken</em> — durumlar</h1>
-    <p class="sub">Tek bir "düşünüyor" hapından türetilmiş 12 farklı durum göstergesi. Orb'lar ve arayüz bu sayfa için sıfırdan yazıldı.</p>
-  </header>
+  <section class="hero">
+    <div class="pill"><canvas data-state="composing" data-size="64"></canvas><span id="heroTxt">Thinking….</span></div>
+  </section>
 
-  <div class="grid">
-    <div class="cell wide"><div class="stage">
-      <div class="pill p1"><canvas class="orb" data-orb="Thinking" data-size="56" data-theme="dark"></canvas><span class="t shim swap" id="t1">Thinking…</span><span class="sec" id="s1">0s</span></div>
-    </div><div class="cap"><b>01 · Durum hapı</b><span>adım adım değişir</span></div></div>
+  <div class="grid" id="grid"></div>
 
-    <div class="cell light"><div class="stage">
-      <div class="pill p2"><canvas class="orb" data-orb="Searching" data-size="42" data-theme="light"></canvas><span class="shim">Web'de arıyor…</span></div>
-    </div><div class="cap"><b>02 · Açık tema</b><span>beyaz · kahve</span></div></div>
-
-    <div class="cell"><div class="stage">
-      <p class="inline">Neo<canvas class="orb" data-orb="Deep thinking" data-size="20" data-theme="dark"></canvas><span class="shim">derin düşünüyor</span>, birazdan bu soruya ayrıntılı bir cevap verecek.</p>
-    </div><div class="cap"><b>03 · Satır içi</b><span>20px</span></div></div>
-
-    <div class="cell"><div class="stage">
-      <div class="pill p4" id="p4" role="button" tabindex="0" aria-expanded="false">
-        <div class="head"><canvas class="orb" data-orb="Reasoning" data-size="40" data-theme="dark"></canvas><span class="shim" id="t4">Akıl yürütüyor…</span>
-          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
-        <ol><div id="steps4"></div></ol>
-      </div>
-    </div><div class="cap"><b>04 · Açılır adımlar</b><span>tıkla</span></div></div>
-
-    <div class="cell"><div class="stage">
-      <button class="send" id="send"><canvas class="orb" data-orb="Planning" data-size="36" data-theme="dark"></canvas><span id="sendLbl">Neo'ya gönder</span></button>
-    </div><div class="cap"><b>05 · Buton → hap</b><span>tıkla</span></div></div>
-
-    <div class="cell"><div class="stage">
-      <div class="pill p6"><div class="stack">
-        <canvas class="orb" data-orb="Searching" data-size="44" data-theme="dark"></canvas>
-        <canvas class="orb" data-orb="Coding" data-size="44" data-theme="dark"></canvas>
-        <canvas class="orb" data-orb="Writing" data-size="44" data-theme="dark"></canvas></div>
-        <div><span class="shim">3 ajan çalışıyor</span><small>arama · kod · yazım</small></div></div>
-    </div><div class="cap"><b>06 · Çoklu ajan</b><span>üst üste orb'lar</span></div></div>
-
-    <div class="cell"><div class="stage">
-      <div class="msg"><canvas class="orb" data-orb="Composing" data-size="36" data-theme="dark"></canvas><div class="lines"><i style="width:92%"></i><i style="width:78%"></i><i style="width:55%"></i></div></div>
-    </div><div class="cap"><b>07 · Yanıt iskeleti</b><span>avatar orb</span></div></div>
-
-    <div class="cell warm"><div class="stage">
-      <div class="big"><canvas class="orb" data-orb="Mapping" data-size="120" data-theme="dark"></canvas><span class="lbl shim swap" id="t8">Haritalıyor…</span><div class="bar" id="bar8"><i></i><i></i><i></i><i></i></div></div>
-    </div><div class="cap"><b>08 · Büyük kart</b><span>ilerleme çubuğu</span></div></div>
-
-    <div class="cell"><div class="stage">
-      <div class="mini"><canvas class="orb" data-orb="Checking" data-size="24" data-theme="dark"></canvas><span class="shim">kontrol ediliyor</span></div>
-    </div><div class="cap"><b>09 · Minimal</b><span>mono yazı</span></div></div>
-
-    <div class="cell"><div class="stage">
-      <div class="toast"><canvas class="orb" data-orb="Reading" data-size="40" data-theme="dark"></canvas><div class="tx"><span class="shim">Kaynaklar okunuyor</span><small id="t10">4 / 12 sayfa</small></div><button type="button">Durdur</button></div>
-    </div><div class="cap"><b>10 · Bildirim</b><span>iptal edilebilir</span></div></div>
-
-    <div class="cell"><div class="stage">
-      <div class="bar2"><canvas class="orb" data-orb="Summarizing" data-size="36" data-theme="dark"></canvas><span class="ph shim">Özetliyor…</span><button class="stop" type="button" aria-label="Durdur"><i></i></button></div>
-    </div><div class="cap"><b>11 · Komut çubuğu</b><span>durdur butonu</span></div></div>
-
-    <div class="cell warm"><div class="stage">
-      <div class="pill p12"><canvas class="orb" data-orb="Imagining" data-size="50" data-theme="warm"></canvas><span class="shim">Hayal ediyor…</span></div>
-    </div><div class="cap"><b>12 · Sıcak cam</b><span>kahve tonları</span></div></div>
-  </div>
+  <div class="inline" id="inline"></div>
 </main>
 
 <script>
-/* ── orb motoru (neo-orbs.html ile aynı, sıfırdan yazıldı) ── */
+/* ═══════════════════════════════════════════════════════════
+   Noktalı düşünme orb'ları — bu sayfa için sıfırdan yazıldı.
+   Her durum 3D bir nokta bulutu üretir; nokta bulutu döndürülür,
+   dik (ortografik) izdüşümle çizilir, arkadan öne sıralanır ve
+   derinliğe göre gri tonlarda boyanır.
+   ═══════════════════════════════════════════════════════════ */
 const TAU = Math.PI*2;
-let INK = '20,18,16', BR = '139,94,60', CR = '196,160,120';
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/* ── yardımcılar ── */
-function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-function fib(n){ const p=[], g=Math.PI*(3-Math.sqrt(5)); for(let i=0;i<n;i++){ const y=1-2*(i+.5)/n, r=Math.sqrt(1-y*y), a=g*i; p.push([Math.cos(a)*r,y,Math.sin(a)*r]); } return p; }
-function rot([x,y,z], ay, ax){ const cy=Math.cos(ay), sy=Math.sin(ay); let x1=x*cy-z*sy, z1=x*sy+z*cy; const cx=Math.cos(ax), sx=Math.sin(ax); return [x1, y*cx-z1*sx, y*sx+z1*cx]; }
 const clamp = (v,a=0,b=1) => Math.max(a,Math.min(b,v));
-const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
-const tri = x => 1-Math.abs((x%2+2)%2-1);           // 0→1→0 üçgen dalga
 const lerp = (a,b,t) => a+(b-a)*t;
-const noise = (x,y,t) => (Math.sin(x*2.1+t)*Math.sin(y*1.7-t*.8)+Math.sin((x+y)*1.3+t*1.3))/2;
+const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+const tri = x => 1-Math.abs((x%2+2)%2-1);
+function fib(n){ const p=[], g=Math.PI*(3-Math.sqrt(5)); for(let i=0;i<n;i++){ const y=1-2*(i+.5)/n, r=Math.sqrt(1-y*y), a=g*i; p.push([Math.cos(a)*r,y,Math.sin(a)*r]); } return p; }
+function rotY([x,y,z],a){ const c=Math.cos(a), s=Math.sin(a); return [x*c-z*s,y,x*s+z*c]; }
+function rotX([x,y,z],a){ const c=Math.cos(a), s=Math.sin(a); return [x,y*c-z*s,y*s+z*c]; }
+function rotZ([x,y,z],a){ const c=Math.cos(a), s=Math.sin(a); return [x*c-y*s,x*s+y*c,z]; }
 
-/* ── derinlik renkleri: uzak = krem, yakın = mürekkep, vurgu = kahve ── */
-let CRM=[226,213,196], INA=[20,18,16], BRA=[139,94,60];
-const mixc=(a,b,k)=>{ k=clamp(k); return `${a[0]+(b[0]-a[0])*k|0},${a[1]+(b[1]-a[1])*k|0},${a[2]+(b[2]-a[2])*k|0}`; };
-const shade=k=>mixc(CRM,INA,k), bshade=k=>mixc(CRM,BRA,k);
-
-/* 3D sahne: noktaları döndür, perspektifle yansıt, arkadan öne sırala (painter) */
-function scene(d, P, ay, ax, sz=2.4, sc=.86){
-  const Q = P.map(p => { const [x,y,z] = rot(p,ay,ax); return [x,y,z,p[3],p[4]]; });
-  Q.sort((a,b) => a[2]-b[2]);
-  for(const [x,y,z,acc,s=1] of Q){
-    const f = 2.8/(2.8-z), k = (z+1)/2;
-    d(x*f*sc, y*f*sc, sz*s*f*(.5+.5*k), 1, acc ? bshade(.35+k*.65) : shade(.12+k*.88));
-  }
-}
-const sph = (n, r=1) => fib(n).map(([x,y,z]) => [x*r,y*r,z*r]);
-
-/* ── 50 orb: [İngilizce adım, Türkçe açıklama, kurulum → çizim(dot, t)] ──
-   Referanslar: derinlik gölgeli z-sıralı nokta bulutları (thinking-orbs), Kitaoka'nın
-   "Rotating Snakes" asimetrik parlaklık adımları, moiré girişimi ve Bees & Bombs döngüleri.
-   Hepsi bu sayfa için sıfırdan yazıldı. */
-const ORBS = [
- ['Thinking','Düşünüyor', () => (d,t)=>{ const N=300; for(let i=0;i<N;i++){ const r=Math.sqrt(i/N)*.97, a=i*2.39996+t*.25; const w=.5+.5*Math.sin(r*12-t*3); d(Math.cos(a)*r,Math.sin(a)*r,.7+w*2.1,1,w>.88?bshade(1):shade(.2+w*.8)); } }],
- ['Searching','Web\'de arıyor', () => { const G=[]; for(let i=-11;i<=11;i++) for(let j=-11;j<=11;j++){ const x=i*.088,y=j*.088; if(x*x+y*y<.95) G.push([x,y]); } return (d,t)=>{ const th=.09+.05*Math.sin(t*.6), c=Math.cos(th), s=Math.sin(th); for(const [x,y] of G) d(x,y,1.9,1,shade(.95)); for(const [x,y] of G){ const X=x*c-y*s, Y=x*s+y*c; if(X*X+Y*Y<.95) d(X,Y,1.6,1,bshade(1)); } }; }],
- ['Reading','Okuyor', () => (d,t)=>{ for(let j=0;j<16;j++){ const u=((j/16)+t*.18)%1, r=.04/(1.04-u); if(r>1.05) continue; const n=Math.max(8,Math.round(r*30)); const tw=u*4+t*.4; for(let i=0;i<n;i++){ const a=i/n*TAU+tw; d(Math.cos(a)*r,Math.sin(a)*r,.4+r*3.2,clamp((1.05-r)*6),j%4===0?bshade(u):shade(u)); } } }],
- ['Summarizing','Özetliyor', () => { const P=sph(240); return (d,t)=>{ const k=ease(tri(t*.3)); scene(d,P.map(([x,y,z],i)=>[x,y*(1-k*.92),z,i%17===0]),t*.5,.55); }; }],
- ['Analyzing','Analiz ediyor', () => (d,t)=>{ const cx=Math.cos(t*.8)*.35, cy=Math.sin(t*1.1)*.35; for(let i=-10;i<=10;i++) for(let j=-10;j<=10;j++){ const x=i*.095,y=j*.095; if(x*x+y*y>.95) continue; const vx=x-cx,vy=y-cy, e=Math.exp(-(vx*vx+vy*vy)*5); d(cx+vx*(1+.7*e),cy+vy*(1+.7*e),.8+e*2.4,1,e>.7?bshade(1):shade(.25+e*.75)); } }],
- ['Reasoning','Akıl yürütüyor', () => { const P=[]; for(let i=0;i<170;i++){ const u=i/170*TAU; P.push([(Math.sin(u)+2*Math.sin(2*u))/3.2,(Math.cos(u)-2*Math.cos(2*u))/3.2,-Math.sin(3*u)/3.2*1.4,i%12===0]); } return (d,t)=>scene(d,P,t*.6,.35,2.6); }],
- ['Planning','Plan yapıyor', () => (d,t)=>{ const P=[]; for(let s=0;s<3;s++) for(let i=0;i<60;i++){ const y=-1+i/59*2, a=y*4+s*TAU/3+t*1.2; P.push([Math.cos(a)*.6,y*.95,Math.sin(a)*.6,s===0]); } scene(d,P,.3,.3,2.3); }],
- ['Writing','Yazıyor', () => (d,t)=>{ const P=[]; for(let i=0;i<15;i++) for(let j=0;j<15;j++){ const x=-1+i/7, z=-1+j/7; const y=.28*Math.sin(3*x+t*2)*Math.cos(2.5*z+t*1.3); P.push([x*.85,y,z*.85,y>.2]); } scene(d,P,t*.25,.95,2.1,.72); }],
- ['Coding','Kod yazıyor', () => { const P=[]; for(let i=0;i<5;i++) for(let j=0;j<5;j++) for(let k=0;k<5;k++){ const e=[i,j,k].filter(v=>v===0||v===4).length; P.push([(i-2)*.3,(j-2)*.3,(k-2)*.3,e===3]); } return (d,t)=>scene(d,P,t*.7,t*.45,2.2,.95); }],
- ['Translating','Çeviriyor', () => (d,t)=>{ for(let s=0;s<2;s++){ const dir=s?1:-1; for(let i=0;i<150;i++){ const r=Math.sqrt(i/150)*.95, a=i*2.39996+dir*t*.35; d(Math.cos(a)*r,Math.sin(a)*r,1.5+r*.8,1,s?bshade(.9):shade(.9)); } } }],
- ['Browsing','Sayfalarda geziyor', () => { const P=[]; for(let la=-60;la<=60;la+=20){ const c=Math.cos(la*Math.PI/180), y=Math.sin(la*Math.PI/180); const n=Math.round(40*c); for(let i=0;i<n;i++){ const a=i/n*TAU; P.push([c*Math.cos(a),y,c*Math.sin(a),la===0]); } } for(let m=0;m<6;m++){ const lo=m/6*Math.PI; for(let i=0;i<34;i++){ const a=i/34*TAU; P.push([Math.cos(a)*Math.cos(lo),Math.sin(a),Math.cos(a)*Math.sin(lo),false,.8]); } } return (d,t)=>scene(d,P,t*.5,.4,2.1); }],
- ['Remembering','Hatırlıyor', () => (d,t)=>{ for(let R=1;R<=10;R++){ const r=R/10*.95, n=R*9; const ox=.06*Math.sin(t*2.2-R*.6), oy=.06*Math.cos(t*2.2-R*.6); for(let i=0;i<n;i++){ const a=i/n*TAU; d(ox+Math.cos(a)*r,oy+Math.sin(a)*r,1.7,1,R%3===0?bshade(1):shade(.3+R*.07)); } } }],
- ['Calculating','Hesaplıyor', () => (d,t)=>{ for(let R=1;R<=11;R++){ const r=R/11*.95, n=Math.round(10+R*3.4); const off=t*1.8/R; for(let i=0;i<n;i++){ const a=i/n*TAU+off; d(Math.cos(a)*r,Math.sin(a)*r,1+R*.14,1,i%Math.max(2,Math.round(n/6))===0?bshade(1):shade(.35+R*.06)); } } }],
- ['Connecting','Bağlantı kuruyor', () => { const P=[]; for(let s=0;s<3;s++) for(let i=0;i<110;i++){ const u=-1+i/109*2, la=u*Math.PI/2*.97, lo=u*12+s*TAU/3; P.push([Math.cos(la)*Math.cos(lo),Math.sin(la),Math.cos(la)*Math.sin(lo),s===0]); } return (d,t)=>scene(d,P,t*.45,.35,2.2); }],
- ['Organizing','Düzenliyor', () => (d,t)=>{ const g=t*.25, cg=Math.cos(g), sg=Math.sin(g); for(let i=-2;i<=2;i++) for(let j=-2;j<=2;j++){ const cx=i*.36, cy=j*.36; if(cx*cx+cy*cy>.75) continue; const X=cx*cg-cy*sg, Y=cx*sg+cy*cg; const a0=-t*((i+j)%2?1.4:-1.4); for(let k=0;k<4;k++){ const a=a0+k*TAU/4; d(X+Math.cos(a)*.1,Y+Math.sin(a)*.1,2,1,k===0?bshade(1):shade(.85)); } } }],
- ['Listening','Dinliyor', () => (d,t)=>{ for(let c=1;c<=6;c++){ const base=c/6*.8, n=18+c*8; for(let i=0;i<n;i++){ const a=i/n*TAU; const r=base*(1+.13*Math.sin(3*a+t*2.2+c*.4)+.08*Math.sin(5*a-t*3)); d(Math.cos(a)*r,Math.sin(a)*r,1.2+c*.25,1,c===6?bshade(1):shade(.3+c*.12)); } } }],
- ['Speaking','Konuşuyor', () => (d,t)=>{ const P=[]; for(let k=0;k<18;k++){ const a=k/18*TAU, h=.15+.45*Math.abs(Math.sin(t*3+k*.8)); for(let y=-h;y<=h+.001;y+=.11) P.push([Math.cos(a)*.72,y,Math.sin(a)*.72,Math.abs(y)>h-.1]); } scene(d,P,t*.4,.45,2.2); }],
- ['Generating image','Görsel üretiyor', () => (d,t)=>{ for(let i=-8;i<=8;i++) for(let j=-8;j<=8;j++){ const x=i*.113,y=j*.113; if(x*x+y*y>.95) continue; const n=noise(x*2.6,y*2.6,t*1.1); d(x,y,1.2+Math.abs(n)*2.2,1,n>.3?bshade(1):n<-.3?shade(1):shade(.28)); } }],
- ['Checking','Kontrol ediyor', () => (d,t)=>{ const cols=[shade(1),bshade(1),shade(.08),'250,248,245']; for(let R=1;R<=5;R++){ const r=R/5*.9, n=R*14, dir=R%2?1:-1; for(let i=0;i<n;i++){ const a=i/n*TAU+dir*t*.15; d(Math.cos(a)*r,Math.sin(a)*r,2.3,1,cols[i%4]); } } }],
- ['Comparing','Karşılaştırıyor', () => { const P=[]; for(let c=0;c<3;c++) for(let i=0;i<56;i++){ const a=i/56*TAU; const p=[Math.cos(a),Math.sin(a),0]; P.push(c===0?[p[0],p[1],p[2],true]:c===1?[p[0],0,p[1],false]:[0,p[0],p[1],false]); } return (d,t)=>scene(d,P,t*.6,t*.35,2.2); }],
- ['Exploring','Keşfediyor', () => (d,t)=>{ const P=[]; for(let i=0;i<200;i++){ const u=i/200*TAU; P.push([Math.sin(3*u)*.85,Math.sin(2*u+t*.4)*.85,Math.sin(5*u)*.85,i%20===0]); } scene(d,P,t*.35,.3,2); }],
- ['Focusing','Odaklanıyor', () => (d,t)=>{ const z=Math.pow(2,(t*.45)%1); for(let arm=0;arm<6;arm++) for(let i=0;i<34;i++){ const r=.02*Math.pow(1.14,i)*z; if(r>1) break; const a=arm*TAU/6+Math.log(r)*2.1; d(Math.cos(a)*r,Math.sin(a)*r,.3+r*4.2,1,arm%2?bshade(.4+r*.6):shade(.3+r*.7)); } }],
- ['Brainstorming','Fikir üretiyor', () => { const D=sph(200), H=D.map((_,i)=>(i*0.618)%1); return (d,t)=>{ scene(d,D.map(([x,y,z],i)=>{ const u=(t*.35+H[i])%1, q=.15+ease(u)*.85; return [x*q,y*q,z*q,H[i]>.85,1.3-u*.8]; }),t*.3,.4,2.3); }; }],
- ['Learning','Öğreniyor', () => (d,t)=>{ const P=[]; for(let i=0;i<34;i++){ const y=-1+i/33*2, a=y*3.4+t; const A=[Math.cos(a)*.45,y*.95,Math.sin(a)*.45], B=[-A[0],y*.95,-A[2]]; P.push([...A,false,1.2],[...B,true,1.2]); if(i%3===0) for(let s=1;s<5;s++) P.push([lerp(A[0],B[0],s/5),y*.95,lerp(A[2],B[2],s/5),false,.6]); } scene(d,P,t*.4,.2,2.4); }],
- ['Scanning files','Dosyaları tarıyor', () => (d,t)=>{ const P=[]; const sx=Math.sin(t*1.2); for(let i=0;i<17;i++) for(let j=0;j<17;j++){ const x=-1+i/8, z=-1+j/8; const e=Math.exp(-Math.pow((x-sx)*3.4,2)); P.push([x*.85,-e*.3,z*.85,e>.6,.6+e*.9]); } scene(d,P,.6,1,2.2,.72); }],
- ['Fetching','Veri çekiyor', () => (d,t)=>{ const P=[]; for(let j=0;j<14;j++){ const u=((j/14)+t*.25)%1, r=.95*(1-u)+.05; for(let i=0;i<22;i++){ const a=i/22*TAU+u*5+t*.5; P.push([Math.cos(a)*r,u*1.5-.75,Math.sin(a)*r,i===0]); } } scene(d,P,0,.55,2); }],
- ['Uploading','Yüklüyor', () => (d,t)=>{ const P=[]; for(let j=0;j<11;j++){ const y=((j/11-t*.25)%1+1)%1*2-1; for(let i=0;i<22;i++){ const a=i/22*TAU+j*.3; P.push([Math.cos(a)*.62,y*.9,Math.sin(a)*.62,j===0,1-Math.abs(y)*.4]); } } scene(d,P,t*.3,.45,2.2); }],
- ['Downloading','İndiriyor', () => (d,t)=>{ const P=[]; for(let j=0;j<12;j++){ const u=((j/12+t*.25)%1), y=1-u*2, r=.2+.65*(1-u); for(let i=0;i<24;i++){ const a=i/24*TAU-t*.8; P.push([Math.cos(a)*r,y*.9,Math.sin(a)*r,j%4===0]); } } scene(d,P,0,.5,2); }],
- ['Indexing','Dizinliyor', () => (d,t)=>{ for(let j=1;j<=11;j++){ const s=j/11*.92, rot_=j*.14+t*.35*(1-j/14); const c=Math.cos(rot_), si=Math.sin(rot_); const n=8; for(let e=0;e<4;e++) for(let k=0;k<n;k++){ const u=k/n; const P=[[-1,-1],[1,-1],[1,1],[-1,1]]; const [x1,y1]=P[e],[x2,y2]=P[(e+1)%4]; const x=lerp(x1,x2,u)*s*.72, y=lerp(y1,y2,u)*s*.72; d(x*c-y*si,x*si+y*c,.6+s*1.8,1,j%3===0?bshade(1):shade(.25+s*.75)); } } }],
- ['Debugging','Hata ayıklıyor', () => (d,t)=>{ const bx=Math.sin(t*1.1)*.5+Math.sin(t*2.3)*.18, by=Math.cos(t*.9)*.45; for(let i=-6;i<=6;i++) for(let j=-6;j<=6;j++){ const x=i*.15,y=j*.15; if(x*x+y*y>.92) continue; const e=Math.exp(-((x-bx)**2+(y-by)**2)*7); d(x,y,3.2-e*2.6,1,e>.5?bshade(1):shade(.95)); } d(bx,by,2.2,1,bshade(1)); }],
- ['Drafting','Taslak çıkarıyor', () => (d,t)=>{ const P=[]; for(let i=0;i<220;i++){ const u=i/220*TAU, r=Math.cos(4*u)*.9; P.push([Math.cos(u)*r,Math.sin(u)*r,.35*Math.sin(8*u+t*1.5),i%22===0]); } scene(d,P,t*.35,.5,1.9); }],
- ['Refining','İyileştiriyor', () => (d,t)=>{ const m=5+2*Math.sin(t*.5); const sf=a=>{ const A=Math.pow(Math.abs(Math.cos(m*a/4)),1.7), B=Math.pow(Math.abs(Math.sin(m*a/4)),1.7); return Math.pow(A+B,-1/1.4); }; [.95,.68,.42].forEach((sc,k)=>{ const n=70-k*18, off=t*(k%2?-.4:.3); let mx=0; for(let i=0;i<n;i++) mx=Math.max(mx,sf(i/n*TAU)); for(let i=0;i<n;i++){ const a=i/n*TAU; const r=sf(a)/mx*sc; d(Math.cos(a+off)*r,Math.sin(a+off)*r,1.5+(2-k)*.4,1,k===1?bshade(1):shade(.5+k*.25)); } }); }],
- ['Evaluating','Değerlendiriyor', () => { const S=sph(46,.27); return (d,t)=>{ const P=[]; for(let b=0;b<3;b++){ const a=t*.9+b*TAU/3, cx=Math.cos(a)*.55, cz=Math.sin(a)*.55, cy=Math.sin(a*2)*.15; for(const [x,y,z] of S){ const [X,Y,Z]=rot([x,y,z],t*1.5,0); P.push([X+cx,Y+cy,Z+cz,b===0]); } } scene(d,P,0,.35,2); }; }],
- ['Structuring','Yapılandırıyor', () => { const V=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]], P=[]; for(let a=0;a<6;a++) for(let b=a+1;b<6;b++){ if(V[a].some((v,i)=>v!==0&&v===-V[b][i])) continue; for(let k=0;k<=10;k++){ const u=k/10; P.push([lerp(V[a][0],V[b][0],u)*.95,lerp(V[a][1],V[b][1],u)*.95,lerp(V[a][2],V[b][2],u)*.95,k===0||k===10]); } } return (d,t)=>scene(d,P,t*.6,t*.37,2.3); }],
- ['Mapping','Haritalıyor', () => { const P=[]; for(let i=0;i<32;i++) for(let j=0;j<13;j++){ const u=i/32*TAU, v=j/13*TAU; P.push([(1+.4*Math.cos(v))*Math.cos(u)*.66,.4*Math.sin(v)*.66,(1+.4*Math.cos(v))*Math.sin(u)*.66,j===0]); } return (d,t)=>scene(d,P,t*.6,1,1.9); }],
- ['Querying database','Veritabanını sorguluyor', () => (d,t)=>{ const hi=Math.floor(t*1.4)%5, P=[]; for(let l=0;l<5;l++){ const y=-.7+l*.35; for(const r of [.25,.5,.75]){ const n=Math.round(r*30); for(let i=0;i<n;i++){ const a=i/n*TAU; P.push([Math.cos(a)*r,y,Math.sin(a)*r,l===hi]); } } } scene(d,P,t*.35,.5,2); }],
- ['Clustering','Kümeliyor', () => (d,t)=>{ const C=[0,1,2].map(k=>{ const a=t*(.7+k*.2)+k*2.1; return [Math.cos(a)*.45,Math.sin(a*1.3)*.45]; }); for(let i=-10;i<=10;i++) for(let j=-10;j<=10;j++){ const x=i*.093,y=j*.093; if(x*x+y*y>.95) continue; let f=0; for(const [cx,cy] of C) f+=.035/((x-cx)**2+(y-cy)**2+.01); d(x,y,.5+clamp(f/2.5)*2.4,1,f>1.6?bshade(1):shade(.2+clamp(f/2)*.8)); } }],
- ['Predicting','Tahmin ediyor', () => (d,t)=>{ const P=[]; for(let arm=0;arm<4;arm++) for(let i=0;i<50;i++){ const r=i/50*.95, a=arm/4*TAU+Math.log(1+r*9)*1.7-t*.6; P.push([Math.cos(a)*r,Math.sin(i*7.3)*.04,Math.sin(a)*r,arm===0,1.4-r*.7]); } scene(d,P,0,1.05,2); }],
- ['Imagining','Hayal ediyor', () => (d,t)=>{ for(let i=-9;i<=9;i++) for(let j=-9;j<=9;j++){ const x=i*.105,y=j*.105; if(x*x+y*y>.95) continue; const v=(noise(x*2.3,y*2.3,t*.9)+1)/2; d(x,y,.35+v*2.9,1,v>.82?bshade(1):shade(v)); } }],
- ['Verifying','Doğruluyor', () => { const P=[]; for(let i=0;i<48;i++) for(let j=0;j<5;j++){ const u=i/48*TAU, v=-.35+j*.175; P.push([(1+v*Math.cos(u/2))*Math.cos(u)*.62,v*Math.sin(u/2)*.62*1.4,(1+v*Math.cos(u/2))*Math.sin(u)*.62,j===2]); } return (d,t)=>scene(d,P,t*.5,.6,1.9); }],
- ['Sorting','Sıralıyor', () => (d,t)=>{ const P=[]; for(let i=0;i<7;i++) for(let j=0;j<7;j++){ const x=-.66+i*.22, z=-.66+j*.22; const h=.15+.55*(.5+.5*Math.sin(x*3+t*1.6)*Math.cos(z*3)); for(let y=0;y<=h;y+=.12) P.push([x,.55-y,z,y+.12>h]); } scene(d,P,t*.3,.6,2); }],
- ['Parsing','Ayrıştırıyor', () => { const P=[]; for(let i=0;i<48;i++){ const a=i/48*TAU; P.push([-.32+Math.cos(a)*.5,Math.sin(a)*.5,0,false],[.32+Math.cos(a)*.5,0,Math.sin(a)*.5,true]); } return (d,t)=>scene(d,P,t*.5,.35,2.3); }],
- ['Researching','Araştırıyor', () => (d,t)=>{ const mx=Math.cos(t*.7)*.32, my=Math.sin(t*1)*.3, L=.42; for(let i=-12;i<=12;i++) for(let j=-12;j<=12;j++){ let x=i*.08,y=j*.08; if(x*x+y*y>.95) continue; const vx=x-mx,vy=y-my, r=Math.hypot(vx,vy); let s=1; if(r<L){ const r2=L*Math.pow(r/L,.55); x=mx+vx/(r||1)*r2; y=my+vy/(r||1)*r2; s=2.4-1.4*(r/L); } d(x,y,.9*s,1,r<L?bshade(.6+.4*(1-r/L)):shade(.55)); } }],
- ['Synthesizing','Sentezliyor', () => { const P=sph(300); return (d,t)=>scene(d,P.map(([x,y,z],i)=>{ const th=Math.acos(y), ph=Math.atan2(z,x); const r=.62+.3*Math.sin(3*th)*Math.cos(2*ph+t*1.2); return [x*r,y*r,z*r,r>.85]; }),t*.35,.4,2.1); }],
- ['Optimizing','Optimize ediyor', () => (d,t)=>{ const P=[]; for(let i=0;i<13;i++) for(let j=0;j<13;j++){ const x=-1+i/6, z=-1+j/6; P.push([x*.8,(x*x-z*z)*.38,z*.8,false,.9]); } const u=t*.9; const bx=Math.cos(u)*.9, bz=Math.sin(u*2)*.5; P.push([bx*.8,(bx*bx-bz*bz)*.38-.07,bz*.8,true,2.2]); scene(d,P,t*.35,.55,2,.72); }],
- ['Composing','Besteliyor', () => (d,t)=>{ const P=[]; for(let i=0;i<110;i++){ const h=i/110, a=i*.42+t*1.2, r=.88*(1-h)+.04; P.push([Math.cos(a)*r,.8-h*1.6,Math.sin(a)*r,i%11===0,1.5-h*.6]); } scene(d,P,0,.35,2.2); }],
- ['Deep thinking','Derin düşünüyor', () => { const A=sph(150,.95), B=sph(70,.58), C=sph(24,.26); return (d,t)=>{ const P=[]; for(const p of A){ const q=rot(p,t*.35,.2); P.push([...q,false,.8]); } for(const p of B){ const q=rot(p,-t*.8,-.4); P.push([...q,true,1.1]); } for(const p of C){ const q=rot(p,t*1.6,.7); P.push([...q,false,1.3]); } scene(d,P,0,.25,2.2); }; }],
- ['Waiting for tools','Araçları bekliyor', () => (d,t)=>{ const cyc=(t*.28)%1, fl=ease(clamp((cyc-.82)/.18))*Math.PI, k=clamp(cyc/.82), P=[]; for(let j=-8;j<=8;j++){ const y=j/8*.85, r=.08+Math.abs(y)*.72; const n=Math.max(6,Math.round(r*26)); for(let i=0;i<n;i++){ const a=i/n*TAU; P.push([Math.cos(a)*r,y,Math.sin(a)*r,false,.7]); } } for(let i=0;i<60;i++){ const top=i/60>k; const u=(i*.618)%1, v=(i*.382)%1; const y=top? -.12-v*.6*(1-k) : .78-v*.55*k; const r=(.08+Math.abs(y)*.72)*.75*Math.sqrt(u); const a=i*2.4; P.push([Math.cos(a)*r,y,Math.sin(a)*r,!top,1.3]); } scene(d,P.map(([x,y,z,a,s])=>{ const c=Math.cos(fl), si=Math.sin(fl); return [x,y*c-z*si,y*si+z*c,a,s]; }),t*.4,.25,2); }],
- ['Collaborating','İş birliği yapıyor', () => (d,t)=>{ const G=[[-.38,-.18,.45,10,1],[.42,-.1,.36,8,-1.25],[.02,.5,.3,7,-1.5]]; G.forEach(([cx,cy,r,teeth,sp],g)=>{ const a0=t*.6*sp; const n=teeth*6; for(let i=0;i<n;i++){ const a=i/n*TAU+a0; const tooth=(i%6)<3; const rr=r*(tooth?1:.82); d(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,1.7,1,g===0?bshade(1):shade(.9)); } for(let i=0;i<12;i++){ const a=i/12*TAU+a0; d(cx+Math.cos(a)*r*.4,cy+Math.sin(a)*r*.4,1.2,1,shade(.6)); } d(cx,cy,2.2,1,shade(1)); }); }],
- ['Finalizing','Son rötuşlar', () => { const P=sph(220); return (d,t)=>{ const k=ease(tri(t*.45)); const r=.3+.65*k; scene(d,P.map(([x,y,z],i)=>[x*r,y*r,z*r,k<.4||i%13===0,1.4-k*.5]),t*.5,.4,2.1); }; }],
-];
-
-/* ── çizim altyapısı ── */
-function makeOrb(canvas, idx, pad = .1){
-  const ctx = canvas.getContext('2d');
-  const draw = ORBS[idx][2]();
-  let W = 0, dpr = 1;
-  const fit = () => { dpr = Math.min(devicePixelRatio||1, 2); W = +canvas.dataset.size || canvas.clientWidth; canvas.width = canvas.height = W*dpr; };
-  fit();
-  const scale = W/120;
-  const dot = (x,y,r,a=1,c=INK) => {
-    if(a <= .01 || r <= 0) return;
-    const R = W/2*(1-pad);
-    ctx.fillStyle = `rgba(${c},${Math.min(1,a)})`;
-    ctx.beginPath(); ctx.arc(W/2 + x*R, W/2 + y*R, r*scale, 0, TAU); ctx.fill();
-  };
-  return { render(t){ ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,W); draw(dot, t); }, fit };
-}
-
-/* ── tema paletleri (uzak · yakın · vurgu) ── */
-const PAL = {
-  light:{CRM:[226,213,196],INA:[20,18,16],BRA:[139,94,60]},
-  dark: {CRM:[52,50,48],INA:[246,244,240],BRA:[222,176,128]},
-  warm: {CRM:[70,48,32],INA:[255,240,222],BRA:[230,170,110]},
+/* Her durum: kurulum → (t) => [[x,y,z,parlaklık?], ...]  (birim küre içinde) */
+const STATES = {
+  // yörüngelerde dönen parçacıklar
+  working: () => (t) => { const P=[]; for(let o=0;o<3;o++){ const tilt=[.35,-.9,1.4][o], spin=o*TAU/3; for(let i=0;i<44;i++){ const a=i/44*TAU+t*(.9+o*.25); let p=[Math.cos(a)*.95,0,Math.sin(a)*.95]; p=rotX(p,tilt); p=rotY(p,spin); P.push(p); } } for(const p of fib(26)) P.push(p.map(v=>v*.22)); return P; },
+  // noktalı küre, üstünden tarayan meridyen
+  searching: () => { const S=fib(260); return (t) => { const sw=(t*1.3)%TAU; return S.map(p=>{ const q=rotY(p,t*.35); const lon=Math.atan2(q[0],q[2]); let d=Math.abs(((lon-sw+Math.PI)%TAU+TAU)%TAU-Math.PI); return [...q, Math.exp(-d*d*14)]; }); }; },
+  // bantlar karışır, sonra "tık" diye çözülür
+  solving: () => { const B=[]; for(let b=0;b<7;b++){ const y=-.84+b*.28, r=Math.sqrt(1-y*y), n=Math.round(r*34); const row=[]; for(let i=0;i<n;i++) row.push([Math.cos(i/n*TAU)*r,y,Math.sin(i/n*TAU)*r]); B.push(row); } const off=[1.9,-2.6,1.2,-.8,2.4,-1.7,.9]; return (t) => { const cyc=(t*.35)%1, k=cyc<.55?ease(clamp(cyc/.55)):1-ease(clamp((cyc-.7)/.3)); const P=[]; B.forEach((row,b)=>{ const a=off[b]*(1-k)+t*.25; for(const p of row) P.push(rotX(rotY(p,a),.35)); }); return P; }; },
+  // halkalar boyunca yuvarlanan dalga
+  listening: () => (t) => { const P=[]; for(let r=1;r<=7;r++){ const R=r/7*.98, n=r*9; for(let i=0;i<n;i++){ const a=i/n*TAU; const y=.2*Math.sin(R*7-t*4)*Math.cos(a*2+t); P.push(rotX([Math.cos(a)*R,y,Math.sin(a)*R],.95)); } } return P; },
+  // kalem küreyi sarmal çizerek doldurur
+  composing: () => { const N=240, S=[]; for(let i=0;i<N;i++){ const u=i/N, y=1-2*u, r=Math.sqrt(1-y*y), a=u*TAU*9; S.push([Math.cos(a)*r,y,Math.sin(a)*r]); } return (t) => { const head=((t*.22)%1.3)*N; const P=[]; S.forEach((p,i)=>{ const q=rotX(rotY(p,t*.5),.3); const d=head-i; if(d<0) return; P.push([...q, d<14?1-d/14:0]); }); return P; }; },
+  // çember → üçgen → kare
+  shaping: () => (t) => { const sh=[64,3,4], ph=(t*.4)%3, si=Math.floor(ph), k=ease(clamp((ph-si)*1.5-.25)); const A=sh[si], Bn=sh[(si+1)%3]; const poly=(n,u)=>{ const s=u*n, e=Math.floor(s), f=s-e; const a1=e/n*TAU-Math.PI/2, a2=(e+1)/n*TAU-Math.PI/2; return [lerp(Math.cos(a1),Math.cos(a2),f),lerp(Math.sin(a1),Math.sin(a2),f)]; }; const P=[]; for(let l=0;l<3;l++) for(let i=0;i<60;i++){ const u=i/60; const [x1,y1]=poly(A,u),[x2,y2]=poly(Bn,u); const s=.95-l*.09; P.push(rotX(rotY([lerp(x1,x2,k)*s,lerp(y1,y2,k)*s,(l-1)*.18],Math.sin(t*.6)*.5),.25)); } return P; },
+  // dönen silindirde satırlar
+  reading: () => (t) => { const P=[]; for(let r=0;r<9;r++){ const y=-.8+r*.2; const n=30; for(let i=0;i<n;i++){ const a=i/n*TAU+t*.6; const len=(Math.sin(r*3.7+i*.9)+1)/2; if(len<.25) continue; P.push(rotX([Math.cos(a)*.78,y,Math.sin(a)*.78],.2)); } } return P; },
+  // dolanan çift sarmal
+  planning: () => (t) => { const P=[]; for(let s=0;s<2;s++) for(let i=0;i<90;i++){ const u=i/90, y=-.95+u*1.9, a=u*TAU*2.5+s*Math.PI+t*1.1, r=Math.sqrt(1-y*y)*.9; P.push(rotX([Math.cos(a)*r,y,Math.sin(a)*r],.3)); } return P; },
+  // atımlı küp kafes
+  coding: () => { const G=[]; for(let i=0;i<4;i++) for(let j=0;j<4;j++) for(let k=0;k<4;k++) G.push([(i-1.5)*.38,(j-1.5)*.38,(k-1.5)*.38,(i*7+j*13+k*5)%11]); return (t) => G.map(([x,y,z,h])=>{ const q=rotX(rotY([x,y,z],t*.6),t*.35+.4); return [...q, Math.max(0,Math.sin(t*3+h))**6]; }); },
+  // iç içe nefes alan kabuklar
+  remembering: () => { const L=[fib(150),fib(70),fib(24)]; return (t) => { const P=[]; L.forEach((S,k)=>{ const r=[.95,.62,.3][k]*(1+.08*Math.sin(t*2-k*1.3)); for(const p of S) P.push(rotX(rotY(p.map(v=>v*r),t*(k%2?-.6:.4)),.3)); }); return P; }; },
+  // küre halkaya çöker, geri açılır
+  summarizing: () => { const S=fib(220); return (t) => { const k=ease(tri(t*.35)); return S.map(([x,y,z])=>{ const a=Math.atan2(z,x); const tx=Math.cos(a)*.9, tz=Math.sin(a)*.9, ty=y*.08; return rotX(rotY([lerp(x,tx,k),lerp(y,ty,k),lerp(z,tz,k)],t*.5),.55); }); }; },
+  // kovalayan ışıkla dolan halka
+  verifying: () => (t) => { const P=[], N=48, h=(t*.5)%1; for(let l=0;l<3;l++) for(let i=0;i<N;i++){ const a=i/N*TAU; const u=i/N; const lit=u<h?1-(h-u)*2.5:0; P.push([...rotX([Math.cos(a)*(.95-l*.05),(l-1)*.1,Math.sin(a)*(.95-l*.05)],1.15), clamp(lit)]); } return P; },
 };
-function setPal(n){ const p = PAL[n]; CRM=p.CRM; INA=p.INA; BRA=p.BRA; INK=`${INA}`; BR=`${BRA}`; }
-const byName = n => ORBS.findIndex(o => o[0] === n);
 
-/* ── sayfadaki tüm orb'lar ── */
-const orbs = [];
-function mount(cv){
-  const s = +cv.dataset.size; cv.style.width = cv.style.height = s + 'px';
-  const o = { cv, theme: cv.dataset.theme, orb: makeOrb(cv, byName(cv.dataset.orb), s < 30 ? .02 : .06) };
-  orbs.push(o); return o;
+/* boyut ayarları: 64 = sohbet avatarı, 20 = satır içi */
+const PRESET = { 64:{scale:.9, dot:1.5, min:.35}, 20:{scale:.92, dot:.75, min:.3} };
+
+function makeOrb(cv, state, size){
+  const ctx = cv.getContext('2d'), gen = STATES[state](), pr = PRESET[size] || PRESET[64];
+  const W = cv.clientWidth || size, dpr = Math.min(devicePixelRatio||1, 2);
+  cv.width = cv.height = W*dpr;
+  const R = W/2*pr.scale, k = W/size;
+  return (t) => {
+    const P = gen(t).map(p => p.slice()).sort((a,b) => a[2]-b[2]);
+    ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,W);
+    for(const [x,y,z,glow=0] of P){
+      const d = (z+1)/2;                                  // 0 = arka, 1 = ön
+      const g = Math.round(lerp(70, 238, d) + glow*17);    // gri ton
+      const a = lerp(pr.min, 1, d);
+      const r = pr.dot*k*(.55 + .6*d) * (1 + glow*.6);
+      ctx.fillStyle = `rgba(${g},${g},${g+2},${a})`;
+      ctx.beginPath(); ctx.arc(W/2 + x*R, W/2 - y*R, r, 0, TAU); ctx.fill();
+    }
+  };
 }
-document.querySelectorAll('canvas.orb').forEach(mount);
-function swapOrb(cv, name){ const o = orbs.find(o => o.cv === cv); o.orb = makeOrb(cv, byName(name), .06); }
-function swapText(el, txt){ el.classList.add('out'); setTimeout(() => { el.textContent = txt; el.classList.remove('out'); el.classList.add('in'); void el.offsetWidth; el.classList.remove('in'); }, 230); }
 
-/* 1 · adımlar sırayla */
-const FLOW1 = [['Thinking','Thinking…'],['Searching','Searching the web…'],['Reading','Reading 4 sources…'],['Summarizing','Summarizing…'],['Writing','Writing…']];
-let i1 = 0, sec = 0; const cv1 = document.querySelector('.p1 canvas');
-setInterval(() => { i1 = (i1+1) % FLOW1.length; swapOrb(cv1, FLOW1[i1][0]); swapText(document.getElementById('t1'), FLOW1[i1][1]); }, 2600);
-setInterval(() => { sec++; document.getElementById('s1').textContent = sec + 's'; }, 1000);
+/* ── sayfa ── */
+const LABELS = {
+  working:'Working…', searching:'Searching…', solving:'Solving…', listening:'Listening…', composing:'Composing…', shaping:'Shaping…',
+  reading:'Reading…', planning:'Planning…', coding:'Coding…', remembering:'Remembering…', summarizing:'Summarizing…', verifying:'Verifying…'
+};
+const grid = document.getElementById('grid'), inline = document.getElementById('inline');
+for(const [st,lbl] of Object.entries(LABELS)){
+  const c = document.createElement('div'); c.className = 'cell';
+  c.innerHTML = `<div class="pill"><canvas data-state="${st}" data-size="64"></canvas><span></span></div>`;
+  c.querySelector('span').textContent = lbl; grid.append(c);
+}
+['working','searching','solving','composing'].forEach(st => {
+  const p = document.createElement('p');
+  p.innerHTML = `<canvas data-state="${st}" data-size="20"></canvas><span></span>`;
+  p.querySelector('span').textContent = { working:'Neo is working on it', searching:'Searching 12 sources', solving:'Solving the equation', composing:'Writing your answer' }[st];
+  inline.append(p);
+});
 
-/* 4 · açılır adımlar */
-const STEPS4 = ['Soruyu parçalara ayırdı','3 kaynak buldu','Kaynakları karşılaştırdı','Sonucu doğruluyor'];
-const s4 = document.getElementById('steps4');
-STEPS4.forEach(t => { const li = document.createElement('li'); li.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" opacity=".3"/><path class="tick" pathLength="1" d="M8 12.5l2.7 2.7L16 9.5"/></svg>'; li.append(t); s4.append(li); });
-let k4 = 0; setInterval(() => { const lis = [...s4.children]; lis.forEach((l,n) => l.classList.toggle('done', n < k4)); k4 = (k4+1) % (lis.length+2); }, 1100);
-const p4 = document.getElementById('p4');
-const tog4 = () => { p4.classList.toggle('open'); p4.setAttribute('aria-expanded', p4.classList.contains('open')); };
-p4.addEventListener('click', tog4); p4.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); tog4(); } });
+const orbs = [...document.querySelectorAll('canvas[data-state]')].map(cv => ({ cv, draw: makeOrb(cv, cv.dataset.state, +cv.dataset.size), vis:true }));
+const io = new IntersectionObserver(es => es.forEach(e => { const o = orbs.find(o => o.cv === e.target); if(o) o.vis = e.isIntersecting; }));
+orbs.forEach(o => io.observe(o.cv));
 
-/* 5 · buton → hap */
-const send = document.getElementById('send');
-send.addEventListener('click', () => { if(send.classList.contains('busy')) return; send.classList.add('busy'); document.getElementById('sendLbl').textContent = 'Planlıyor…';
-  setTimeout(() => { send.classList.remove('busy'); document.getElementById('sendLbl').textContent = "Neo'ya gönder"; }, 3500); });
-
-/* 8 · büyük kart */
-const FLOW8 = [['Mapping','Haritalıyor…'],['Clustering','Kümeliyor…'],['Verifying','Doğruluyor…'],['Finalizing','Son rötuşlar…']];
-let i8 = 0; const cv8 = document.querySelector('.big canvas'), bar8 = document.getElementById('bar8');
-const set8 = () => [...bar8.children].forEach((b,n) => b.classList.toggle('on', n <= i8)); set8();
-setInterval(() => { i8 = (i8+1) % FLOW8.length; swapOrb(cv8, FLOW8[i8][0]); swapText(document.getElementById('t8'), FLOW8[i8][1]); set8(); }, 2800);
-
-/* 10 · sayfa sayacı */
-let pg = 4; setInterval(() => { pg = pg >= 12 ? 1 : pg+1; document.getElementById('t10').textContent = `${pg} / 12 sayfa`; }, 900);
-
-/* ── tek döngü ── */
 const t0 = performance.now();
 (function frame(now){
-  const t = (now - t0)/1000;
-  for(const o of orbs){ setPal(o.theme); o.orb.render(REDUCED ? 3 : t); }
+  const t = REDUCED ? 2 : (now - t0)/1000;
+  for(const o of orbs) if(o.vis) o.draw(t);
   if(!REDUCED) requestAnimationFrame(frame);
 })(t0);
 </script>
