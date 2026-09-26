@@ -157,11 +157,11 @@ const comp = $('composer'), ta = $('ta');
 
 /* ── yay (spring): hafif esnek, küçük bir taşma ile oturur ── */
 class Spring{
-  constructor(x, k=105, c=8.5){ this.x=x; this.v=0; this.to=x; this.k=k; this.c=c; }
+  constructor(x, k=125, c=10.5){ this.x=x; this.v=0; this.to=x; this.k=k; this.c=c; }
   step(dt){ if(REDUCED){ this.x=this.to; return this.x; } const a=this.k*(this.to-this.x)-this.c*this.v; this.v+=a*dt; this.x+=this.v*dt; return this.x; }
   get rest(){ return Math.abs(this.to-this.x)<.05 && Math.abs(this.v)<.05; }
 }
-const S = { w:new Spring(360), h:new Spring(56), r:new Spring(28), s:new Spring(1,230,9), ox:new Spring(0,140,9), oy:new Spring(0,140,9) };
+const S = { w:new Spring(360), h:new Spring(56), r:new Spring(28), s:new Spring(1,250,10.5), ox:new Spring(0,160,10.5), oy:new Spring(0,160,10.5) };
 
 let open = false;
 function sizes(){
@@ -169,8 +169,8 @@ function sizes(){
   const closedW = Math.min(440, vw-32), openW = Math.min(680, vw-24);
   if(!open) return {w:closedW, h:56, r:28};
   // metin kadar uzar: textarea + araç çubuğu
-  ta.style.height = 'auto';
-  const th = Math.min(180, Math.max(44, ta.scrollHeight));
+  ta.style.height = '0px';            // gerçek içerik yüksekliğini ölç (esnek satır gerdirmesin)
+  const th = Math.min(180, Math.max(46, ta.scrollHeight));
   ta.style.height = th + 'px';
   return {w:openW, h:Math.max(112, th + 30 + 40), r:34};
 }
@@ -298,8 +298,8 @@ function tick(now){
   comp.style.setProperty('--w', w+'px'); comp.style.setProperty('--h', h+'px'); dock.style.setProperty('--w', w+'px'); dock.style.setProperty('--h', h+'px');
   comp.style.setProperty('--r', Math.min(r, h/2)+'px'); comp.style.setProperty('--s', s);
   const ox = S.ox.step(dt), oy = S.oy.step(dt);
-  const jig = Math.max(-.11, Math.min(.11, S.h.v*.0006 - S.w.v*.00018 + S.oy.v*.0012));
-  const jx = Math.max(-.08, Math.min(.08, S.ox.v*.0012));
+  const jig = Math.max(-.09, Math.min(.09, S.h.v*.0005 - S.w.v*.00015 + S.oy.v*.001));
+  const jx = Math.max(-.065, Math.min(.065, S.ox.v*.001));
   comp.style.setProperty('--sy', 1 + jig - Math.abs(jx)*.5); comp.style.setProperty('--sx', 1 - jig*.6 + Math.abs(jx));
   comp.style.setProperty('--ox', ox+'px'); comp.style.setProperty('--oy', oy+'px');
   if(Object.values(S).every(sp => sp.rest)){ comp.style.setProperty('--sx',1); comp.style.setProperty('--sy',1); comp.style.setProperty('--ox','0px'); comp.style.setProperty('--oy','0px'); running = false; return; }
