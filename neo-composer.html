@@ -31,7 +31,7 @@ button,textarea{font:inherit;color:inherit}
   box-shadow:inset 0 1px 1px rgba(255,255,255,.14),inset 0 0 0 .5px rgba(255,255,255,.1),0 24px 60px -12px rgba(0,0,0,.65);
   transform:translateY(var(--ty));opacity:0;pointer-events:none;
   clip-path:inset(calc(100% - 38px) calc(100% - var(--cw,120px)) 0 0 round 19px);
-  transition:clip-path .55s cubic-bezier(.32,1.25,.5,1),opacity .18s}
+  transition:clip-path .7s cubic-bezier(.3,1.55,.45,1),opacity .18s}
 .menu.show{opacity:1;pointer-events:auto;clip-path:inset(0 0 0 0 round 20px)}
 .menu.down{top:calc(var(--h,56px) / 2 + 10px);--ty:0px;clip-path:inset(0 calc(100% - var(--cw,120px)) calc(100% - 38px) 0 round 19px)}
 .menu.down.show{clip-path:inset(0 0 0 0 round 20px)}
@@ -49,7 +49,7 @@ button,textarea{font:inherit;color:inherit}
 .menu.show .grp{opacity:1;transition-delay:.08s}
 /* imleci/klavyeyi takip eden kayan vurgu */
 .menu .hl{position:absolute;left:5px;right:5px;top:0;height:0;border-radius:14px;background:rgba(255,255,255,.075);box-shadow:inset 0 1px 0 rgba(255,255,255,.06);opacity:0;pointer-events:none;
-  transition:transform .42s cubic-bezier(.3,1.3,.5,1),height .42s cubic-bezier(.3,1.3,.5,1),opacity .2s}
+  transition:transform .55s cubic-bezier(.3,1.6,.45,1),height .55s cubic-bezier(.3,1.6,.45,1),opacity .2s}
 .menu .hl.on{opacity:1}
 /* derinlik göstergesi: 4 minik çubuk */
 .lv{display:inline-flex;align-items:flex-end;gap:2px;height:12px;flex:none}
@@ -84,7 +84,7 @@ button,textarea{font:inherit;color:inherit}
 @keyframes aura{to{transform:translate(-46%,-82%) scale(1.08)}}
 .composer{
   --w:360px;--h:56px;--r:28px;--s:1;--mx:50%;--my:0%;
-  position:relative;width:var(--w);height:var(--h);border-radius:var(--r);transform:translateX(-50%) scale(calc(var(--s)*var(--sx,1)),calc(var(--s)*var(--sy,1)));
+  position:relative;width:var(--w);height:var(--h);border-radius:var(--r);transform:translateX(-50%) translate(var(--ox,0px),var(--oy,0px)) scale(calc(var(--s)*var(--sx,1)),calc(var(--s)*var(--sy,1)));
   left:0;margin-left:0;cursor:text;isolation:isolate;
   /* yedek: tüm tarayıcılarda buzlu cam */
   -webkit-backdrop-filter:blur(48px) saturate(180%) brightness(1.08);
@@ -157,11 +157,11 @@ const comp = $('composer'), ta = $('ta');
 
 /* ── yay (spring): hafif esnek, küçük bir taşma ile oturur ── */
 class Spring{
-  constructor(x, k=120, c=12.5){ this.x=x; this.v=0; this.to=x; this.k=k; this.c=c; }
+  constructor(x, k=105, c=8.5){ this.x=x; this.v=0; this.to=x; this.k=k; this.c=c; }
   step(dt){ if(REDUCED){ this.x=this.to; return this.x; } const a=this.k*(this.to-this.x)-this.c*this.v; this.v+=a*dt; this.x+=this.v*dt; return this.x; }
   get rest(){ return Math.abs(this.to-this.x)<.05 && Math.abs(this.v)<.05; }
 }
-const S = { w:new Spring(360), h:new Spring(56), r:new Spring(28), s:new Spring(1,260,14) };
+const S = { w:new Spring(360), h:new Spring(56), r:new Spring(28), s:new Spring(1,230,9), ox:new Spring(0,140,9), oy:new Spring(0,140,9) };
 
 let open = false;
 function sizes(){
@@ -180,8 +180,10 @@ function expand(){ if(open) return; open = true; comp.classList.add('open'); ret
 function collapse(){ if(!open || ta.value.trim()) return; open = false; comp.classList.remove('open'); ta.style.height = ''; retarget(); }
 
 /* basınca hafifçe ezilir, bırakınca genişler */
-comp.addEventListener('pointerdown', e => { if(e.target.closest('.voice,.mode')) return; S.s.to = .965; kick(); setTimeout(() => ta.focus(), 0); });
-addEventListener('pointerup', () => { S.s.to = 1; kick(); });
+let pull = null;
+comp.addEventListener('pointerdown', e => { if(e.target.closest('.voice,.mode')) return; S.s.to = .93; pull = {x:e.clientX, y:e.clientY}; kick(); setTimeout(() => ta.focus(), 0); });
+addEventListener('pointermove', e => { if(!pull) return; const dx = e.clientX-pull.x, dy = e.clientY-pull.y; const rb = v => Math.sign(v)*Math.min(26, Math.sqrt(Math.abs(v))*3.2); S.ox.to = rb(dx); S.oy.to = rb(dy); kick(); });
+addEventListener('pointerup', () => { pull = null; S.s.to = 1; S.ox.to = 0; S.oy.to = 0; kick(); });
 ta.addEventListener('focus', expand);
 document.addEventListener('pointerdown', e => { if(!e.target.closest('#menu,#modeBtn')) closeMenu(); if(!comp.contains(e.target) && !e.target.closest('#menu')) collapse(); });
 ta.addEventListener('keydown', e => {
@@ -295,9 +297,12 @@ function tick(now){
   const w = S.w.step(dt), h = S.h.step(dt), r = S.r.step(dt), s = S.s.step(dt);
   comp.style.setProperty('--w', w+'px'); comp.style.setProperty('--h', h+'px'); dock.style.setProperty('--w', w+'px'); dock.style.setProperty('--h', h+'px');
   comp.style.setProperty('--r', Math.min(r, h/2)+'px'); comp.style.setProperty('--s', s);
-  const jig = Math.max(-.06, Math.min(.06, S.h.v*.00035 - S.w.v*.0001));
-  comp.style.setProperty('--sy', 1 + jig); comp.style.setProperty('--sx', 1 - jig*.6);
-  if(Object.values(S).every(sp => sp.rest)){ comp.style.setProperty('--sx',1); comp.style.setProperty('--sy',1); running = false; return; }
+  const ox = S.ox.step(dt), oy = S.oy.step(dt);
+  const jig = Math.max(-.11, Math.min(.11, S.h.v*.0006 - S.w.v*.00018 + S.oy.v*.0012));
+  const jx = Math.max(-.08, Math.min(.08, S.ox.v*.0012));
+  comp.style.setProperty('--sy', 1 + jig - Math.abs(jx)*.5); comp.style.setProperty('--sx', 1 - jig*.6 + Math.abs(jx));
+  comp.style.setProperty('--ox', ox+'px'); comp.style.setProperty('--oy', oy+'px');
+  if(Object.values(S).every(sp => sp.rest)){ comp.style.setProperty('--sx',1); comp.style.setProperty('--sy',1); comp.style.setProperty('--ox','0px'); comp.style.setProperty('--oy','0px'); running = false; return; }
   requestAnimationFrame(tick);
 }
 const fitPh = () => { ta.placeholder = innerWidth < 420 ? "Neo'ya sor…" : "Neo'ya bir şey sor…"; };
