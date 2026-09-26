@@ -92,11 +92,16 @@ form[data-mode="login"] .signup-only,form[data-mode="signup"] .login-only{displa
 
 .row{display:flex;justify-content:space-between;align-items:center;margin:4px 0 20px;font-size:13px}
 .check{display:flex;align-items:center;gap:8px;color:var(--tx2);cursor:pointer;user-select:none;margin:0;font-weight:400}
-.check input{appearance:none;width:16px;height:16px;border-radius:5px;border:1px solid var(--ln2);display:grid;place-items:center;cursor:pointer;transition:background .15s,border-color .15s}
-.check input:checked{background:var(--tx);border-color:var(--tx)}
-.check input:checked::after{content:"";width:8px;height:4px;border:2px solid #fff;border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
+.check input{position:absolute;opacity:0;width:1px;height:1px}
+.box{width:16px;height:16px;border-radius:5px;border:1px solid var(--ln2);display:grid;place-items:center;transition:background .2s,border-color .2s,transform .2s var(--e)}
+.box svg{width:12px;height:12px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.box path{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .35s var(--e) .05s}
+.check input:checked+.box{background:var(--tx);border-color:var(--tx)}
+.check input:checked+.box path{stroke-dashoffset:0}
+.check:active .box{transform:scale(.88)}
+.check input:focus-visible+.box{box-shadow:0 0 0 3px rgba(139,94,60,.25)}
 .check.bad{color:var(--er)}
-.check.bad input{border-color:var(--er)}
+.check.bad .box{border-color:var(--er)}
 .link{color:var(--br);text-decoration:none;font-weight:500;background:none;border:0;padding:0;cursor:pointer;font-size:inherit;line-height:inherit;display:inline-flex;align-items:center;gap:5px}
 .link:hover{text-decoration:underline;text-underline-offset:3px}
 .link .i{width:13px;height:13px}
@@ -104,8 +109,6 @@ form[data-mode="login"] .signup-only,form[data-mode="signup"] .login-only{displa
 .submit{appearance:none;width:100%;height:44px;border:0;border-radius:10px;background:var(--tx);color:#fff;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,background .2s}
 .submit:hover{background:#2a241f}
 .submit:active{transform:scale(.99)}
-.submit .i{transition:transform .25s var(--e)}
-.submit:hover .i{transform:translateX(3px)}
 .foot{text-align:center;color:var(--tx2);font-size:13.5px;margin-top:20px}
 
 /* ikon animasyonları (odakta / ilk açılışta) */
@@ -113,6 +116,20 @@ form[data-mode="login"] .signup-only,form[data-mode="signup"] .login-only{displa
 .play .dr{animation:draw .7s var(--e) var(--dl,0s) both}
 .play .wave{animation:wave 1.4s ease-in-out .2s both;transform-box:fill-box;transform-origin:70% 90%}
 .play .pop{animation:pop .5s var(--e) var(--dl,0s) both;transform-box:fill-box;transform-origin:center}
+.play .sl{animation:sl .6s var(--e) var(--dl,0s) both}
+.play .turn{animation:turn .8s var(--e) var(--dl,0s) both;transform-box:fill-box;transform-origin:30% 70%}
+.play .shk{animation:shk .45s ease-in-out both;transform-box:fill-box;transform-origin:center}
+.play .diag{animation:diag .6s var(--e) both}
+.play .lid{animation:lid .35s ease-in-out both;transform-box:fill-box;transform-origin:center}
+.submit:hover .nudge{animation:nudge .9s ease-in-out infinite}
+form.shake{animation:fshake .42s ease-in-out}
+@keyframes sl{from{transform:translateX(-5px);opacity:0}}
+@keyframes turn{from{transform:rotate(-70deg)}}
+@keyframes shk{20%,60%{transform:translateX(-1.6px)}40%,80%{transform:translateX(1.6px)}}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
+@keyframes diag{0%{transform:translate(-4px,4px);opacity:0}100%{transform:none}}
+@keyframes lid{50%{transform:scaleY(.1)}}
+@keyframes fshake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 @keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 @keyframes wave{15%{transform:rotate(16deg)}30%{transform:rotate(-10deg)}45%{transform:rotate(14deg)}60%{transform:rotate(-6deg)}75%{transform:rotate(8deg)}100%{transform:rotate(0)}}
 @keyframes pop{0%{transform:scale(0)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
@@ -154,17 +171,6 @@ form[data-mode="login"] .signup-only,form[data-mode="signup"] .login-only{displa
 </head>
 <body>
 
-<!-- ikon kütüphanesi (sıfırdan çizildi) -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="ic-login" viewBox="0 0 24 24"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M4 12h10M10.5 8.5 14 12l-3.5 3.5"/></symbol>
-  <symbol id="ic-userplus" viewBox="0 0 24 24"><circle cx="9.5" cy="8" r="3.5"/><path d="M3 20c.7-3.4 3.3-5.3 6.5-5.3s5.8 1.9 6.5 5.3M18.5 8v6M15.5 11h6"/></symbol>
-  <symbol id="ic-at" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M15.5 12v1.3a2.5 2.5 0 0 0 5 0V12a8.5 8.5 0 1 0-3.4 6.8"/></symbol>
-  <symbol id="ic-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16h.01"/></symbol>
-  <symbol id="ic-key" viewBox="0 0 24 24"><circle cx="8" cy="15.5" r="4"/><path d="M11 12.5l8.5-8.5M16.5 7l2 2M14.5 9l1.5 1.5"/></symbol>
-  <symbol id="ic-arrow" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
-  <symbol id="ic-upright" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></symbol>
-  <symbol id="ic-eye" viewBox="0 0 24 24"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></symbol>
-</svg>
 
 <div class="page">
 
@@ -180,8 +186,8 @@ form[data-mode="login"] .signup-only,form[data-mode="signup"] .login-only{displa
 
         <div class="tabs" id="tabs" role="tablist" data-mode="login">
           <span class="pill"></span>
-          <button type="button" role="tab" aria-selected="true" data-mode="login"><svg class="i"><use href="#ic-login"/></svg>Giriş yap</button>
-          <button type="button" role="tab" aria-selected="false" data-mode="signup"><svg class="i"><use href="#ic-userplus"/></svg>Kayıt ol</button>
+          <button type="button" role="tab" aria-selected="true" data-mode="login"><svg class="i" viewBox="0 0 24 24"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><g class="sl"><path d="M4 12h10M10.5 8.5 14 12l-3.5 3.5"/></g></svg>Giriş yap</button>
+          <button type="button" role="tab" aria-selected="false" data-mode="signup"><svg class="i" viewBox="0 0 24 24"><circle cx="9.5" cy="8" r="3.5"/><path d="M3 20c.7-3.4 3.3-5.3 6.5-5.3s5.8 1.9 6.5 5.3"/><path class="pop" d="M18.5 8v6M15.5 11h6"/></svg>Kayıt ol</button>
         </div>
 
         <div class="sso">
@@ -195,19 +201,19 @@ form[data-mode="login"] .signup-only,form[data-mode="signup"] .login-only{displa
           </button>
         </div>
 
-        <div class="or"><span><svg class="i"><use href="#ic-at"/></svg>veya e-posta ile</span></div>
+        <div class="or"><span><svg class="i" viewBox="0 0 24 24"><circle class="dr" pathLength="1" cx="12" cy="12" r="3.5"/><path class="dr" pathLength="1" style="--dl:.2s" d="M15.5 12v1.3a2.5 2.5 0 0 0 5 0V12a8.5 8.5 0 1 0-3.4 6.8"/></svg>veya e-posta ile</span></div>
 
         <div class="field signup-only" id="nameField">
           <label for="name"><svg class="i" viewBox="0 0 24 24"><circle class="dr" pathLength="1" cx="12" cy="8" r="4"/><path class="dr" pathLength="1" style="--dl:.2s" d="M4.5 20.5c.9-3.8 3.9-6 7.5-6s6.6 2.2 7.5 6"/></svg>Adın</label>
           <div class="inp"><input id="name" autocomplete="name" placeholder="Adın soyadın"></div>
-          <div class="err"><svg class="i"><use href="#ic-alert"/></svg>Sana nasıl hitap edelim?</div>
+          <div class="err"><svg class="i" viewBox="0 0 24 24"><g class="shk"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16h.01"/></g></svg>Sana nasıl hitap edelim?</div>
         </div>
 
         <div class="field" id="emailField">
           <label for="email"><svg class="i" viewBox="0 0 24 24"><rect class="dr" pathLength="1" x="3" y="5" width="18" height="14" rx="2.5"/><path class="dr" pathLength="1" style="--dl:.25s" d="M3.5 7l8.5 6 8.5-6"/></svg>E-posta adresi</label>
           <div class="inp"><input id="email" type="email" inputmode="email" autocomplete="email" placeholder="ornek@mail.com" spellcheck="false"></div>
           <button type="button" class="suggest" id="suggest"><b></b><span>Tab</span></button>
-          <div class="err"><svg class="i"><use href="#ic-alert"/></svg>Geçerli bir e-posta adresi gir.</div>
+          <div class="err"><svg class="i" viewBox="0 0 24 24"><g class="shk"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16h.01"/></g></svg>Geçerli bir e-posta adresi gir.</div>
         </div>
 
         <div class="field" id="passField">
@@ -215,23 +221,23 @@ form[data-mode="login"] .signup-only,form[data-mode="signup"] .login-only{displa
           <div class="inp">
             <input id="pass" type="password" autocomplete="current-password" placeholder="Şifreni gir">
             <button class="eye" id="eye" type="button" aria-label="Şifreyi göster">
-              <svg class="i" viewBox="0 0 24 24"><use href="#ic-eye"/><path id="eyeSlash" d="M4 4l16 16" style="display:none"/></svg>
+              <svg class="i" viewBox="0 0 24 24"><g class="lid"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></g><path id="eyeSlash" class="dr" pathLength="1" d="M4 4l16 16" style="display:none"/></svg>
             </button>
           </div>
           <div class="meter signup-only" id="meter"><i></i><i></i><i></i><i></i></div>
-          <div class="err"><svg class="i"><use href="#ic-alert"/></svg>Şifre en az 8 karakter olmalı.</div>
+          <div class="err"><svg class="i" viewBox="0 0 24 24"><g class="shk"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16h.01"/></g></svg>Şifre en az 8 karakter olmalı.</div>
         </div>
 
         <div class="row login-only">
-          <label class="check"><input type="checkbox" checked> Beni hatırla</label>
-          <button class="link" type="button"><svg class="i"><use href="#ic-key"/></svg>Şifremi unuttum</button>
+          <label class="check"><input type="checkbox" checked><span class="box"><svg viewBox="0 0 24 24"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>Beni hatırla</label>
+          <button class="link" type="button"><svg class="i" viewBox="0 0 24 24"><g class="turn"><circle cx="8" cy="15.5" r="4"/><path d="M11 12.5l8.5-8.5M16.5 7l2 2M14.5 9l1.5 1.5"/></g></svg>Şifremi unuttum</button>
         </div>
         <div class="row signup-only" style="justify-content:flex-start">
-          <label class="check" id="termsLbl"><input type="checkbox" id="terms"> <span>Kullanım koşullarını kabul ediyorum</span></label>
+          <label class="check" id="termsLbl"><input type="checkbox" id="terms"><span class="box"><svg viewBox="0 0 24 24"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Kullanım koşullarını kabul ediyorum</span></label>
         </div>
 
-        <button class="submit" id="submit" type="submit"><span id="submitLbl">Giriş yap</span><svg class="i"><use href="#ic-arrow"/></svg></button>
-        <p class="foot" id="foot">Neo'da yeni misin? <button class="link" type="button" data-go="signup">Hesap oluştur<svg class="i"><use href="#ic-upright"/></svg></button></p>
+        <button class="submit" id="submit" type="submit"><span id="submitLbl">Giriş yap</span><svg class="i" viewBox="0 0 24 24"><g class="nudge"><path d="M4 12h15M13 6l6 6-6 6"/></g></svg></button>
+        <p class="foot" id="foot">Neo'da yeni misin? <button class="link" type="button" data-go="signup">Hesap oluştur<svg class="i" viewBox="0 0 24 24"><g class="diag"><path d="M7 17 17 7M8 7h9v9"/></g></svg></button></p>
       </form>
 
       <!-- başarı: noktalar çember olup döner, sonra aralarından tik çizilir -->
@@ -297,17 +303,21 @@ const bgGL = (() => {
     vec3 col=vec3(.035,.026,.02);
     col=mix(col,vec3(.2,.12,.07),smoothstep(.28,.62,f));
     col=mix(col,vec3(.55,.36,.22),smoothstep(.58,.88,f)*.7);
-    col=mix(col,vec3(.93,.84,.72),smoothstep(.8,1.05,f+length(w)*.15)*.35);
-    col*=.55+.6*uv.y;
+    col=mix(col,vec3(.93,.84,.72),smoothstep(.8,1.05,f+length(w)*.15)*.22);
+    col*=.5+.5*uv.y;
+    // yukarıdan inen yumuşak sıcak gökyüzü
+    col=mix(col,vec3(.16,.1,.06),smoothstep(.55,1.,uv.y)*.35);
     // dünyanın ufkundan yükselen ışık
     float d=length(gl_FragCoord.xy-G)/GR;
     float rim=exp(-pow((d-1.)*7.,2.))*.55+exp(-max(d-1.,0.)*3.)*.18*step(1.,d);
     col+=vec3(.95,.72,.48)*rim*(.8+.2*sin(T*.6));
-    // yukarı süzülen ışık tozu
-    vec2 g=gl_FragCoord.xy/R.y*38.+vec2(0.,-T*.6);
-    vec2 id=floor(g);float s=h(id);
-    float dust=step(.985,s)*smoothstep(.45,0.,length(fract(g)-.5))*(.5+.5*sin(T*2.+s*40.));
-    col+=vec3(.95,.85,.7)*dust*.5*uv.y;
+    // ufuktan yükselen ışık huzmeleri (god rays)
+    vec2 v=gl_FragCoord.xy-G;
+    float ang=atan(v.x,v.y);
+    float ray=n(vec2(ang*9.,T*.12))*.6+n(vec2(ang*23.+4.,-T*.18))*.4;
+    ray=pow(smoothstep(.35,1.,ray),1.6);
+    float fall=smoothstep(1.,1.06,d)*exp(-(d-1.)*1.6);
+    col+=vec3(1.,.8,.58)*ray*fall*.32*smoothstep(-.2,.6,v.y/GR);
     col+=(h(gl_FragCoord.xy+fract(T)*97.)-.5)*.04;
     gl_FragColor=vec4(col,1.);
   }`);
@@ -493,6 +503,12 @@ const H_ICONS = {
 function play(el){ el.classList.remove('play'); void el.getBoundingClientRect(); el.classList.add('play'); }
 function setHeadIcon(mode){ const h = $('hIcon'); h.innerHTML = H_ICONS[mode]; play(h); }
 setHeadIcon('login');
+// açılışta tüm ikonlar sırayla canlanır
+document.querySelectorAll('form .i').forEach((ic,k) => setTimeout(() => play(ic), 250 + k*70));
+// üzerine gelince yeniden oynar
+document.querySelectorAll('.tabs button,.sbtn,.link,.or,.eye').forEach(el => el.addEventListener('mouseenter', () => { const ic = el.querySelector('.i'); if(ic) play(ic); }));
+// başlık ikonu birkaç saniyede bir yeniden canlanır
+if(!REDUCED) setInterval(() => { if(!document.hidden) play($('hIcon')); }, 5200);
 document.querySelectorAll('.field').forEach(f => {
   const ic = f.querySelector('label .i');
   f.querySelector('input').addEventListener('focus', () => play(ic));
@@ -511,7 +527,7 @@ function setMode(m){
   $('title').textContent = c.title; $('lead').textContent = c.lead; $('submitLbl').textContent = c.btn; $('pass').autocomplete = c.ac;
   const f = $('foot'); f.replaceChildren(c.foot[0]);
   const l = document.createElement('button'); l.type='button'; l.className='link'; l.dataset.go=c.foot[2];
-  l.innerHTML = '<svg class="i"><use href="#ic-upright"/></svg>'; l.prepend(c.foot[1]); f.append(l);
+  l.innerHTML = '<svg class="i" viewBox="0 0 24 24"><g class="diag"><path d="M7 17 17 7M8 7h9v9"/></g></svg>'; l.prepend(c.foot[1]); f.append(l);
   form.querySelectorAll('.field,.check').forEach(x => x.classList.remove('bad'));
   setHeadIcon(m);
 }
@@ -542,6 +558,7 @@ $('eye').addEventListener('click', () => {
   p.type = show ? 'text' : 'password';
   $('eyeSlash').style.display = show ? 'block' : 'none';
   $('eye').setAttribute('aria-label', show ? 'Şifreyi gizle' : 'Şifreyi göster');
+  play($('eye').querySelector('.i'));
 });
 $('pass').addEventListener('input', () => {
   $('passField').classList.remove('bad');
@@ -606,7 +623,11 @@ form.addEventListener('submit', e => {
   $('passField').classList.toggle('bad', !okPass);
   $('nameField').classList.toggle('bad', !okName);
   $('termsLbl').classList.toggle('bad', !okTerms);
-  if(!(okEmail && okPass && okName && okTerms)) return;
+  if(!(okEmail && okPass && okName && okTerms)){
+    form.querySelectorAll('.field.bad .err .i').forEach(play);
+    form.classList.remove('shake'); void form.offsetWidth; form.classList.add('shake');
+    return;
+  }
   success(form.dataset.mode);
 });
 form.querySelectorAll('[data-sso]').forEach(b => b.addEventListener('click', () => {
