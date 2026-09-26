@@ -6,7 +6,7 @@
 <title>Neo'ya Giriş</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <!--
   Neo AI giriş sayfası. Shader, dünya çizimi ve arayüz bu sayfa için yazıldı.
   Yalnızca kara haritası (256×128 PNG) COBE'dan alındı:
@@ -23,41 +23,39 @@
 -->
 <style>
 :root{
-  --tx:#f1f0f7;--tx2:#a3a1b3;--tx3:#6c6a7d;
-  --glass:rgba(12,10,22,.55);--ln:rgba(255,255,255,.09);--ln2:rgba(255,255,255,.16);
-  --field:rgba(255,255,255,.045);--field-f:rgba(167,139,250,.09);
-  --ac:#a78bfa;--er:#ff6b7a;--ok:#4ade80;
+  --bg:#ffffff;
+  --tx:#141210;--tx2:#6e675f;--tx3:#a39b91;
+  --field:#f6f3ef;--field-f:#f3ebe2;--ln:#e8e2da;--ln2:#d8cfc4;
+  --br:#8b5e3c;          /* kahverengi vurgu */
+  --br2:#b08462;
+  --er:#c2410c;--ok:#3f7d4e;
   --e:cubic-bezier(.22,1,.36,1);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
-body{font-family:'DM Sans',system-ui,sans-serif;background:#07060d;color:var(--tx);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
 button,input{font:inherit;color:inherit}
 
-/* ── shader arka planı ── */
-#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;
-  background:radial-gradient(60% 70% at 70% 40%,#3b1680 0%,#170a35 45%,#07060d 100%)}
-.page{position:relative;z-index:1;min-height:100%;display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:24px;padding:20px}
+.page{min-height:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:16px;padding:16px}
 
-/* ── form paneli ── */
-.panel{display:flex;flex-direction:column;padding:26px 30px;border-radius:22px;background:var(--glass);border:1px solid var(--ln);
-  backdrop-filter:blur(26px) saturate(140%);-webkit-backdrop-filter:blur(26px) saturate(140%);box-shadow:0 30px 80px rgba(0,0,0,.35)}
-.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;color:var(--tx);text-decoration:none}
-.logo i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#c4b5fd,#7c3aed);display:grid;place-items:center;color:#fff;font-style:normal;font-weight:700;font-size:14px;box-shadow:0 0 24px rgba(167,139,250,.45)}
-.wrap{flex:1;display:flex;align-items:center;padding:36px 0 20px}
-form{width:100%}
-h1{font-weight:400;font-size:clamp(32px,3.4vw,40px);letter-spacing:-.035em;line-height:1.05}
+/* ── form ── */
+.side{display:flex;flex-direction:column;padding:10px 24px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:15px;color:var(--tx);text-decoration:none}
+.logo i{width:28px;height:28px;border-radius:8px;background:var(--tx);display:grid;place-items:center;color:#f3ebe2;font-style:normal;font-weight:700;font-size:13px}
+.wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:36px 0}
+form{width:100%;max-width:380px}
+h1{font-weight:400;font-size:clamp(34px,4vw,44px);letter-spacing:-.035em;line-height:1.05}
 .lead{color:var(--tx2);font-size:14.5px;margin:10px 0 26px;line-height:1.5}
 
-.tabs{display:grid;grid-template-columns:1fr 1fr;background:rgba(255,255,255,.04);border:1px solid var(--ln);border-radius:11px;padding:3px;margin-bottom:20px;position:relative}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--field);border-radius:10px;padding:3px;margin-bottom:20px;position:relative}
 .tabs button{appearance:none;border:0;background:none;padding:8px;font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;position:relative;z-index:1;transition:color .2s}
 .tabs button[aria-selected="true"]{color:var(--tx)}
-.tabs .pill{position:absolute;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);border-radius:8px;background:rgba(255,255,255,.09);border:1px solid var(--ln);transition:transform .4s var(--e)}
+.tabs .pill{position:absolute;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);border-radius:8px;background:#fff;box-shadow:0 1px 2px rgba(40,25,10,.08),0 0 0 1px var(--ln);transition:transform .4s var(--e)}
 .tabs[data-mode="signup"] .pill{transform:translateX(100%)}
 
 .sso{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.sbtn{appearance:none;border:1px solid var(--ln);background:rgba(255,255,255,.035);height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:13.5px;font-weight:500;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}
-.sbtn:hover{background:rgba(255,255,255,.07);border-color:var(--ln2)}
+.sbtn{appearance:none;border:1px solid var(--ln);background:#fff;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:13.5px;font-weight:500;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}
+.sbtn:hover{background:var(--field);border-color:var(--ln2)}
 .sbtn:active{transform:scale(.98)}
 .sbtn svg{width:17px;height:17px}
 .or{display:flex;align-items:center;gap:12px;color:var(--tx3);font-size:12.5px;margin:18px 0}
@@ -66,18 +64,18 @@ h1{font-weight:400;font-size:clamp(32px,3.4vw,40px);letter-spacing:-.035em;line-
 .field{margin-bottom:14px;position:relative}
 label{display:block;font-size:12.5px;font-weight:500;color:var(--tx2);margin-bottom:6px}
 .inp{position:relative}
-.inp input{width:100%;height:44px;border-radius:10px;border:1px solid var(--ln);background:var(--field);padding:0 42px 0 14px;font-size:14px;outline:none;transition:border-color .2s,background .2s,box-shadow .2s}
+.inp input{width:100%;height:44px;border-radius:10px;border:1px solid transparent;background:var(--field);padding:0 42px 0 14px;font-size:14px;outline:none;transition:border-color .2s,background .2s,box-shadow .2s}
 .inp input::placeholder{color:var(--tx3)}
-.inp input:focus{background:var(--field-f);border-color:rgba(167,139,250,.55);box-shadow:0 0 0 3px rgba(167,139,250,.14)}
-.field.bad input{border-color:rgba(255,107,122,.6);background:rgba(255,107,122,.06)}
+.inp input:focus{background:var(--field-f);border-color:rgba(139,94,60,.45);box-shadow:0 0 0 3px rgba(139,94,60,.1)}
+.field.bad input{border-color:rgba(194,65,12,.5);background:#fdf3ee}
 .eye{position:absolute;right:6px;top:6px;width:32px;height:32px;border:0;background:none;border-radius:8px;display:grid;place-items:center;color:var(--tx3);cursor:pointer}
 .eye:hover{color:var(--tx)}
 .eye svg{width:17px;height:17px}
 .err{font-size:12px;color:var(--er);margin-top:6px;display:none}
 .field.bad .err{display:block}
 
-.suggest{position:absolute;left:14px;top:calc(100% + 8px);z-index:5;background:#f1f0f7;color:#0b0a12;font-size:13px;padding:7px 11px;border-radius:8px;cursor:pointer;border:0;box-shadow:0 10px 30px rgba(0,0,0,.35);opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .2s,transform .2s var(--e)}
-.suggest::before{content:"";position:absolute;left:14px;top:-5px;border:5px solid transparent;border-top:0;border-bottom-color:#f1f0f7}
+.suggest{position:absolute;left:14px;top:calc(100% + 8px);z-index:5;background:var(--tx);color:#f6f3ef;font-size:13px;padding:7px 11px;border-radius:8px;cursor:pointer;border:0;box-shadow:0 8px 24px rgba(40,25,10,.2);opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .2s,transform .2s var(--e)}
+.suggest::before{content:"";position:absolute;left:14px;top:-5px;border:5px solid transparent;border-top:0;border-bottom-color:var(--tx)}
 .suggest.show{opacity:1;transform:none;pointer-events:auto}
 .suggest b{font-weight:500}
 .suggest span{opacity:.5;margin-left:8px;font-size:11.5px}
@@ -89,58 +87,50 @@ form[data-mode="login"] .signup-only,form[data-mode="signup"] .login-only{displa
 .row{display:flex;justify-content:space-between;align-items:center;margin:4px 0 20px;font-size:13px}
 .check{display:flex;align-items:center;gap:8px;color:var(--tx2);cursor:pointer;user-select:none;margin:0}
 .check input{appearance:none;width:16px;height:16px;border-radius:5px;border:1px solid var(--ln2);display:grid;place-items:center;cursor:pointer;transition:background .15s,border-color .15s}
-.check input:checked{background:var(--ac);border-color:var(--ac)}
-.check input:checked::after{content:"";width:8px;height:4px;border:2px solid #0b0a12;border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
+.check input:checked{background:var(--tx);border-color:var(--tx)}
+.check input:checked::after{content:"";width:8px;height:4px;border:2px solid #fff;border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
 .check.bad{color:var(--er)}
 .check.bad input{border-color:var(--er)}
-.link{color:var(--ac);text-decoration:none;font-weight:500;background:none;border:0;padding:0;cursor:pointer;font-size:inherit;line-height:inherit}
+.link{color:var(--br);text-decoration:none;font-weight:500;background:none;border:0;padding:0;cursor:pointer;font-size:inherit;line-height:inherit}
 .link:hover{text-decoration:underline;text-underline-offset:3px}
 
-.submit{appearance:none;width:100%;height:44px;border:0;border-radius:10px;background:#f1f0f7;color:#0b0a12;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,background .2s,box-shadow .2s}
-.submit:hover{background:#fff;box-shadow:0 0 30px rgba(167,139,250,.35)}
+.submit{appearance:none;width:100%;height:44px;border:0;border-radius:10px;background:var(--tx);color:#fff;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,background .2s}
+.submit:hover{background:#2a241f}
 .submit:active{transform:scale(.99)}
 .submit .sp{width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .7s linear infinite;display:none}
 .submit.busy .sp{display:block}
-.submit.done{background:var(--ok);color:#06240f}
+.submit.done{background:var(--ok)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .foot{text-align:center;color:var(--tx2);font-size:13.5px;margin-top:20px}
-.legal{color:var(--tx3);font-size:12px;line-height:1.5}
 
-/* ── dünya tarafı ── */
-.stage{position:relative;min-height:600px;display:flex;flex-direction:column;justify-content:space-between;padding:10px 12px}
-.globe-wrap{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
-#globe{width:min(100%,86vh);aspect-ratio:1;touch-action:none;cursor:grab;pointer-events:auto}
+/* ── görsel (sağ) ── */
+.visual{position:relative;border-radius:24px;overflow:hidden;background:#15100c;min-height:560px;isolation:isolate}
+.visual canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#globe{touch-action:none;cursor:grab}
 #globe:active{cursor:grabbing}
-.hud{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font:500 12px 'JetBrains Mono',monospace;color:rgba(241,240,247,.6);pointer-events:none}
-.hud b{color:var(--tx);font-weight:500}
-.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok);margin-right:8px;vertical-align:1px;animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{50%{opacity:.35}}
-.tag{position:relative;max-width:460px;pointer-events:none}
-.tag h2{font-weight:400;font-size:clamp(26px,3vw,38px);letter-spacing:-.03em;line-height:1.1}
-.tag h2 span{background:linear-gradient(90deg,#c4b5fd,#f0abfc,#67e8f9);-webkit-background-clip:text;background-clip:text;color:transparent}
-.term{margin-top:14px;display:inline-flex;align-items:center;gap:10px;padding:9px 13px;border-radius:10px;background:rgba(8,6,18,.55);border:1px solid var(--ln);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font:13px 'JetBrains Mono',monospace;color:var(--tx2);min-height:40px}
-.term em{font-style:normal;color:var(--ac)}
-.term .out{color:var(--ok)}
-.caret{display:inline-block;width:7px;height:15px;background:var(--tx2);vertical-align:-3px;margin-left:2px;animation:blink 1s steps(1) infinite}
-@keyframes blink{50%{opacity:0}}
+.motto{position:absolute;right:30px;bottom:26px;z-index:2;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:clamp(30px,3.6vw,52px);line-height:1;letter-spacing:-.01em;color:#f6efe6;text-shadow:0 2px 30px rgba(10,6,3,.7);pointer-events:none;text-align:right}
+.motto em{font-style:italic;color:#e3c6a4}
 
-@media (max-width:920px){
-  .page{grid-template-columns:1fr;padding:12px;gap:12px}
-  .stage{order:-1;min-height:330px}
-  #globe{width:min(100%,330px)}
-  .tag{display:none}
-  .panel{padding:22px 20px}
-  .wrap{padding:24px 0 8px}
+@media (max-width:760px){
+  .page{grid-template-columns:minmax(0,1fr) minmax(0,.8fr);gap:10px;padding:10px}
+  .side{padding:4px 6px}
+  .wrap{padding:22px 0}
+  .sso{grid-template-columns:1fr}
+  .visual{min-height:0;border-radius:18px}
+  .motto{right:16px;bottom:16px}
+}
+@media (max-width:520px){
+  .page{grid-template-columns:1fr}
+  .visual{min-height:380px}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<canvas id="bg" aria-hidden="true"></canvas>
-
 <div class="page">
-  <!-- ═══ FORM ═══ -->
-  <div class="panel">
+
+  <!-- ═══ FORM (sol) ═══ -->
+  <div class="side">
     <a class="logo" href="#"><i>N</i>Neo AI</a>
     <div class="wrap">
       <form id="form" data-mode="login" novalidate>
@@ -203,31 +193,24 @@ form[data-mode="login"] .signup-only,form[data-mode="signup"] .login-only{displa
         <p class="foot" id="foot">Neo'da yeni misin? <button class="link" type="button" data-go="signup">Hesap oluştur</button></p>
       </form>
     </div>
-    <p class="legal">Devam ederek Neo'nun kullanım koşullarını ve gizlilik politikasını kabul etmiş olursun.</p>
   </div>
 
-  <!-- ═══ DÜNYA ═══ -->
-  <div class="stage">
-    <div class="globe-wrap"><canvas id="globe" aria-label="Neo'nun bağlandığı şehirleri gösteren dönen dünya"></canvas></div>
-    <div class="hud" aria-hidden="true">
-      <span><span class="dot"></span><b>neo</b> · çevrimiçi</span>
-      <span id="city">İstanbul ↔ Tokyo</span>
-    </div>
-    <div class="tag">
-      <h2>Dünyanın her yerinden, <span>tek bir asistan.</span></h2>
-      <div class="term" aria-hidden="true"><em>›</em><span id="term"></span><span class="caret"></span></div>
-    </div>
-  </div>
+  <!-- ═══ GÖRSEL (sağ) ═══ -->
+  <aside class="visual">
+    <canvas id="bg" aria-hidden="true"></canvas>
+    <canvas id="globe" aria-label="Dönen yarım dünya"></canvas>
+    <p class="motto">Create the <em>Future.</em></p>
+  </aside>
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ════════════════ 1. SHADER ARKA PLANI (WebGL) ════════════════ */
+/* ════════════════ 1. SHADER (siyah · kahve · krem) ════════════════ */
 (() => {
   const c = $('bg'), gl = c.getContext('webgl', {antialias:false, alpha:false, powerPreference:'low-power'});
-  if(!gl) return; // WebGL yoksa CSS gradyanı kalır
+  if(!gl) return;
   const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
   const FS = `precision highp float;
   uniform vec2 R;uniform float T;uniform vec2 M;
@@ -239,17 +222,16 @@ const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   void main(){
     vec2 uv=gl_FragCoord.xy/R;
     vec2 p=(gl_FragCoord.xy-.5*R)/R.y;
-    float t=T*.035;
-    vec2 q=vec2(fbm(p*1.3+vec2(0.,t)),fbm(p*1.3+vec2(5.2,1.3)-t));
-    vec2 w=vec2(fbm(p*1.5+3.2*q+vec2(1.7,9.2)+t*1.4),fbm(p*1.5+3.2*q+vec2(8.3,2.8)-t));
-    float f=fbm(p*1.1+2.6*w+M*.12);
-    vec3 col=vec3(.018,.016,.04);
-    col=mix(col,vec3(.13,.05,.32),smoothstep(.25,.62,f));
-    col=mix(col,vec3(.47,.24,.92),smoothstep(.58,.9,f)*.75);
-    col=mix(col,vec3(.9,.3,.62),smoothstep(.72,1.05,length(w))*.28);
-    col+=vec3(.35,.78,.98)*pow(max(0.,q.y-.52),3.)*1.1;
-    col*=1.-.6*smoothstep(.2,1.15,length((uv-vec2(.68,.52))*vec2(R.x/R.y,1.)));
-    col+=(h(gl_FragCoord.xy+fract(T)*97.)-.5)*.035;
+    float t=T*.03;
+    vec2 q=vec2(fbm(p*1.2+vec2(0.,t)),fbm(p*1.2+vec2(5.2,1.3)-t));
+    vec2 w=vec2(fbm(p*1.4+3.*q+vec2(1.7,9.2)+t*1.3),fbm(p*1.4+3.*q+vec2(8.3,2.8)-t));
+    float f=fbm(p*1.1+2.4*w+M*.1);
+    vec3 col=vec3(.035,.026,.02);                                   // siyaha yakın
+    col=mix(col,vec3(.2,.12,.07),smoothstep(.28,.62,f));             // espresso
+    col=mix(col,vec3(.55,.36,.22),smoothstep(.58,.88,f)*.7);         // karamel
+    col=mix(col,vec3(.93,.84,.72),smoothstep(.8,1.05,f+length(w)*.15)*.35); // krem ışık
+    col*=.55+.6*uv.y;                                                 // altta koyulaşma
+    col+=(h(gl_FragCoord.xy+fract(T)*97.)-.5)*.04;                    // film greni
     gl_FragColor=vec4(col,1.);
   }`;
   const sh = (t,s) => { const o = gl.createShader(t); gl.shaderSource(o,s); gl.compileShader(o); return o; };
@@ -262,11 +244,10 @@ const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,3,-1,-1,3]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(pr,'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
   const uR = gl.getUniformLocation(pr,'R'), uT = gl.getUniformLocation(pr,'T'), uM = gl.getUniformLocation(pr,'M');
-  const SCALE = .5; // yarım çözünürlük: yumuşak görünüm + düşük GPU yükü
-  const mouse = {x:0,y:0,tx:0,ty:0};
+  const SCALE = .5, mouse = {x:0,y:0,tx:0,ty:0};
   addEventListener('pointermove', e => { mouse.tx = e.clientX/innerWidth-.5; mouse.ty = .5-e.clientY/innerHeight; });
-  function size(){ c.width = Math.ceil(innerWidth*SCALE); c.height = Math.ceil(innerHeight*SCALE); gl.viewport(0,0,c.width,c.height); gl.uniform2f(uR,c.width,c.height); }
-  addEventListener('resize', size); size();
+  function size(){ const r = c.getBoundingClientRect(); c.width = Math.ceil(r.width*SCALE); c.height = Math.ceil(r.height*SCALE); gl.viewport(0,0,c.width,c.height); gl.uniform2f(uR,c.width,c.height); }
+  new ResizeObserver(size).observe(c); size();
   const t0 = performance.now();
   function frame(now){
     mouse.x += (mouse.tx-mouse.x)*.04; mouse.y += (mouse.ty-mouse.y)*.04;
@@ -278,169 +259,130 @@ const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   requestAnimationFrame(frame);
 })();
 
-/* ════════════════ 2. KARE NOKTALI DÜNYA (Canvas 2D) ════════════════ */
+/* ════════════════ 2. YARIM DÜNYA — kare noktalar ════════════════ */
 (() => {
   const LAND = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAACAAQAAAADMzoqnAAAECklEQVR42u3VsW4jRRzH8d94gzfF4Q0VQaC4vBLTRTp0mze4ggfAPAE5XQEFsGNAVIjwBrmW7h7gJE+giKjyABTZE4g06LKJETdRJvtD65kdz6yduKABiW+TVfzRf2bXYxtcE/59YJCz6YdbgQF6ACSRrwYKYImmh5PbwOewlV3wlQNbAN6SEExjUOO+BU0aCSnxReHABUlK4YFQeJeUT3da8IIkZ6NGoSnFY5KsMoVzMKfECUnqxgPYRArarmUCndHwzIEaQEpg5xVdBXROl8mpAQx5dUgPiHoYAAkg5w3JABR06byGAVgcRGAz5bznj6phBQNRFwyqgdxebH6gshJAesWoFhgYpApAFoG8BIZ/fEhSox5jDjQXmV0Ar5XJfAIrALi3URVs09gHIL4XJCkLC5LH9JWiArABFCSrQjdgkBzRJ0WJeUOSNyQAfJJwUSWUBRlJQ8oGHATACGlBynnzy2kEYLNjrxouigD8BZcgOeVPqh12RtufaCN5wCPVDpvQ9lsIrqndsJtDcWqBCpf4hWN7OdWHBw58FwIaNOU/n1TpMW2DFaD48cmr4185T8NHkpUFX749pQPVdgRKC/DGoQPVeAEKv+WHvY8OOWNTPRp5kHuwSf8wzXtVBKR7YwEH9H3lQUaypUfSATOALyVNu5vZJW31Bnx98nkLfDUWJaz6ixvm+RIQRdl3kmRxxiaDoGnZW4CpPfkaQadlcPim1xOSvETQo7Lv75enVAXJ3xGUlony4KQBBWUM1NiDc6qhyS8RgQs18OCMMtPDaAUIyg0PZkRWDqs+wnKJBTDI1Js6BolegOsKmUxNDBAAKqQyMQmidhegBlLZ+wwKYdv5M/8x1khkb1cgKqP2H+MKyV5vS+whrE8DQDgAlUAoRBX056EElJCjJVACeJBZgNfVp+iCCm4RBWCgKsRxASSA9KgDhDtCiTuMyfHsKXzhC6wNAIjjWb8LKAOA2ctk3FmCOlgKFy8f1N0JJtgsxinYnVAHt4t3gPzZXSCTyCWCQmBT91QE3B5yarSN40dNHYPka4TlDhTUI8zLvl0JSL3vZn6DsCFZOeB2yROEpR68sECQQA++xIGCR2X7DwlEoLRgUrZrqlUg50S1uy43YqDcN6UFBVkhAjWiCV2Q0jgQPdplMKxvBXodcOfAwJYvgdL+1etA1YJJfBcZlQV7sO1i2gHoNiyxtQ5sBsCgWyoxCHiFFd2L5nUTCqMAqGUgsQ9f5kCcCiZgRYkMgMTd5WsB1rTzj0Em14BE4r+QxN1lCEsVur2PoF5Wbg8RJXR4djgvBgauhLywoEZQrt1KKRdVS4CdlJ8qafyP+9KIj/nE/d7kKwH9jgS72e9DV+kvfTWgct4ZyP8Byb8BPG7MaaIIkAQAAAAASUVORK5CYII=';
-  const CITIES = [
-    ['İstanbul',41.01,28.97],['Londra',51.51,-.13],['New York',40.71,-74.0],['San Francisco',37.77,-122.42],
-    ['Tokyo',35.68,139.69],['Singapur',1.35,103.82],['Dubai',25.2,55.27],['São Paulo',-23.55,-46.63],['Lagos',6.52,3.38],['Sidney',-33.87,151.21]
-  ];
-  const ROUTES = [[0,4],[0,2],[0,1],[0,6],[2,3],[1,7],[6,5],[5,9],[0,8]];
+  const CITIES = [[41.01,28.97],[51.51,-.13],[40.71,-74.0],[37.77,-122.42],[35.68,139.69],[1.35,103.82],[25.2,55.27],[-23.55,-46.63],[6.52,3.38],[55.75,37.62],[19.08,72.88]];
+  const ROUTES = [[0,4],[0,2],[0,1],[0,6],[2,3],[1,7],[6,5],[0,8],[0,9],[6,10]];
   const cv = $('globe'), ctx = cv.getContext('2d');
   const rad = d => d*Math.PI/180;
   const toVec = (lat,lon) => { const la=rad(lat), lo=rad(lon); return [Math.cos(la)*Math.sin(lo), Math.sin(la), Math.cos(la)*Math.cos(lo)]; };
 
-  let dots = [];
+  let dots = new Float32Array(0);
   const img = new Image();
   img.onload = () => {
     const m = document.createElement('canvas'); m.width = img.width; m.height = img.height;
     const mc = m.getContext('2d'); mc.drawImage(img,0,0);
     const data = mc.getImageData(0,0,m.width,m.height).data;
-    const land = (lat,lon) => {
-      const x = Math.floor((lon+180)/360*m.width) % m.width, y = Math.floor((90-lat)/180*m.height);
-      return data[(Math.min(m.height-1,y)*m.width + x)*4] > 128;
-    };
-    const STEP = 1.9; // derece — noktalar arası aralık
-    const out = [];
+    const land = (lat,lon) => data[(Math.min(m.height-1,Math.floor((90-lat)/180*m.height))*m.width + Math.floor((lon+180)/360*m.width)%m.width)*4] > 128;
+    const STEP = 1.6, out = [];
     for(let lat=-86; lat<=86; lat+=STEP){
       const n = Math.max(1, Math.round(360*Math.cos(rad(lat))/STEP));
-      for(let i=0;i<n;i++){
-        const lon = -180 + i*360/n;
-        if(land(lat,lon)) out.push(...toVec(lat,lon));
-      }
+      for(let i=0;i<n;i++){ const lon = -180 + i*360/n; if(land(lat,lon)) out.push(...toVec(lat,lon)); }
     }
     dots = new Float32Array(out);
   };
   img.src = LAND;
 
-  let W=0, H=0, R=0, dpr=1;
+  let W=0, H=0, R=0, CX=0, CY=0, dpr=1;
   function size(){
     dpr = Math.min(devicePixelRatio||1, 2);
     const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
-    cv.width = W*dpr; cv.height = H*dpr; R = Math.min(W,H)*.42;
+    cv.width = W*dpr; cv.height = H*dpr;
+    R = Math.max(Math.min(W*.62, H*.78), Math.min(W*.95, H*.5)); // büyük küre; dar panelde yanlardan taşar
+    CX = W*.5; CY = H + R*.02;         // merkez alt kenarda → üst yarısı görünür
   }
   new ResizeObserver(size).observe(cv); size();
 
-  // döndürme: otomatik + sürükleme
-  let rotY = rad(-30), rotX = rad(-18), drag = null;
-  const velY = REDUCED ? 0 : .0016;
-  cv.addEventListener('pointerdown', e => { drag = {x:e.clientX,y:e.clientY,ry:rotY,rx:rotX}; cv.setPointerCapture(e.pointerId); });
-  cv.addEventListener('pointermove', e => { if(!drag) return; rotY = drag.ry + (e.clientX-drag.x)*.008; rotX = Math.max(-1,Math.min(1, drag.rx + (e.clientY-drag.y)*.006)); });
+  let rotY = rad(-25), rotX = rad(-28), drag = null;
+  const velY = REDUCED ? 0 : .0013;
+  cv.addEventListener('pointerdown', e => { drag = {x:e.clientX,ry:rotY}; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', e => { if(drag) rotY = drag.ry + (e.clientX-drag.x)*.006; });
   cv.addEventListener('pointerup', () => drag = null);
 
   function project(x,y,z){
     const cy = Math.cos(rotY), sy = Math.sin(rotY), cx = Math.cos(rotX), sx = Math.sin(rotX);
     const x1 = x*cy - z*sy, z1 = x*sy + z*cy;
     const y2 = y*cx - z1*sx, z2 = y*sx + z1*cx;
-    return [W/2 + x1*R, H/2 - y2*R, z2];
+    return [CX + x1*R, CY - y2*R, z2];
   }
   const slerp = (a,b,t) => {
     const d = Math.acos(Math.max(-1,Math.min(1,a[0]*b[0]+a[1]*b[1]+a[2]*b[2])));
     const s = Math.sin(d)||1, k1 = Math.sin((1-t)*d)/s, k2 = Math.sin(t*d)/s;
     return [a[0]*k1+b[0]*k2, a[1]*k1+b[1]*k2, a[2]*k1+b[2]*k2];
   };
-  const cityV = CITIES.map(c => toVec(c[1],c[2]));
-  const routes = ROUTES.map(([a,b],i) => ({a,b,off:i*.37}));
+  const cityV = CITIES.map(c => toVec(c[0],c[1]));
+  const routes = ROUTES.map(([a,b],i) => ({a,b,off:i*.31}));
 
-  let t = 0, hudKey = -1;
+  let t = 0;
   function draw(){
     t += 1/60;
     if(!drag) rotY += velY;
     ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.clearRect(0,0,W,H);
 
-    // atmosfer halkası
-    const g = ctx.createRadialGradient(W/2,H/2,R*.85,W/2,H/2,R*1.25);
-    g.addColorStop(0,'rgba(167,139,250,0)'); g.addColorStop(.35,'rgba(167,139,250,.16)'); g.addColorStop(1,'rgba(167,139,250,0)');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(W/2,H/2,R*1.25,0,Math.PI*2); ctx.fill();
+    // ufuk parıltısı
+    const g = ctx.createRadialGradient(CX,CY,R*.9,CX,CY,R*1.18);
+    g.addColorStop(0,'rgba(227,198,164,0)'); g.addColorStop(.3,'rgba(227,198,164,.18)'); g.addColorStop(1,'rgba(227,198,164,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(CX,CY,R*1.18,0,Math.PI*2); ctx.fill();
     // küre gövdesi
-    const body = ctx.createRadialGradient(W/2-R*.35,H/2-R*.4,R*.1,W/2,H/2,R);
-    body.addColorStop(0,'rgba(60,40,120,.35)'); body.addColorStop(1,'rgba(10,8,24,.55)');
-    ctx.fillStyle = body; ctx.beginPath(); ctx.arc(W/2,H/2,R,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle = 'rgba(196,181,253,.14)'; ctx.lineWidth = 1; ctx.stroke();
+    const body = ctx.createRadialGradient(CX-R*.2,CY-R*.7,R*.05,CX,CY,R);
+    body.addColorStop(0,'rgba(70,48,32,.55)'); body.addColorStop(1,'rgba(14,10,7,.9)');
+    ctx.fillStyle = body; ctx.beginPath(); ctx.arc(CX,CY,R,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle = 'rgba(227,198,164,.25)'; ctx.lineWidth = 1; ctx.stroke();
 
     // kare noktalar
-    const px = Math.max(1.4, R/150);
+    const px = Math.max(1.8, R/140);
     for(let i=0;i<dots.length;i+=3){
       const [sx,sy,z] = project(dots[i],dots[i+1],dots[i+2]);
-      if(z < -.05) continue;
-      const a = Math.min(1, .15 + z*.95), s = px*(.55+.45*z);
-      ctx.fillStyle = `rgba(${200+z*41|0},${190+z*50|0},255,${a})`;
+      if(z < -.02 || sy > H+4) continue;
+      const s = px*(.5+.5*z);
+      ctx.fillStyle = `rgba(${236+z*10|0},${222+z*16|0},${200+z*28|0},${Math.min(1,.12+z*.95)})`;
       ctx.fillRect(sx-s/2, sy-s/2, s, s);
     }
 
-    // rotalar (yay + ilerleyen ışık)
-    let bestZ = -2, best = null;
+    // rotalar
     for(const r of routes){
       const A = cityV[r.a], B = cityV[r.b], pts = [];
-      for(let k=0;k<=48;k++){
-        const u = k/48, v = slerp(A,B,u), lift = 1 + .22*Math.sin(Math.PI*u);
-        pts.push(project(v[0]*lift, v[1]*lift, v[2]*lift));
-      }
-      ctx.lineWidth = 1.2;
-      for(let k=0;k<48;k++){
+      for(let k=0;k<=40;k++){ const u=k/40, v=slerp(A,B,u), l=1+.18*Math.sin(Math.PI*u); pts.push(project(v[0]*l,v[1]*l,v[2]*l)); }
+      ctx.lineWidth = 1;
+      for(let k=0;k<40;k++){
         const p = pts[k], q = pts[k+1];
-        if(p[2] < -.1 && q[2] < -.1) continue;
-        ctx.strokeStyle = `rgba(196,181,253,${.12 + Math.max(0,p[2])*.3})`;
+        if(p[2] < -.05 && q[2] < -.05) continue;
+        ctx.strokeStyle = `rgba(214,168,122,${.1+Math.max(0,p[2])*.35})`;
         ctx.beginPath(); ctx.moveTo(p[0],p[1]); ctx.lineTo(q[0],q[1]); ctx.stroke();
       }
-      const u = ((t*.28 + r.off) % 1.4) / 1.4;
+      const u = ((t*.25 + r.off) % 1.5) / 1.5;
       if(u < 1){
-        const idx = Math.floor(u*48), p = pts[idx];
-        if(p[2] > -.1){
+        const idx = Math.floor(u*40), p = pts[idx];
+        if(p[2] > -.05){
           const from = Math.max(0, idx-6), tail = pts[from];
           const lg = ctx.createLinearGradient(tail[0],tail[1],p[0],p[1]);
-          lg.addColorStop(0,'rgba(240,171,252,0)'); lg.addColorStop(1,'rgba(240,171,252,.95)');
-          ctx.strokeStyle = lg; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(tail[0],tail[1]);
+          lg.addColorStop(0,'rgba(246,239,230,0)'); lg.addColorStop(1,'rgba(246,239,230,.95)');
+          ctx.strokeStyle = lg; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.moveTo(tail[0],tail[1]);
           for(let k=from+1;k<=idx;k++) ctx.lineTo(pts[k][0],pts[k][1]);
           ctx.stroke();
           ctx.fillStyle = '#fff'; ctx.fillRect(p[0]-1.5,p[1]-1.5,3,3);
         }
       }
-      if(pts[24][2] > bestZ){ bestZ = pts[24][2]; best = r; }
     }
 
-    // şehir işaretleri (kare + nabız)
-    ctx.font = `500 ${Math.max(10, R/34)}px 'JetBrains Mono', monospace`;
-    CITIES.forEach((c,i) => {
-      const [sx,sy,z] = project(...cityV[i]);
+    // şehir kareleri (yazısız)
+    cityV.forEach((v,i) => {
+      const [sx,sy,z] = project(...v);
       if(z < .05) return;
-      const pulse = (t*.8 + i*.23) % 1, ps = 4 + pulse*14;
-      ctx.strokeStyle = `rgba(167,139,250,${(1-pulse)*.8*z})`; ctx.lineWidth = 1;
+      const pulse = (t*.7 + i*.19) % 1, ps = 4 + pulse*14;
+      ctx.strokeStyle = `rgba(227,198,164,${(1-pulse)*.8*z})`; ctx.lineWidth = 1;
       ctx.strokeRect(sx-ps/2, sy-ps/2, ps, ps);
-      ctx.fillStyle = '#c4b5fd'; ctx.fillRect(sx-3,sy-3,6,6);
-      if(z > .35){ ctx.fillStyle = `rgba(241,240,247,${Math.min(1,(z-.35)*2)*.85})`; ctx.fillText(c[0], sx+9, sy+4); }
+      ctx.fillStyle = '#e3c6a4'; ctx.fillRect(sx-2.5,sy-2.5,5,5);
     });
 
-    if(best){ const k = best.a*100+best.b; if(k !== hudKey){ hudKey = k; $('city').textContent = `${CITIES[best.a][0]} ↔ ${CITIES[best.b][0]}`; } }
     if(!REDUCED || !dots.length) requestAnimationFrame(draw);
   }
   requestAnimationFrame(draw);
 })();
 
-/* ════════════════ 3. TERMİNAL SATIRI ════════════════ */
-(() => {
-  const lines = [
-    ['neo.ask("merhaba dünya")','✓ yanıt hazır'],
-    ['neo.translate("günaydın", "ja")','✓ おはようございます'],
-    ['neo.summarize("toplanti.pdf")','✓ 3 madde'],
-    ['neo.code("css ile ortala")','✓ place-items: center'],
-  ];
-  const el = $('term'), wait = ms => new Promise(r => setTimeout(r, ms));
-  if(REDUCED){ el.textContent = lines[0][0]; return; }
-  (async () => {
-    for(let i=0;;i++){
-      const [cmd,out] = lines[i % lines.length];
-      el.textContent = '';
-      for(const ch of cmd){ el.textContent += ch; await wait(45); }
-      await wait(500);
-      const o = document.createElement('span'); o.className = 'out'; o.textContent = '  ' + out; el.append(o);
-      await wait(2600);
-    }
-  })();
-})();
-
-/* ════════════════ 4. FORM ════════════════ */
+/* ════════════════ 3. FORM ════════════════ */
 const form = $('form');
 const COPY = {
   login:{title:'Tekrar hoş geldin',lead:'Hesabına giriş yap ve Neo ile kaldığın yerden devam et.',btn:'Giriş yap',foot:['Neo\'da yeni misin? ','Hesap oluştur','signup'],ac:'current-password'},
@@ -487,7 +429,7 @@ $('pass').addEventListener('input', () => {
   $('passField').classList.remove('bad');
   const v = $('pass').value;
   const score = [v.length >= 8, /[A-ZÇĞİÖŞÜ]/.test(v) && /[a-zçğıöşü]/.test(v), /\d/.test(v), /[^\w\sçğıöşüÇĞİÖŞÜ]/.test(v)].filter(Boolean).length;
-  const col = ['var(--er)','var(--er)','#f5a524','#84cc16','var(--ok)'][score];
+  const col = ['var(--er)','var(--er)','#c08a2e','#8b5e3c','var(--ok)'][score];
   $('meter').querySelectorAll('i').forEach((i,n) => i.style.background = n < score ? col : '');
 });
 $('name').addEventListener('input', () => $('nameField').classList.remove('bad'));
