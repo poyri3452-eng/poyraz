@@ -148,7 +148,6 @@ const voice = $('voice');
 voice.addEventListener('click', () => {
   const on = voice.getAttribute('aria-pressed') !== 'true';
   voice.setAttribute('aria-pressed', on);
-  ta.placeholder = on ? 'Dinliyorum…' : "Neo'ya bir şey sor…";
   S.s.to = .97; kick(); setTimeout(() => { S.s.to = 1; kick(); }, 110);
 });
 
