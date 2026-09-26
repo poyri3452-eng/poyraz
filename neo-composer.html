@@ -15,6 +15,36 @@ body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0e0b09;col
 button,textarea{font:inherit;color:inherit}
 
 /* ═══════════ LIQUID GLASS COMPOSER ═══════════ */
+/* mod seçici — renksiz, sade */
+.mode{appearance:none;border:0;align-self:flex-end;flex:none;height:36px;margin-bottom:2px;border-radius:999px;padding:0 10px 0 13px;display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:500;color:rgba(255,248,240,.82);background:transparent;transition:background .25s,color .25s,transform .45s var(--e)}
+.mode:hover,.mode[aria-expanded="true"]{background:rgba(255,255,255,.07);color:#fffaf3}
+.mode:active{transform:scale(.95)}
+.mode .chev{width:14px;height:14px;opacity:.5;transition:transform .45s var(--e)}
+.mode[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.mode .nm{display:inline-block;transition:opacity .22s,filter .22s,transform .35s var(--e)}
+.mode .nm.out{opacity:0;filter:blur(3px);transform:translateY(-4px)}
+
+/* menü: düğmenin içinden cam gibi büyüyerek açılır */
+.menu{position:absolute;left:calc(var(--w,360px) / -2);top:calc(var(--h,56px) / -2 - 10px);--ty:-100%;width:min(280px,calc(100vw - 32px));padding:5px;border-radius:20px;
+  -webkit-backdrop-filter:blur(28px) saturate(150%);backdrop-filter:blur(28px) saturate(150%);
+  background:rgba(34,30,27,.72);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.14),inset 0 0 0 .5px rgba(255,255,255,.1),0 24px 60px -12px rgba(0,0,0,.65);
+  transform:translateY(var(--ty));opacity:0;pointer-events:none;
+  clip-path:inset(calc(100% - 38px) calc(100% - var(--cw,120px)) 0 0 round 19px);
+  transition:clip-path .55s cubic-bezier(.32,1.25,.5,1),opacity .18s}
+.menu.show{opacity:1;pointer-events:auto;clip-path:inset(0 0 0 0 round 20px)}
+.menu.down{top:calc(var(--h,56px) / 2 + 10px);--ty:0px;clip-path:inset(0 calc(100% - var(--cw,120px)) calc(100% - 38px) 0 round 19px)}
+.menu.down.show{clip-path:inset(0 0 0 0 round 20px)}
+.menu .it{display:flex;align-items:center;gap:10px;width:100%;appearance:none;border:0;background:none;text-align:left;padding:9px 12px;border-radius:15px;cursor:pointer;color:#fffaf3;opacity:0;transition:background .2s,opacity .25s}
+.menu.show .it{opacity:1;transition:background .2s,opacity .35s calc(80ms + var(--i)*25ms)}
+.menu .it:hover,.menu .it:focus-visible{background:rgba(255,255,255,.07);outline:none}
+.menu .tx{min-width:0;flex:1}
+.menu b{display:block;font-size:14px;font-weight:500;color:rgba(255,250,243,.95)}
+.menu small{display:block;font-size:12.5px;color:rgba(255,246,236,.45);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu .ck{flex:none;width:16px;height:16px;fill:none;stroke:rgba(255,250,243,.9);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.menu .ck path{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .4s var(--e) .1s}
+.menu .it[aria-checked="true"] .ck path{stroke-dashoffset:0}
+.menu .sep{height:1px;margin:4px 12px;background:rgba(255,255,255,.07)}
 .voice{appearance:none;border:0;background:none;align-self:flex-end;flex:none;width:40px;height:40px;margin:0 -12px 0 0;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:rgba(255,246,236,.72);transition:color .3s,background .3s,transform .5s var(--e)}
 .voice:hover{color:#fff4e6;background:rgba(255,255,255,.07)}
 .voice:active{transform:scale(.88)}
@@ -29,7 +59,7 @@ button,textarea{font:inherit;color:inherit}
 @keyframes talk{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1.25)}}
 .open .voice{margin-bottom:2px}
 
-.dock{position:fixed;left:50%;top:50%;z-index:2}
+.dock{position:fixed;left:50%;top:58%;z-index:2}
 .composer{
   --w:360px;--h:56px;--r:28px;--s:1;--mx:50%;--my:0%;
   position:relative;width:var(--w);height:var(--h);border-radius:var(--r);transform:translateX(-50%) scale(calc(var(--s)*var(--sx,1)),calc(var(--s)*var(--sy,1)));
@@ -55,11 +85,12 @@ button,textarea{font:inherit;color:inherit}
 .composer::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.7;
   background:radial-gradient(220px 120px at var(--mx) var(--my),rgba(255,255,255,.1),transparent 70%);transition:opacity .3s}
 
-.inner{position:absolute;inset:0;display:flex;flex-direction:column;padding:8px 22px;overflow:hidden;border-radius:inherit}
+.inner{position:absolute;inset:0;display:flex;flex-direction:column;padding:8px 22px 8px 10px;overflow:hidden;border-radius:inherit}
 .top{flex:1;display:flex;align-items:stretch;gap:8px;min-height:40px}
 textarea{flex:1;resize:none;border:0;outline:none;background:transparent;font-size:15.5px;line-height:22px;padding:9px 0;transition:padding .5s var(--e);max-height:180px;color:#fffaf3;caret-color:#f0c99d;scrollbar-width:none}
 textarea::placeholder{color:rgba(255,246,236,.55)}
-.open textarea{padding-top:14px}
+.open textarea{padding-top:14px;padding-left:12px}
+.open .mode{position:absolute;left:10px;bottom:8px;margin:0}
 
 
 
@@ -77,10 +108,15 @@ textarea::placeholder{color:rgba(255,246,236,.55)}
   </filter>
 </svg>
 
-<div class="dock">
+<div class="dock" id="dock">
+  <div class="menu" id="menu" role="menu" aria-label="Modlar"></div>
   <div class="composer" id="composer">
     <div class="inner">
       <div class="top">
+        <button class="mode" id="modeBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="menu">
+          <span class="nm" id="modeName">Adaptive</span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
+        </button>
         <textarea id="ta" rows="1" placeholder="Neo'ya bir şey sor…" aria-label="Mesaj"></textarea>
         <button class="voice" id="voice" type="button" aria-label="Sesli sohbet" aria-pressed="false">
           <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -108,13 +144,13 @@ const S = { w:new Spring(360), h:new Spring(56), r:new Spring(28), s:new Spring(
 let open = false;
 function sizes(){
   const vw = innerWidth;
-  const closedW = Math.min(360, vw-32), openW = Math.min(680, vw-24);
+  const closedW = Math.min(440, vw-32), openW = Math.min(680, vw-24);
   if(!open) return {w:closedW, h:56, r:28};
   // metin kadar uzar: textarea + araç çubuğu
   ta.style.height = 'auto';
   const th = Math.min(180, Math.max(44, ta.scrollHeight));
   ta.style.height = th + 'px';
-  return {w:openW, h:Math.max(104, th + 30), r:34};
+  return {w:openW, h:Math.max(112, th + 30 + 40), r:34};
 }
 function retarget(){ const z = sizes(); S.w.to = z.w; S.h.to = z.h; S.r.to = z.r; kick(); }
 
@@ -122,10 +158,10 @@ function expand(){ if(open) return; open = true; comp.classList.add('open'); ret
 function collapse(){ if(!open || ta.value.trim()) return; open = false; comp.classList.remove('open'); ta.style.height = ''; retarget(); }
 
 /* basınca hafifçe ezilir, bırakınca genişler */
-comp.addEventListener('pointerdown', e => { if(e.target.closest('.voice')) return; S.s.to = .965; kick(); setTimeout(() => ta.focus(), 0); });
+comp.addEventListener('pointerdown', e => { if(e.target.closest('.voice,.mode')) return; S.s.to = .965; kick(); setTimeout(() => ta.focus(), 0); });
 addEventListener('pointerup', () => { S.s.to = 1; kick(); });
 ta.addEventListener('focus', expand);
-document.addEventListener('pointerdown', e => { if(!comp.contains(e.target)) collapse(); });
+document.addEventListener('pointerdown', e => { if(!e.target.closest('#menu,#modeBtn')) closeMenu(); if(!comp.contains(e.target) && !e.target.closest('#menu')) collapse(); });
 ta.addEventListener('keydown', e => {
   if(e.key === 'Escape'){ ta.blur(); collapse(); }
   if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); submit(); }
@@ -142,6 +178,47 @@ function submit(){
   ta.value = ''; retarget();
   S.s.to = .94; kick(); setTimeout(() => { S.s.to = 1; kick(); }, 140);
 }
+
+/* ── modlar (Neo'daki modlar, animasyonlu ikonlarla) ── */
+const MODES = [
+  {id:'adaptive',  name:'Adaptive',      desc:'Soruya göre en uygun yanıt'},
+  {id:'fast',      name:'Fast',          desc:'Ultra hızlı, özet yanıtlar'},
+  {id:'deepthink', name:'DeepThink',     desc:'Derin analiz, adım adım düşünce'},
+  {id:'sun11',     name:'Sun 1.1',       desc:'Yapılandırılmış, aydınlatıcı yanıtlar'},
+  {id:'profundus', name:'Profundus 1.1', desc:'Felsefi derinlik, katmanlı düşünce'},
+  {id:'ultimate',  name:'Ultimate 1.1',  desc:'Maksimum detay, kapsamlı analiz'},
+];
+const menu = $('menu'), modeBtn = $('modeBtn'), dock = $('dock');
+let mode = 'adaptive';
+const ck = '<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+MODES.forEach((m,i) => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'it'; b.setAttribute('role','menuitemradio');
+  b.dataset.id = m.id; b.style.setProperty('--i', i);
+  b.innerHTML = `<span class="tx"><b></b><small></small></span>${ck}`;
+  b.querySelector('b').textContent = m.name; b.querySelector('small').textContent = m.desc;
+  b.addEventListener('click', () => { setMode(m.id); setTimeout(() => { closeMenu(); ta.focus(); }, 220); });
+  if(i === 1) { const sp = document.createElement('div'); sp.className = 'sep'; menu.append(sp); }
+  menu.append(b);
+});
+function setMode(id, first){
+  const m = MODES.find(x => x.id === id); mode = id;
+  menu.querySelectorAll('.it').forEach(b => b.setAttribute('aria-checked', b.dataset.id === id));
+  const nm = $('modeName');
+  if(first){ nm.textContent = m.name; return; }
+  nm.classList.add('out');
+  setTimeout(() => { nm.textContent = m.name; nm.classList.remove('out'); retarget(); }, 200);
+  S.s.to = .97; kick(); setTimeout(() => { S.s.to = 1; kick(); }, 120);
+}
+function openMenu(){ menu.style.setProperty('--cw', modeBtn.offsetWidth + 'px'); const r = comp.getBoundingClientRect(); menu.classList.toggle('down', r.top < menu.offsetHeight + 16 && innerHeight - r.bottom > r.top); menu.classList.add('show'); modeBtn.setAttribute('aria-expanded','true'); (menu.querySelector('[aria-checked="true"]')||menu.firstChild).focus({preventScroll:true}); }
+function closeMenu(){ if(!menu.classList.contains('show')) return; menu.classList.remove('show'); modeBtn.setAttribute('aria-expanded','false'); }
+modeBtn.addEventListener('click', () => menu.classList.contains('show') ? closeMenu() : openMenu());
+menu.addEventListener('keydown', e => {
+  const items = [...menu.querySelectorAll('.it')], k = items.indexOf(document.activeElement);
+  if(e.key === 'ArrowDown'){ e.preventDefault(); items[(k+1)%items.length].focus(); }
+  if(e.key === 'ArrowUp'){ e.preventDefault(); items[(k-1+items.length)%items.length].focus(); }
+  if(e.key === 'Escape'){ closeMenu(); modeBtn.focus(); }
+});
+setMode('adaptive', true);
 
 /* ── sesli sohbet ikonu ── */
 const voice = $('voice');
@@ -189,7 +266,7 @@ function kick(){ if(!running){ running = true; last = performance.now(); request
 function tick(now){
   const dt = Math.min(.032, (now-last)/1000); last = now;
   const w = S.w.step(dt), h = S.h.step(dt), r = S.r.step(dt), s = S.s.step(dt);
-  comp.style.setProperty('--w', w+'px'); comp.style.setProperty('--h', h+'px');
+  comp.style.setProperty('--w', w+'px'); comp.style.setProperty('--h', h+'px'); dock.style.setProperty('--w', w+'px'); dock.style.setProperty('--h', h+'px');
   comp.style.setProperty('--r', Math.min(r, h/2)+'px'); comp.style.setProperty('--s', s);
   const jig = Math.max(-.06, Math.min(.06, S.h.v*.00035 - S.w.v*.0001));
   comp.style.setProperty('--sy', 1 + jig); comp.style.setProperty('--sx', 1 - jig*.6);
