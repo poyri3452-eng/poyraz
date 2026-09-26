@@ -62,10 +62,10 @@ h2{font-size:12px;font-weight:500;color:var(--tx3);letter-spacing:.08em;text-tra
 .x svg{width:13px;height:13px}
 
 /* pill */
-.n.pill{border-radius:99px;display:inline-flex;justify-self:start}
-.n.pill .row{padding:9px 16px 9px 12px;align-items:center;gap:9px}
-.n.pill .ic,.n.pill .ic svg{width:18px;height:18px}
-.n.pill .ic{margin:0}
+.n.v-pill{border-radius:99px;display:inline-flex;justify-self:start}
+.n.v-pill .row{padding:9px 16px 9px 12px;align-items:center;gap:9px}
+.n.v-pill .ic,.n.v-pill .ic svg{width:18px;height:18px}
+.n.v-pill .ic{margin:0}
 
 /* aksiyon */
 .acts{display:flex;justify-content:flex-end;gap:8px;padding:0 13px 12px}
@@ -87,7 +87,7 @@ h2{font-size:12px;font-weight:500;color:var(--tx3);letter-spacing:.08em;text-tra
 .meta i{width:3px;height:3px;border-radius:50%;background:var(--tx3)}
 
 /* geri al */
-.n.undo .row{align-items:center}
+.n.v-undo .row{align-items:center}
 .ring{flex:none;width:18px;height:18px;color:var(--tx3)}
 .ring circle{stroke-dasharray:1;stroke-dashoffset:0}
 .play .ring .rg{animation:ring 5s linear both}
@@ -99,10 +99,10 @@ h2{font-size:12px;font-weight:500;color:var(--tx3);letter-spacing:.08em;text-tra
 .file .fi{width:22px;height:26px;border-radius:4px;background:rgba(255,255,255,.06);display:grid;place-items:center;font-size:8px;font-weight:600;color:var(--tx2);letter-spacing:.02em}
 
 /* afiş */
-.n.banner{grid-column:1/-1}
-.n.banner .row{align-items:center}
-.n.banner .tx{display:flex;flex-wrap:wrap;gap:0 8px;align-items:baseline}
-.n.banner .d{margin:0}
+.n.v-banner{grid-column:1/-1}
+.n.v-banner .row{align-items:center}
+.n.v-banner .tx{display:flex;flex-wrap:wrap;gap:0 8px;align-items:baseline}
+.n.v-banner .d{margin:0}
 
 /* klavye */
 .keys{display:flex;gap:5px;margin-top:9px;align-items:center;font-size:12px;color:var(--tx3)}
@@ -221,11 +221,11 @@ kbd{font:500 12px 'DM Sans',sans-serif;color:var(--tx);min-width:24px;padding:3p
 /* canlı yığın */
 .stack{position:fixed;z-index:50;right:20px;bottom:20px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;width:min(370px,calc(100vw - 32px));pointer-events:none}
 .stack .n{pointer-events:auto;width:100%;box-shadow:0 12px 32px rgba(0,0,0,.5);animation:tin .45s var(--e) both}
-.stack .n.pill,.stack .n.banner{width:auto;max-width:100%}
+.stack .n.v-pill,.stack .n.v-banner{width:auto;max-width:100%}
 .stack .n.out{animation:tout .25s ease forwards}
 @keyframes tin{from{opacity:0;transform:translateY(12px) scale(.97)}}
 @keyframes tout{to{opacity:0;transform:translateY(6px) scale(.97)}}
-@media (max-width:560px){.stack{left:16px;right:16px;bottom:16px;width:auto;align-items:stretch}.stack .n.pill{align-self:center}}
+@media (max-width:560px){.stack{left:16px;right:16px;bottom:16px;width:auto;align-items:stretch}.stack .n.v-pill{align-self:center}}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
@@ -498,7 +498,7 @@ const ALERTS = [
 function el(tag, cls, text){ const e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
 
 function buildAlert(a){
-  const n = el('div', 'n '+a.type+' '+a.variant);
+  const n = el('div', 'n '+a.type+' v-'+a.variant);
   n.setAttribute('role', a.type==='err'||a.type==='warn' ? 'alert' : 'status');
   const row = el('div','row');
   const ic = el('div','ic'); ic.innerHTML = svg(a.icon);
