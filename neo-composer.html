@@ -26,8 +26,8 @@ button,textarea{font:inherit;color:inherit}
 
 /* menü: düğmenin içinden cam gibi büyüyerek açılır */
 .menu{position:absolute;left:calc(var(--w,360px) / -2);top:calc(var(--h,56px) / -2 - 10px);--ty:-100%;width:min(300px,calc(100vw - 32px));padding:5px;border-radius:20px;
-  -webkit-backdrop-filter:blur(28px) saturate(150%);backdrop-filter:blur(28px) saturate(150%);
-  background:rgba(34,30,27,.72);
+  -webkit-backdrop-filter:blur(48px) saturate(180%) brightness(1.08);backdrop-filter:blur(48px) saturate(180%) brightness(1.08);
+  background:linear-gradient(180deg,rgba(255,250,244,.11),rgba(255,250,244,.06));
   box-shadow:inset 0 1px 1px rgba(255,255,255,.14),inset 0 0 0 .5px rgba(255,255,255,.1),0 24px 60px -12px rgba(0,0,0,.65);
   transform:translateY(var(--ty));opacity:0;pointer-events:none;
   clip-path:inset(calc(100% - 38px) calc(100% - var(--cw,120px)) 0 0 round 19px);
@@ -78,19 +78,22 @@ button,textarea{font:inherit;color:inherit}
 .open .voice{margin-bottom:2px}
 
 .dock{position:fixed;left:50%;top:62%;z-index:2}
+.dock::before{content:"";position:absolute;left:0;top:0;width:min(560px,90vw);height:260px;transform:translate(-50%,-78%);border-radius:50%;pointer-events:none;z-index:-1;
+  background:radial-gradient(closest-side,rgba(214,150,96,.28),rgba(214,150,96,.08) 55%,transparent),radial-gradient(40% 50% at 70% 60%,rgba(150,120,200,.14),transparent);
+  filter:blur(30px);animation:aura 14s ease-in-out infinite alternate}
+@keyframes aura{to{transform:translate(-46%,-82%) scale(1.08)}}
 .composer{
   --w:360px;--h:56px;--r:28px;--s:1;--mx:50%;--my:0%;
   position:relative;width:var(--w);height:var(--h);border-radius:var(--r);transform:translateX(-50%) scale(calc(var(--s)*var(--sx,1)),calc(var(--s)*var(--sy,1)));
   left:0;margin-left:0;cursor:text;isolation:isolate;
   /* yedek: tüm tarayıcılarda buzlu cam */
-  -webkit-backdrop-filter:blur(22px) saturate(160%) brightness(1.05);
-  backdrop-filter:blur(22px) saturate(160%) brightness(1.05);
-  background:radial-gradient(120% 140% at 30% 0%,rgba(255,250,244,.16),rgba(255,250,244,.05) 60%,rgba(255,250,244,.03));
+  -webkit-backdrop-filter:blur(48px) saturate(180%) brightness(1.08);
+  backdrop-filter:blur(48px) saturate(180%) brightness(1.08);
+  background:linear-gradient(180deg,rgba(255,250,244,.12),rgba(255,250,244,.07));
   box-shadow:
-    inset 0 1px 1px rgba(255,255,255,.22),
-    inset 0 -8px 18px rgba(255,255,255,.035),
-    inset 0 0 0 .5px rgba(255,255,255,.12),
-    inset 0 0 30px rgba(255,255,255,.05),
+    inset 0 1px 2px rgba(255,255,255,.16),
+    inset 0 0 0 .5px rgba(255,255,255,.1),
+    inset 0 0 40px rgba(255,255,255,.06),
     0 24px 60px -12px rgba(10,5,2,.45);
   transform-origin:50% 50%;margin-top:calc(var(--h) / -2);
 }
@@ -98,7 +101,7 @@ button,textarea{font:inherit;color:inherit}
 .composer.refract{backdrop-filter:url(#liquid) blur(10px) saturate(165%) brightness(1.06)}
 /* kenardaki parlak ışık + imleci takip eden parıltı */
 .composer::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
-  background:linear-gradient(160deg,rgba(255,255,255,.32),rgba(255,255,255,.04) 30%,rgba(255,255,255,0) 60%,rgba(255,255,255,.1));filter:blur(.4px);
+  background:linear-gradient(160deg,rgba(255,255,255,.32),rgba(255,255,255,.04) 30%,rgba(255,255,255,0) 60%,rgba(255,255,255,.1));filter:blur(1.2px);opacity:.7;
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
 .composer::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.7;
   background:radial-gradient(220px 120px at var(--mx) var(--my),rgba(255,255,255,.1),transparent 70%);transition:opacity .3s}
@@ -282,7 +285,7 @@ function updateMap(w, h, r){
   if(key !== mapKey){ mapKey = key; lqMap.setAttribute('href', buildMap(Math.round(w/2), Math.round(h/2), r/2, Math.min(14, h/4))); }
   lqMap.setAttribute('width', w); lqMap.setAttribute('height', h);
 }
-if(REFRACT) comp.classList.add('refract');
+/* tamamen buzlu görünüm için kırılma kapalı */
 
 /* ── animasyon döngüsü (yalnızca hareket varken çalışır) ── */
 let running = false, last = 0;
@@ -294,7 +297,6 @@ function tick(now){
   comp.style.setProperty('--r', Math.min(r, h/2)+'px'); comp.style.setProperty('--s', s);
   const jig = Math.max(-.06, Math.min(.06, S.h.v*.00035 - S.w.v*.0001));
   comp.style.setProperty('--sy', 1 + jig); comp.style.setProperty('--sx', 1 - jig*.6);
-  if(REFRACT) updateMap(w, h, Math.min(r, h/2));
   if(Object.values(S).every(sp => sp.rest)){ comp.style.setProperty('--sx',1); comp.style.setProperty('--sy',1); running = false; return; }
   requestAnimationFrame(tick);
 }
