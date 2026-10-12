@@ -37,6 +37,17 @@
   .ring-glow { box-shadow: 0 0 0 1px rgba(90,168,255,.18), 0 20px 80px -20px rgba(47,123,255,.55), inset 0 1px 0 rgba(255,255,255,.06); }
   .grad-text { background: linear-gradient(180deg, #fff 30%, #a9c8ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .shimmer { background: linear-gradient(90deg, #5aa8ff 0%, #fff 50%, #5aa8ff 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .word-grad { background: linear-gradient(90deg, #7cc4ff, #2f7bff 45%, #b78cff 90%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 6s linear infinite; filter: drop-shadow(0 0 24px rgba(47,123,255,.45)); }
+  .prompt-shell { position: relative; padding: 1px; border-radius: 28px; overflow: hidden; isolation: isolate; }
+  .prompt-shell::before { content: ''; position: absolute; inset: -150%; z-index: -1;
+    background: conic-gradient(from 0deg, transparent 0 55%, rgba(90,168,255,.9) 70%, rgba(183,140,255,.9) 80%, transparent 92%);
+    animation: spin 6s linear infinite; }
+  .prompt-shell::after { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 28px; border: 1px solid rgba(255,255,255,.1); }
+  .prompt-shell.is-focused::before { animation-duration: 2.2s; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .no-bar { scrollbar-width: none; } .no-bar::-webkit-scrollbar { display: none; }
+  .chip:hover .chip-arrow { opacity: 1; margin-left: 0; }
+  @media (prefers-reduced-motion: reduce) { *, *::before { animation-duration: .001s !important; animation-iteration-count: 1 !important; } }
   .scroll::-webkit-scrollbar { width: 8px; height: 8px; }
   .scroll::-webkit-scrollbar-thumb { background: #232838; border-radius: 8px; }
   textarea { resize: none; }
@@ -458,10 +469,17 @@ const MODES = [
   { k: 'Prototype', n: 'flask', tr: 'Prototip' },
 ];
 const PLACEHOLDERS = [
-  'Northeasterly One için bir landing page yap...',
-  'Neo AI için bir görev listesi uygulaması...',
-  'Startup metrikleri için bir dashboard...',
-  'Yatırımcı sunumu hazırla...',
+  'Northeasterly One için karanlık temalı bir landing page yap',
+  'Neo AI için sürükle-bırak görev listesi uygulaması',
+  'Startup metriklerini gösteren canlı bir dashboard',
+  'Yatırımcılar için 4 slaytlık bir pitch deck hazırla',
+  'Kahve dükkânım için menü ve sipariş sayfası',
+];
+const WORDS = ['web sitesi', 'mobil uygulama', 'dashboard', 'sunum', 'oyun', 'startup'];
+const SUGGESTIONS = [
+  ['🚀', 'Startup landing page'], ['✅', 'Görev takip uygulaması'], ['📊', 'Satış dashboard\'u'],
+  ['🎤', 'Yatırımcı sunumu'], ['☕', 'Kafe menü sitesi'], ['🎨', 'Portfolyo sitesi'],
+  ['🛒', 'Mini e-ticaret mağazası'], ['📅', 'Etkinlik kayıt sayfası'], ['🧠', 'Neo AI tanıtım sayfası'],
 ];
 const TEMPLATES = [
   { t: 'SaaS Landing', d: 'Hero, özellikler, CTA', p: 'Neo AI için modern bir SaaS landing page', c: 'from-sky-500/30 to-indigo-600/30' },
@@ -470,29 +488,79 @@ const TEMPLATES = [
   { t: 'Pitch Deck', d: '4 slaytlık sunum', p: 'Northeasterly One yatırımcı sunumu', c: 'from-amber-500/30 to-orange-600/30' },
 ];
 
-function useTypewriter(list) {
-  const [text, setText] = useState('');
+function useTypewriter(list, { type = 45, erase = 22, hold = 1700 } = {}) {
+  const [state, setState] = useState({ text: '', i: 0 });
   useEffect(() => {
     let i = 0, j = 0, del = false, t;
     const step = () => {
       const w = list[i];
-      if (!del) { j++; if (j > w.length) { del = true; t = setTimeout(step, 1600); return; } }
-      else { j--; if (j === 0) { del = false; i = (i + 1) % list.length; } }
-      setText(w.slice(0, j));
-      t = setTimeout(step, del ? 22 : 45);
+      if (!del) { j++; if (j > w.length) { del = true; t = setTimeout(step, hold); return; } }
+      else { j--; if (j === 0) { del = false; i = (i + 1) % list.length; t = setTimeout(step, 300); setState({ text: '', i }); return; } }
+      setState({ text: w.slice(0, j), i });
+      t = setTimeout(step, del ? erase : type + Math.random() * 30);
     };
-    step();
+    t = setTimeout(step, 500);
     return () => clearTimeout(t);
   }, []);
-  return text;
+  return state;
+}
+
+const Caret = ({ className = '' }) => <span className={`inline-block w-[3px] rounded-full bg-neo-400 align-[-0.1em] animate-blink ${className}`} />;
+
+/* Sırayla dönen öneri çipleri */
+function SuggestionChips({ onPick }) {
+  const [page, setPage] = useState(0);
+  const [paused, setPaused] = useState(false);
+  useEffect(() => {
+    if (paused) return;
+    const t = setInterval(() => setPage((p) => (p + 1) % 3), 4200);
+    return () => clearInterval(t);
+  }, [paused]);
+  const items = SUGGESTIONS.slice(page * 3, page * 3 + 3);
+  return (
+    <div className="mt-5 min-h-[44px]" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+      <div key={page} className="no-bar flex sm:flex-wrap sm:justify-center gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
+        {items.map(([e, t], k) => (
+          <button key={t} onClick={() => onPick(t)} style={{ animationDelay: k * 0.08 + 's' }}
+            className="chip animate-rise shrink-0 whitespace-nowrap flex items-center gap-2 pl-2.5 pr-3.5 py-2 rounded-full text-sm glass border border-white/10 hover:border-neo-400/60 hover:bg-neo-500/10 transition">
+            <span>{e}</span><span className="text-slate-200">{t}</span>
+            <span className="text-neo-400 opacity-0 -ml-1 transition chip-arrow">↗</span>
+          </button>
+        ))}
+      </div>
+      <div className="mt-3 flex justify-center gap-1.5">
+        {[0, 1, 2].map((d) => (
+          <button key={d} onClick={() => setPage(d)} aria-label={`Öneri grubu ${d + 1}`}
+            className={`h-1.5 rounded-full transition-all duration-500 ${d === page ? 'w-6 bg-neo-400' : 'w-1.5 bg-white/25'}`} />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function Home({ onStart }) {
   const [prompt, setPrompt] = useState('');
   const [mode, setMode] = useState('Website');
   const [listening, setListening] = useState(false);
-  const ph = useTypewriter(PLACEHOLDERS);
+  const ph = useTypewriter(PLACEHOLDERS, { hold: 2200 });
+  const word = useTypewriter(WORDS, { type: 85, erase: 40, hold: 1900 });
+  const [focused, setFocused] = useState(false);
+  const typing = useRef(0);
   const taRef = useRef(null);
+
+  // Öneriyi istem kutusuna harf harf yazar
+  const typeInto = (text) => {
+    const id = ++typing.current;
+    let n = 0;
+    taRef.current && taRef.current.focus();
+    const tick = () => {
+      if (id !== typing.current) return;
+      n += 2; setPrompt(text.slice(0, n));
+      if (n < text.length) setTimeout(tick, 16);
+    };
+    tick();
+  };
+  const pick = (t) => typeInto(t + ' — koyu tema, mavi vurgu, mobil uyumlu');
 
   const submit = () => { if (prompt.trim()) onStart(prompt.trim(), mode); };
 
@@ -520,22 +588,43 @@ function Home({ onStart }) {
           <span className="text-neo-400">→</span>
         </a>
         <h1 className="mt-6 text-[40px] leading-[1.05] sm:text-6xl font-extrabold tracking-[-0.035em] grad-text animate-rise" style={{ animationDelay: '.05s' }}>
-          Bugün ne inşa edeceksin?
+          <span className="block">Bugün bir</span>
+          <span className="block min-h-[1.1em] whitespace-nowrap">
+            <span className="word-grad">{word.text}</span><Caret className="h-[0.85em] ml-1" />
+          </span>
+          <span className="block">inşa edelim.</span>
         </h1>
         <p className="mt-4 text-lg sm:text-xl text-slate-300/90 animate-rise" style={{ animationDelay: '.1s' }}>
           Yapay zekâ ile sohbet ederek muhteşem uygulamalar ve web siteleri oluştur.
         </p>
 
-        <div className="mt-9 text-left rounded-[28px] bg-[#16171d]/90 border border-white/10 ring-glow animate-rise backdrop-blur-xl" style={{ animationDelay: '.15s' }}>
-          <textarea
-            ref={taRef}
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); } }}
-            rows={3}
-            placeholder={ph || ' '}
-            className="w-full bg-transparent outline-none px-6 pt-6 text-[17px] placeholder:text-slate-500"
-          />
+        <div className={`prompt-shell mt-9 animate-rise ${focused ? 'is-focused' : ''}`} style={{ animationDelay: '.15s' }}>
+        <div className="relative text-left rounded-[27px] bg-[#16171d]/95 ring-glow backdrop-blur-xl">
+          <div className="relative">
+            <textarea
+              ref={taRef}
+              value={prompt}
+              onChange={(e) => { typing.current++; setPrompt(e.target.value); }}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              onKeyDown={(e) => {
+                if (e.key === 'Tab' && !prompt) { e.preventDefault(); typeInto(PLACEHOLDERS[ph.i]); }
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); }
+              }}
+              rows={3}
+              aria-label="Ne inşa etmek istiyorsun?"
+              className="relative z-10 w-full bg-transparent outline-none px-6 pt-6 text-[17px]"
+            />
+            {!prompt && (
+              <div className="absolute inset-0 px-6 pt-6 text-[17px] text-slate-500 pointer-events-none leading-normal">
+                {ph.text}<Caret className="h-[1.1em] ml-0.5 !w-[2px] !bg-slate-500" />
+                <button onClick={() => typeInto(PLACEHOLDERS[ph.i])}
+                  className="pointer-events-auto relative z-20 ml-2 align-middle inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md border border-white/10 text-slate-400 hover:text-white hover:border-neo-400/50">
+                  <span className="hidden sm:inline">Tab</span><span className="sm:hidden">Kullan</span> ⇥
+                </button>
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-2 px-4 pb-4">
             <button className="w-11 h-11 grid place-items-center rounded-full border border-white/15 hover:bg-white/5" title="Dosya ekle"><Icon n="plus" /></button>
             <button onClick={enhance} className="w-11 h-11 grid place-items-center rounded-full hover:bg-white/5 text-slate-300" title="İstemi geliştir"><Icon n="bulb" /></button>
@@ -546,6 +635,9 @@ function Home({ onStart }) {
             </button>
           </div>
         </div>
+        </div>
+
+        <SuggestionChips onPick={pick} />
 
         <div className="mt-8 flex justify-center gap-3 sm:gap-4 animate-rise" style={{ animationDelay: '.2s' }}>
           {MODES.map((m) => (
