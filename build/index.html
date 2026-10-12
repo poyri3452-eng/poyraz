@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Neo Build — Northeasterly One</title>
+<meta name="theme-color" content="#05060b" />
+<meta name="description" content="Neo Build: yapay zekâ ile sohbet ederek uygulama ve web sitesi oluştur." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com/3.4.5"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+        colors: { ink: '#05060b', panel: '#0d0f17', line: '#1c2030', neo: { 400: '#5aa8ff', 500: '#2f7bff', 600: '#1f5fe0' } },
+        keyframes: {
+          rise: { '0%': { opacity: 0, transform: 'translateY(14px)' }, '100%': { opacity: 1, transform: 'none' } },
+          blink: { '50%': { opacity: 0 } },
+          shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+        },
+        animation: { rise: 'rise .6s cubic-bezier(.2,.8,.2,1) both', blink: 'blink 1s step-end infinite', shimmer: 'shimmer 2.4s linear infinite' },
+      },
+    },
+  };
+</script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+<style>
+  html, body { background: #05060b; color: #e7eaf3; -webkit-font-smoothing: antialiased; }
+  body { overscroll-behavior: none; }
+  .glass { background: rgba(14, 16, 24, .72); backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); }
+  .ring-glow { box-shadow: 0 0 0 1px rgba(90,168,255,.18), 0 20px 80px -20px rgba(47,123,255,.55), inset 0 1px 0 rgba(255,255,255,.06); }
+  .grad-text { background: linear-gradient(180deg, #fff 30%, #a9c8ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .shimmer { background: linear-gradient(90deg, #5aa8ff 0%, #fff 50%, #5aa8ff 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scroll::-webkit-scrollbar-thumb { background: #232838; border-radius: 8px; }
+  textarea { resize: none; }
+  .code-line:hover { background: rgba(255,255,255,.03); }
+  .tok-k { color: #c792ea } .tok-s { color: #a5e07a } .tok-t { color: #5aa8ff } .tok-c { color: #5c6680; font-style: italic } .tok-n { color: #f78c6c }
+</style>
+</head>
+<body class="font-sans">
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+/* ---------------------------------------------------------------
+   WebGL arka plan: Three.js shader (akan mavi aurora) + Neo çekirdeği
+---------------------------------------------------------------- */
+function NeoScene({ calm }) {
+  const ref = useRef(null);
+  const calmRef = useRef(calm);
+  calmRef.current = calm;
+
+  useEffect(() => {
+    const host = ref.current;
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+    host.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 0, 6);
+
+    // Tam ekran shader düzlemi
+    const bgUniforms = {
+      uTime: { value: 0 }, uRes: { value: new THREE.Vector2(1, 1) },
+      uMouse: { value: new THREE.Vector2(0.5, 0.5) }, uCalm: { value: 0 },
+    };
+    const bg = new THREE.Mesh(
+      new THREE.PlaneGeometry(2, 2),
+      new THREE.ShaderMaterial({
+        uniforms: bgUniforms, depthWrite: false, depthTest: false,
+        vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+        fragmentShader: `
+          precision highp float;
+          varying vec2 vUv; uniform float uTime; uniform vec2 uRes; uniform vec2 uMouse; uniform float uCalm;
+          float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
+          float noise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f);
+            return mix(mix(hash(i),hash(i+vec2(1,0)),u.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x), u.y); }
+          float fbm(vec2 p){ float v=0.0, a=0.5; for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.02; a*=0.5; } return v; }
+          void main(){
+            vec2 uv = vUv; vec2 p = (uv - 0.5) * vec2(uRes.x/uRes.y, 1.0);
+            float t = uTime * 0.06;
+            vec2 q = vec2(fbm(p*1.6 + t), fbm(p*1.6 - t + 3.1));
+            vec2 m = (uMouse - 0.5) * 0.35;
+            float f = fbm(p*1.3 + q*1.8 + m + vec2(t*0.7, -t*0.4));
+            vec3 deep = vec3(0.012, 0.018, 0.05);
+            vec3 blue = vec3(0.12, 0.33, 0.95);
+            vec3 cyan = vec3(0.30, 0.70, 1.00);
+            vec3 col = mix(deep, blue, smoothstep(0.25, 0.85, f));
+            col = mix(col, cyan, smoothstep(0.62, 0.95, f) * 0.55);
+            float glow = smoothstep(0.9, 0.0, length(p - vec2(0.0, 0.18)));
+            col += vec3(0.08, 0.16, 0.45) * glow * 0.6;
+            float vig = smoothstep(1.25, 0.25, length(p * vec2(0.9, 1.2)));
+            col *= mix(0.25, 1.0, vig);
+            col = mix(col, col * 0.35, uCalm);
+            // ince nokta ızgarası (Bolt hissi)
+            vec2 g = fract(uv * uRes / 22.0) - 0.5;
+            col += vec3(0.6,0.75,1.0) * smoothstep(0.06, 0.0, length(g)) * 0.05 * vig;
+            col = mix(col, deep, smoothstep(0.55, 1.0, 1.0 - uv.y) * 0.65);
+            gl_FragColor = vec4(col, 1.0);
+          }`,
+      })
+    );
+    bg.frustumCulled = false; bg.renderOrder = -1;
+    scene.add(bg);
+
+    // Neo çekirdeği: tel kafes ikosahedron + parçacık halkası
+    const core = new THREE.Group();
+    const ico = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(1, 1),
+      new THREE.MeshBasicMaterial({ color: 0x7fb8ff, wireframe: true, transparent: true, opacity: 0.28 })
+    );
+    const inner = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.55, 2),
+      new THREE.MeshBasicMaterial({ color: 0x2f7bff, transparent: true, opacity: 0.18 })
+    );
+    core.add(ico, inner);
+    const N = 900, pos = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      const a = Math.random() * Math.PI * 2, r = 1.6 + Math.random() * 1.4, y = (Math.random() - 0.5) * 0.35;
+      pos[i * 3] = Math.cos(a) * r; pos[i * 3 + 1] = y; pos[i * 3 + 2] = Math.sin(a) * r;
+    }
+    const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const ring = new THREE.Points(pg, new THREE.PointsMaterial({ color: 0xa9d0ff, size: 0.018, transparent: true, opacity: 0.8 }));
+    ring.rotation.x = 0.35;
+    core.add(ring);
+    core.position.set(0, 1.55, -2);
+    scene.add(core);
+
+    const mouse = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5 };
+    const onMove = (e) => { const pt = e.touches ? e.touches[0] : e; mouse.tx = pt.clientX / innerWidth; mouse.ty = 1 - pt.clientY / innerHeight; };
+    window.addEventListener('pointermove', onMove, { passive: true });
+
+    const resize = () => {
+      const w = host.clientWidth, h = host.clientHeight;
+      renderer.setSize(w, h, false);
+      renderer.domElement.style.width = '100%'; renderer.domElement.style.height = '100%';
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      bgUniforms.uRes.value.set(w, h);
+      core.scale.setScalar(w < 640 ? 0.7 : 1);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    let raf, last = performance.now(), visible = true;
+    const onVis = () => { visible = !document.hidden; };
+    document.addEventListener('visibilitychange', onVis);
+    const tick = (now) => {
+      raf = requestAnimationFrame(tick);
+      if (!visible) return;
+      const dt = Math.min((now - last) / 1000, 0.05); last = now;
+      mouse.x += (mouse.tx - mouse.x) * 0.05; mouse.y += (mouse.ty - mouse.y) * 0.05;
+      bgUniforms.uTime.value += dt;
+      bgUniforms.uMouse.value.set(mouse.x, mouse.y);
+      bgUniforms.uCalm.value += ((calmRef.current ? 1 : 0) - bgUniforms.uCalm.value) * 0.04;
+      ico.rotation.y += dt * 0.25; ico.rotation.x += dt * 0.1;
+      inner.rotation.y -= dt * 0.4;
+      ring.rotation.y += dt * 0.08;
+      core.rotation.z = (mouse.x - 0.5) * 0.3;
+      core.rotation.x = (mouse.y - 0.5) * 0.3;
+      const s = 1 + Math.sin(now / 900) * 0.03; inner.scale.setScalar(s);
+      renderer.render(scene, camera);
+    };
+    raf = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('resize', resize);
+      document.removeEventListener('visibilitychange', onVis);
+      renderer.dispose(); host.removeChild(renderer.domElement);
+    };
+  }, []);
+
+  return <div ref={ref} className="fixed inset-0 -z-10 pointer-events-none" aria-hidden="true" />;
+}
+
+/* ---------------------------------------------------------------
+   İkonlar
+---------------------------------------------------------------- */
+const I = {
+  globe: <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm-9-9h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z" />,
+  slides: <path d="M3 4h18M5 4v10h14V4M12 14v3m-4 4 4-4 4 4M9 11V9m3 2V7m3 4v-3" />,
+  app: <path d="M3 6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7H3V6Zm0 7v1a2 2 0 0 0 2 2h7m5-6h3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Z" />,
+  flask: <path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3M7.5 14h9" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  bulb: <path d="M9 18h6m-5 3h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3Z" />,
+  mic: <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Zm-7 9a7 7 0 0 0 14 0M12 19v3" />,
+  send: <path d="M5 12h14m-6-6 6 6-6 6" />,
+  menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+  code: <path d="m8 8-4 4 4 4m8-8 4 4-4 4m-6 3 4-14" />,
+  eye: <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />,
+  chat: <path d="M4 5h16v11H8l-4 4V5Z" />,
+  file: <path d="M14 3H6v18h12V7l-4-4Zm0 0v4h4" />,
+  check: <path d="m5 12 5 5 9-10" />,
+  back: <path d="m15 6-6 6 6 6" />,
+  rocket: <path d="M5 15c-1 1-2 4-2 6 2 0 5-1 6-2m-4-4 4 4m-4-4 3-3m1 7 3-3m-6-1c1-5 5-10 12-11-1 7-6 11-11 12m6-8a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />,
+  refresh: <path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" />,
+  download: <path d="M12 4v11m-5-5 5 5 5-5M5 20h14" />,
+  terminal: <path d="m5 7 5 5-5 5m8 0h6" />,
+  figma: <path d="M9 3h3v6H9a3 3 0 0 1 0-6Zm3 0h3a3 3 0 0 1 0 6h-3V3Zm-3 6h3v6H9a3 3 0 0 1 0-6Zm3 3a3 3 0 1 0 6 0 3 3 0 0 0-6 0Zm-3 3h3v3a3 3 0 1 1-3-3Z" />,
+  layout: <path d="M4 5h6v14H4zM14 5h6v6h-6zM14 15h6v4h-6z" />,
+  spark: <path d="M12 3v4m0 10v4M3 12h4m10 0h4M6 6l2.5 2.5m7 7L18 18M6 18l2.5-2.5m7-7L18 6" />,
+};
+const Icon = ({ n, className = 'w-5 h-5', stroke = 1.6 }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" className={className}>{I[n]}</svg>
+);
+
+/* ---------------------------------------------------------------
+   Yapay zekâ simülasyonu: istemden proje dosyaları üretir
+---------------------------------------------------------------- */
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function detectKind(prompt, mode) {
+  const p = prompt.toLowerCase();
+  if (mode === 'Slides' || /sunum|slayt|slide|pitch/.test(p)) return 'slides';
+  if (/todo|görev|yapılacak|task|liste/.test(p)) return 'todo';
+  if (/dashboard|panel|analitik|grafik|admin|metrik/.test(p)) return 'dashboard';
+  return 'landing';
+}
+
+function titleFrom(prompt) {
+  const clean = prompt.replace(/^(bir|let's build|build|yap|oluştur)\s+/i, '').trim();
+  const t = clean.split(/[.,\n]/)[0].slice(0, 42);
+  return t ? t.charAt(0).toUpperCase() + t.slice(1) : 'Neo Projesi';
+}
+
+function generateProject(prompt, mode) {
+  const kind = detectKind(prompt, mode);
+  const title = esc(titleFrom(prompt));
+  const css = `:root { --bg:#07080d; --fg:#eef1f8; --muted:#8b93a7; --accent:#2f7bff; --card:#11131c; --line:#1f2333; }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family: Inter, system-ui, sans-serif; background:var(--bg); color:var(--fg); line-height:1.5; }
+.wrap { max-width:1040px; margin:0 auto; padding:24px; }
+.btn { display:inline-flex; gap:8px; align-items:center; border:0; cursor:pointer; padding:12px 20px; border-radius:12px;
+  background:var(--accent); color:#fff; font-weight:600; transition:transform .15s, filter .15s; }
+.btn:hover { transform:translateY(-1px); filter:brightness(1.1); }
+.card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:20px; }
+.muted { color:var(--muted); }
+.grid { display:grid; gap:16px; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }`;
+
+  let html, js, extraCss = '';
+  if (kind === 'todo') {
+    extraCss = `.row { display:flex; gap:8px; margin:20px 0; }
+input { flex:1; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:var(--card); color:var(--fg); font-size:15px; }
+li { list-style:none; display:flex; align-items:center; gap:12px; padding:14px; border-bottom:1px solid var(--line); }
+li.done span { text-decoration:line-through; color:var(--muted); }
+li button { margin-left:auto; background:none; border:0; color:var(--muted); cursor:pointer; font-size:18px; }`;
+    html = `<main class="wrap">
+  <h1>${title}</h1>
+  <p class="muted">Neo AI ile oluşturuldu — görevlerin cihazında saklanır.</p>
+  <form class="row" id="form">
+    <input id="input" placeholder="Yeni görev ekle..." autocomplete="off" />
+    <button class="btn">Ekle</button>
+  </form>
+  <ul class="card" id="list"></ul>
+  <p class="muted" id="count" style="margin-top:12px"></p>
+</main>`;
+    js = `const KEY = 'neo-todos';
+let todos = [];
+try { todos = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) {}
+if (!todos.length) todos = [{ t: 'Neo AI demosunu hazırla', d: true }, { t: 'Northeasterly One yol haritası', d: false }];
+
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(todos)); } catch (e) {} };
+
+function render() {
+  list.innerHTML = '';
+  todos.forEach((todo, i) => {
+    const li = document.createElement('li');
+    li.className = todo.d ? 'done' : '';
+    li.innerHTML = '<input type="checkbox" ' + (todo.d ? 'checked' : '') + '><span></span><button>×</button>';
+    li.querySelector('span').textContent = todo.t;
+    li.querySelector('input').onchange = () => { todo.d = !todo.d; save(); render(); };
+    li.querySelector('button').onclick = () => { todos.splice(i, 1); save(); render(); };
+    list.appendChild(li);
+  });
+  count.textContent = todos.filter(t => !t.d).length + ' görev kaldı';
+}
+
+form.onsubmit = (e) => {
+  e.preventDefault();
+  if (!input.value.trim()) return;
+  todos.unshift({ t: input.value.trim(), d: false });
+  input.value = ''; save(); render();
+};
+render();`;
+  } else if (kind === 'dashboard') {
+    extraCss = `.kpi b { font-size:28px; display:block; margin-top:6px; }
+.bars { display:flex; align-items:flex-end; gap:8px; height:180px; margin-top:16px; }
+.bars div { flex:1; background:linear-gradient(180deg, #5aa8ff, var(--accent)); border-radius:8px 8px 2px 2px; transition:height .8s cubic-bezier(.2,.8,.2,1); }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; gap:12px; flex-wrap:wrap; }`;
+    html = `<main class="wrap">
+  <header>
+    <div><h1>${title}</h1><p class="muted">Canlı metrikler · son 12 ay</p></div>
+    <button class="btn" id="shuffle">Verileri yenile</button>
+  </header>
+  <section class="grid" id="kpis"></section>
+  <section class="card" style="margin-top:16px">
+    <h3>Aylık büyüme</h3>
+    <div class="bars" id="bars"></div>
+  </section>
+</main>`;
+    js = `const kpiNames = ['Aktif kullanıcı', 'Gelir (₺)', 'Dönüşüm', 'Memnuniyet'];
+const rand = (a, b) => Math.round(a + Math.random() * (b - a));
+
+function render() {
+  const values = [rand(8000, 24000).toLocaleString('tr-TR'), rand(120, 480) + 'K', rand(3, 9) + '%', rand(88, 99) + '%'];
+  kpis.innerHTML = kpiNames.map((n, i) => '<div class="card kpi"><span class="muted">' + n + '</span><b>' + values[i] + '</b></div>').join('');
+  if (!bars.children.length) for (let i = 0; i < 12; i++) bars.appendChild(document.createElement('div'));
+  [...bars.children].forEach((b, i) => { b.style.height = rand(20 + i * 4, 60 + i * 3) + '%'; });
+}
+shuffle.onclick = render;
+render();`;
+  } else if (kind === 'slides') {
+    extraCss = `.deck { height:100vh; display:grid; place-items:center; text-align:center; padding:24px; }
+.slide { display:none; max-width:760px; animation:in .5s ease both; }
+.slide.on { display:block; }
+.slide h1 { font-size:clamp(32px, 6vw, 64px); line-height:1.05; margin-bottom:16px; }
+.nav { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; }
+@keyframes in { from { opacity:0; transform:translateY(12px); } }`;
+    html = `<div class="deck">
+  <section class="slide on"><h1>${title}</h1><p class="muted">Northeasterly One · Neo AI</p></section>
+  <section class="slide"><h1>Problem</h1><p class="muted">Fikirden ürüne giden yol hâlâ çok uzun ve pahalı.</p></section>
+  <section class="slide"><h1>Çözüm</h1><p class="muted">Neo AI ile konuş, dakikalar içinde çalışan ürünün olsun.</p></section>
+  <section class="slide"><h1>Teşekkürler</h1><p class="muted">neoai.com.tr</p></section>
+</div>
+<div class="nav"><button class="btn" id="prev">←</button><span class="muted" id="page"></span><button class="btn" id="next">→</button></div>`;
+    js = `const slides = [...document.querySelectorAll('.slide')];
+let i = 0;
+function go(n) {
+  i = (n + slides.length) % slides.length;
+  slides.forEach((s, k) => s.classList.toggle('on', k === i));
+  page.textContent = (i + 1) + ' / ' + slides.length;
+}
+prev.onclick = () => go(i - 1);
+next.onclick = () => go(i + 1);
+addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') go(i + 1); if (e.key === 'ArrowLeft') go(i - 1); });
+go(0);`;
+  } else {
+    extraCss = `nav { display:flex; justify-content:space-between; align-items:center; padding:20px 0; }
+.hero { text-align:center; padding:72px 0 56px; }
+.hero h1 { font-size:clamp(34px, 6vw, 64px); line-height:1.05; letter-spacing:-.03em; margin-bottom:16px;
+  background:linear-gradient(180deg,#fff,#9fc4ff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.hero p { max-width:560px; margin:0 auto 28px; }
+.glow { position:fixed; inset:-30% -10% auto; height:70vh; background:radial-gradient(closest-side, rgba(47,123,255,.35), transparent); z-index:-1; }
+.card h3 { margin:10px 0 6px; }
+footer { text-align:center; padding:48px 0; }`;
+    html = `<div class="glow"></div>
+<div class="wrap">
+  <nav><strong>${title}</strong><a class="btn" href="#cta">Başla</a></nav>
+  <section class="hero">
+    <h1>${title}</h1>
+    <p class="muted">Hızlı, sade ve güçlü. Neo AI tarafından saniyeler içinde tasarlandı.</p>
+    <button class="btn" id="cta">Ücretsiz dene →</button>
+  </section>
+  <section class="grid" id="features"></section>
+  <footer class="muted">© ${new Date().getFullYear()} · Northeasterly One ile yapıldı</footer>
+</div>`;
+    js = `const features = [
+  ['⚡', 'Işık hızında', 'Optimize edilmiş performans ile anında açılır.'],
+  ['🛡️', 'Güvenli', 'Verilerin her zaman korunur.'],
+  ['✨', 'Yapay zekâ', 'Neo AI akıllı öneriler sunar.'],
+];
+features.forEach(([icon, title, text]) => {
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.innerHTML = '<div style="font-size:26px">' + icon + '</div><h3>' + title + '</h3><p class="muted">' + text + '</p>';
+  document.getElementById('features').appendChild(el);
+});
+
+document.getElementById('cta').addEventListener('click', () => {
+  document.getElementById('cta').textContent = 'Harika! Hoş geldin 🎉';
+});`;
+  }
+
+  const fullCss = css + '\n\n' + extraCss;
+  const indexHtml = `<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${title}</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+${html}
+<script src="app.js"></` + `script>
+</body>
+</html>`;
+
+  const plan = {
+    landing: ['Proje iskeleti hazırlanıyor', 'Hero ve navigasyon tasarlanıyor', 'Özellik kartları ekleniyor', 'Etkileşimler bağlanıyor'],
+    todo: ['Proje iskeleti hazırlanıyor', 'Görev listesi arayüzü kuruluyor', 'Yerel kayıt (localStorage) ekleniyor', 'Etkileşimler bağlanıyor'],
+    dashboard: ['Proje iskeleti hazırlanıyor', 'KPI kartları tasarlanıyor', 'Grafik bileşeni çiziliyor', 'Veri yenileme bağlanıyor'],
+    slides: ['Sunum iskeleti hazırlanıyor', 'Slaytlar yazılıyor', 'Geçiş animasyonları ekleniyor', 'Klavye kontrolleri bağlanıyor'],
+  }[kind];
+
+  return {
+    kind, title: titleFrom(prompt), plan,
+    files: [
+      { name: 'index.html', lang: 'html', content: indexHtml },
+      { name: 'style.css', lang: 'css', content: fullCss },
+      { name: 'app.js', lang: 'js', content: js },
+    ],
+  };
+}
+
+function buildPreview(files) {
+  const get = (n) => (files.find((f) => f.name === n) || {}).content || '';
+  return get('index.html')
+    .replace('<link rel="stylesheet" href="style.css" />', '<style>' + get('style.css') + '</style>')
+    .replace('<script src="app.js"></' + 'script>', '<script>' + get('app.js') + '</' + 'script>');
+}
+
+/* Basit sözdizimi renklendirme */
+function highlight(line, lang) {
+  let s = esc(line);
+  if (lang === 'js') {
+    s = s.replace(/(\/\/.*)$/g, '<span class="tok-c">$1</span>')
+      .replace(/('[^']*')/g, '<span class="tok-s">$1</span>')
+      .replace(/\b(const|let|var|function|return|if|else|for|new|try|catch|document|addEventListener|forEach|map)\b/g, '<span class="tok-k">$1</span>')
+      .replace(/\b(\d+)\b/g, '<span class="tok-n">$1</span>');
+  } else if (lang === 'css') {
+    s = s.replace(/^([^{}:]+)(\s*\{)/, '<span class="tok-t">$1</span>$2')
+      .replace(/([\w-]+)(:)(?!\/)/g, '<span class="tok-k">$1</span>$2')
+      .replace(/(#[0-9a-fA-F]{3,6})/g, '<span class="tok-n">$1</span>');
+  } else {
+    s = s.replace(/(&lt;\/?)([\w-]+)/g, '$1<span class="tok-t">$2</span>')
+      .replace(/(&quot;[^&]*&quot;)/g, '<span class="tok-s">$1</span>');
+  }
+  return s;
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/* ---------------------------------------------------------------
+   Üst menü
+---------------------------------------------------------------- */
+function TopBar({ onHome, inWorkspace, title }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <header className={`sticky top-0 z-30 ${inWorkspace ? 'glass border-b border-line' : ''}`}>
+      <div className="flex items-center justify-between px-4 sm:px-6 h-16">
+        <button onClick={onHome} className="flex items-center gap-2.5 group">
+          <span className="relative grid place-items-center w-8 h-8 rounded-xl bg-gradient-to-br from-neo-400 to-neo-600 ring-glow">
+            <span className="w-3 h-3 rotate-45 border-2 border-white rounded-[3px]" />
+          </span>
+          <span className="text-[22px] font-extrabold tracking-tight italic">neo<span className="text-neo-400 not-italic text-sm font-semibold">.build</span></span>
+        </button>
+        {inWorkspace && <div className="hidden md:block text-sm text-slate-400 truncate max-w-[40%]">{title}</div>}
+        <div className="flex items-center gap-2">
+          {!inWorkspace && <a href="#" className="hidden sm:inline text-sm text-slate-300 hover:text-white px-3">Fiyatlar</a>}
+          <button className="h-10 px-4 sm:px-5 rounded-lg bg-neo-500 hover:bg-neo-400 transition font-semibold text-sm shadow-lg shadow-neo-500/30">
+            {inWorkspace ? 'Yayınla' : 'Başla'}
+          </button>
+          <button onClick={() => setOpen(!open)} className="w-10 h-10 grid place-items-center rounded-lg hover:bg-white/5" aria-label="Menü">
+            <Icon n="menu" className="w-6 h-6" />
+          </button>
+        </div>
+      </div>
+      {open && (
+        <div className="absolute right-4 top-16 w-56 glass rounded-2xl border border-line p-2 animate-rise">
+          {['Projelerim', 'Şablonlar', 'Neo AI Docs', 'Northeasterly One'].map((x) => (
+            <a key={x} href={x === 'Northeasterly One' ? '../northeasterly-one.html' : '#'} className="block px-3 py-2.5 rounded-xl text-sm hover:bg-white/5">{x}</a>
+          ))}
+        </div>
+      )}
+    </header>
+  );
+}
+
+/* ---------------------------------------------------------------
+   Ana sayfa (Bolt.new tarzı hero + Replit tarzı şablonlar)
+---------------------------------------------------------------- */
+const MODES = [
+  { k: 'Website', n: 'globe', tr: 'Web sitesi' },
+  { k: 'Slides', n: 'slides', tr: 'Sunum', badge: 'Yeni' },
+  { k: 'App', n: 'app', tr: 'Uygulama' },
+  { k: 'Prototype', n: 'flask', tr: 'Prototip' },
+];
+const PLACEHOLDERS = [
+  'Northeasterly One için bir landing page yap...',
+  'Neo AI için bir görev listesi uygulaması...',
+  'Startup metrikleri için bir dashboard...',
+  'Yatırımcı sunumu hazırla...',
+];
+const TEMPLATES = [
+  { t: 'SaaS Landing', d: 'Hero, özellikler, CTA', p: 'Neo AI için modern bir SaaS landing page', c: 'from-sky-500/30 to-indigo-600/30' },
+  { t: 'Görev Uygulaması', d: 'localStorage ile kalıcı', p: 'Şık bir todo görev listesi uygulaması', c: 'from-emerald-500/30 to-teal-600/30' },
+  { t: 'Analitik Panel', d: 'KPI + grafikler', p: 'Startup için analitik dashboard paneli', c: 'from-fuchsia-500/30 to-purple-600/30' },
+  { t: 'Pitch Deck', d: '4 slaytlık sunum', p: 'Northeasterly One yatırımcı sunumu', c: 'from-amber-500/30 to-orange-600/30' },
+];
+
+function useTypewriter(list) {
+  const [text, setText] = useState('');
+  useEffect(() => {
+    let i = 0, j = 0, del = false, t;
+    const step = () => {
+      const w = list[i];
+      if (!del) { j++; if (j > w.length) { del = true; t = setTimeout(step, 1600); return; } }
+      else { j--; if (j === 0) { del = false; i = (i + 1) % list.length; } }
+      setText(w.slice(0, j));
+      t = setTimeout(step, del ? 22 : 45);
+    };
+    step();
+    return () => clearTimeout(t);
+  }, []);
+  return text;
+}
+
+function Home({ onStart }) {
+  const [prompt, setPrompt] = useState('');
+  const [mode, setMode] = useState('Website');
+  const [listening, setListening] = useState(false);
+  const ph = useTypewriter(PLACEHOLDERS);
+  const taRef = useRef(null);
+
+  const submit = () => { if (prompt.trim()) onStart(prompt.trim(), mode); };
+
+  const enhance = () => {
+    const base = prompt.trim() || 'Northeasterly One için bir landing page';
+    setPrompt(base + ' — koyu tema, mavi vurgu rengi, yumuşak animasyonlar, mobil uyumlu ve modern tipografi ile.');
+    taRef.current && taRef.current.focus();
+  };
+
+  const voice = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert('Tarayıcın sesli girişi desteklemiyor.'); return; }
+    const r = new SR(); r.lang = 'tr-TR'; r.interimResults = false;
+    r.onresult = (e) => setPrompt((p) => (p ? p + ' ' : '') + e.results[0][0].transcript);
+    r.onend = () => setListening(false);
+    setListening(true); r.start();
+  };
+
+  return (
+    <main className="px-4 pb-24">
+      <section className="max-w-3xl mx-auto pt-16 sm:pt-28 text-center">
+        <a href="#" className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full glass border border-white/10 animate-rise">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px] shadow-emerald-400" />
+          Neo AI v4 ile güçlendirildi
+          <span className="text-neo-400">→</span>
+        </a>
+        <h1 className="mt-6 text-[40px] leading-[1.05] sm:text-6xl font-extrabold tracking-[-0.035em] grad-text animate-rise" style={{ animationDelay: '.05s' }}>
+          Bugün ne inşa edeceksin?
+        </h1>
+        <p className="mt-4 text-lg sm:text-xl text-slate-300/90 animate-rise" style={{ animationDelay: '.1s' }}>
+          Yapay zekâ ile sohbet ederek muhteşem uygulamalar ve web siteleri oluştur.
+        </p>
+
+        <div className="mt-9 text-left rounded-[28px] bg-[#16171d]/90 border border-white/10 ring-glow animate-rise backdrop-blur-xl" style={{ animationDelay: '.15s' }}>
+          <textarea
+            ref={taRef}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); } }}
+            rows={3}
+            placeholder={ph || ' '}
+            className="w-full bg-transparent outline-none px-6 pt-6 text-[17px] placeholder:text-slate-500"
+          />
+          <div className="flex items-center gap-2 px-4 pb-4">
+            <button className="w-11 h-11 grid place-items-center rounded-full border border-white/15 hover:bg-white/5" title="Dosya ekle"><Icon n="plus" /></button>
+            <button onClick={enhance} className="w-11 h-11 grid place-items-center rounded-full hover:bg-white/5 text-slate-300" title="İstemi geliştir"><Icon n="bulb" /></button>
+            <div className="ml-auto" />
+            <button onClick={voice} className={`w-11 h-11 grid place-items-center rounded-full hover:bg-white/5 ${listening ? 'text-red-400 animate-pulse' : 'text-slate-400'}`} title="Sesli giriş"><Icon n="mic" /></button>
+            <button onClick={submit} disabled={!prompt.trim()} className="h-12 w-20 grid place-items-center rounded-full bg-neo-500 disabled:bg-neo-600/40 disabled:text-white/40 hover:bg-neo-400 transition shadow-lg shadow-neo-500/30">
+              <Icon n="send" stroke={2.2} />
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-8 flex justify-center gap-3 sm:gap-4 animate-rise" style={{ animationDelay: '.2s' }}>
+          {MODES.map((m) => (
+            <button key={m.k} onClick={() => setMode(m.k)} className="group flex flex-col items-center gap-2.5 w-[76px] sm:w-24">
+              <span className={`relative w-[64px] h-[64px] sm:w-20 sm:h-20 grid place-items-center rounded-2xl border transition
+                ${mode === m.k ? 'bg-neo-500/30 border-neo-400/60 shadow-lg shadow-neo-500/30' : 'bg-[#13204a]/70 border-white/10 group-hover:border-white/25'}`}>
+                <Icon n={m.n} className="w-6 h-6" />
+                {m.badge && <span className="absolute -top-2.5 px-2 py-0.5 text-[11px] rounded-md bg-neo-500 font-semibold">{m.badge}</span>}
+              </span>
+              <span className={`text-sm ${mode === m.k ? 'text-white' : 'text-slate-300'}`}>{m.tr}</span>
+            </button>
+          ))}
+        </div>
+
+        <p className="mt-10 text-slate-400">veya şuradan başla</p>
+        <div className="mt-3 flex justify-center gap-3 flex-wrap">
+          <button className="flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 hover:border-white/25 text-sm"><Icon n="figma" className="w-4 h-4" />Figma</button>
+          <button className="flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 hover:border-white/25 text-sm"><Icon n="layout" className="w-4 h-4" />Takım şablonu</button>
+          <button className="flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 hover:border-white/25 text-sm"><Icon n="code" className="w-4 h-4" />GitHub içe aktar</button>
+        </div>
+      </section>
+
+      <section className="max-w-5xl mx-auto mt-24">
+        <div className="flex items-end justify-between mb-5">
+          <h2 className="text-xl font-bold">Şablonlarla hızlı başla</h2>
+          <span className="text-sm text-slate-400">Replit tarzı · tek tıkla</span>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {TEMPLATES.map((t) => (
+            <button key={t.t} onClick={() => onStart(t.p, t.t === 'Pitch Deck' ? 'Slides' : 'App')}
+              className="text-left rounded-2xl p-4 glass border border-white/10 hover:border-neo-400/50 hover:-translate-y-0.5 transition group">
+              <div className={`h-24 rounded-xl bg-gradient-to-br ${t.c} mb-3 grid place-items-center`}>
+                <Icon n="spark" className="w-7 h-7 opacity-70 group-hover:rotate-45 transition duration-500" />
+              </div>
+              <div className="font-semibold">{t.t}</div>
+              <div className="text-xs text-slate-400 mt-0.5">{t.d}</div>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="max-w-5xl mx-auto mt-20 grid sm:grid-cols-3 gap-4">
+        {[
+          ['terminal', 'Tarayıcıda çalışır', 'Kurulum yok. Kod, önizleme ve dosyalar tek ekranda.'],
+          ['rocket', 'Tek tıkla yayınla', 'Projeni indir ya da neoai.com.tr üzerinde paylaş.'],
+          ['chat', 'Sohbetle düzenle', 'Neo AI ile konuşarak tasarımı adım adım geliştir.'],
+        ].map(([n, t, d]) => (
+          <div key={t} className="rounded-2xl p-6 glass border border-white/10">
+            <div className="w-10 h-10 rounded-xl bg-neo-500/20 text-neo-400 grid place-items-center"><Icon n={n} /></div>
+            <h3 className="mt-4 font-semibold">{t}</h3>
+            <p className="mt-1 text-sm text-slate-400">{d}</p>
+          </div>
+        ))}
+      </section>
+
+      <footer className="text-center text-sm text-slate-500 mt-24">
+        © {new Date().getFullYear()} Northeasterly One · Neo AI
+      </footer>
+    </main>
+  );
+}
+
+/* ---------------------------------------------------------------
+   Çalışma alanı (sohbet + kod editörü + canlı önizleme)
+---------------------------------------------------------------- */
+function Workspace({ prompt, mode, onTitle }) {
+  const [messages, setMessages] = useState([]);
+  const [files, setFiles] = useState([]);
+  const [active, setActive] = useState('index.html');
+  const [tab, setTab] = useState('preview');
+  const [mobileTab, setMobileTab] = useState('chat');
+  const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState('');
+  const [input, setInput] = useState('');
+  const [logs, setLogs] = useState([]);
+  const chatRef = useRef(null);
+  const started = useRef(false);
+
+  useEffect(() => { chatRef.current && (chatRef.current.scrollTop = chatRef.current.scrollHeight); }, [messages]);
+
+  const run = useCallback(async (text, m) => {
+    setBusy(true);
+    setMessages((ms) => [...ms, { role: 'user', text }]);
+    const project = generateProject(text, m);
+    onTitle(project.title);
+    const id = Date.now();
+    setMessages((ms) => [...ms, { role: 'ai', id, text: '', steps: project.plan.map((s) => ({ s, done: false })), files: [] }]);
+    setLogs(['$ neo create ' + project.kind, '✓ şablon seçildi: ' + project.kind]);
+
+    const intro = `Harika fikir! "${project.title}" için bir ${({ landing: 'web sitesi', todo: 'uygulama', dashboard: 'dashboard', slides: 'sunum' })[project.kind]} hazırlıyorum.`;
+    for (let i = 1; i <= intro.length; i += 3) {
+      setMessages((ms) => ms.map((x) => (x.id === id ? { ...x, text: intro.slice(0, i) } : x)));
+      await sleep(14);
+    }
+    setMessages((ms) => ms.map((x) => (x.id === id ? { ...x, text: intro } : x)));
+
+    const fresh = project.files.map((f) => ({ ...f, content: '' }));
+    setFiles(fresh);
+    setTab('code');
+    for (let k = 0; k < project.files.length; k++) {
+      const f = project.files[k];
+      setActive(f.name);
+      setMessages((ms) => ms.map((x) => (x.id === id ? { ...x, steps: x.steps.map((st, si) => (si <= k ? { ...st, done: si < k } : st)) } : x)));
+      const lines = f.content.split('\n');
+      for (let l = 1; l <= lines.length; l += 2) {
+        const partial = lines.slice(0, l).join('\n');
+        setFiles((fs) => fs.map((x) => (x.name === f.name ? { ...x, content: partial } : x)));
+        await sleep(18);
+      }
+      setFiles((fs) => fs.map((x) => (x.name === f.name ? { ...x, content: f.content } : x)));
+      setMessages((ms) => ms.map((x) => (x.id === id ? { ...x, files: [...x.files, f.name] } : x)));
+      setLogs((lg) => [...lg, '✓ ' + f.name + ' yazıldı (' + lines.length + ' satır)']);
+    }
+    setMessages((ms) => ms.map((x) => (x.id === id ? { ...x, steps: x.steps.map((st) => ({ ...st, done: true })), doneText: 'Hazır! Önizlemede deneyebilirsin. Değişiklik için bana yazman yeterli ✨' } : x)));
+    setLogs((lg) => [...lg, '$ neo dev', '➜ önizleme hazır: http://localhost:5173']);
+    setPreview(buildPreview(project.files));
+    setTab('preview');
+    setMobileTab('preview');
+    setBusy(false);
+  }, [onTitle]);
+
+  useEffect(() => { if (!started.current) { started.current = true; run(prompt, mode); } }, []);
+
+  const send = () => { if (input.trim() && !busy) { run(input.trim(), mode); setInput(''); } };
+
+  const download = () => {
+    const blob = new Blob([buildPreview(files)], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'neo-proje.html'; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+
+  const current = files.find((f) => f.name === active);
+
+  const Chat = (
+    <div className="flex flex-col h-full min-h-0">
+      <div ref={chatRef} className="flex-1 overflow-y-auto scroll p-4 space-y-4">
+        {messages.map((m, i) => m.role === 'user' ? (
+          <div key={i} className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-neo-500/20 border border-neo-400/30 px-4 py-3 text-sm animate-rise">{m.text}</div>
+        ) : (
+          <div key={i} className="max-w-[92%] animate-rise">
+            <div className="flex items-center gap-2 mb-2 text-xs text-slate-400">
+              <span className="w-5 h-5 rounded-md bg-gradient-to-br from-neo-400 to-neo-600" /> Neo AI
+            </div>
+            <div className="text-sm leading-relaxed">{m.text}{busy && !m.doneText && i === messages.length - 1 && <span className="inline-block w-1.5 h-4 bg-neo-400 align-middle ml-0.5 animate-blink" />}</div>
+            <div className="mt-3 rounded-xl border border-line bg-panel/80 p-3 space-y-2">
+              {m.steps.map((st, k) => (
+                <div key={k} className="flex items-center gap-2 text-[13px]">
+                  {st.done ? <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 grid place-items-center"><Icon n="check" className="w-3 h-3" stroke={3} /></span>
+                    : <span className="w-4 h-4 rounded-full border-2 border-neo-400 border-t-transparent animate-spin" />}
+                  <span className={st.done ? 'text-slate-400' : 'shimmer animate-shimmer'}>{st.s}</span>
+                </div>
+              ))}
+              {m.files.length > 0 && (
+                <div className="pt-2 flex flex-wrap gap-1.5">
+                  {m.files.map((f) => (
+                    <button key={f} onClick={() => { setActive(f); setTab('code'); setMobileTab('code'); }} className="flex items-center gap-1.5 text-xs font-mono px-2 py-1 rounded-md bg-white/5 hover:bg-white/10">
+                      <Icon n="file" className="w-3.5 h-3.5" />{f}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {m.doneText && <div className="mt-3 text-sm text-slate-300">{m.doneText}</div>}
+          </div>
+        ))}
+      </div>
+      <div className="p-3 border-t border-line">
+        <div className="rounded-2xl bg-[#16171d] border border-white/10 focus-within:border-neo-400/50 transition">
+          <textarea value={input} onChange={(e) => setInput(e.target.value)} rows={2}
+            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+            placeholder={busy ? 'Neo AI çalışıyor...' : 'Yeni bir şey iste: "bir dashboard yap"'} disabled={busy}
+            className="w-full bg-transparent outline-none px-4 pt-3 text-sm placeholder:text-slate-500" />
+          <div className="flex justify-end px-2 pb-2">
+            <button onClick={send} disabled={busy || !input.trim()} className="h-9 w-14 grid place-items-center rounded-full bg-neo-500 disabled:opacity-40"><Icon n="send" className="w-4 h-4" stroke={2.2} /></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const Code = (
+    <div className="flex h-full min-h-0">
+      <aside className="hidden sm:block w-48 border-r border-line p-2 text-sm">
+        <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-slate-500">Dosyalar</div>
+        {files.map((f) => (
+          <button key={f.name} onClick={() => setActive(f.name)} className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md font-mono text-[13px] ${active === f.name ? 'bg-neo-500/15 text-white' : 'text-slate-400 hover:bg-white/5'}`}>
+            <Icon n="file" className="w-4 h-4" />{f.name}
+          </button>
+        ))}
+      </aside>
+      <div className="flex-1 min-w-0 flex flex-col">
+        <div className="flex sm:hidden gap-1 p-2 border-b border-line overflow-x-auto">
+          {files.map((f) => (
+            <button key={f.name} onClick={() => setActive(f.name)} className={`px-3 py-1 rounded-md font-mono text-xs whitespace-nowrap ${active === f.name ? 'bg-neo-500/20' : 'text-slate-400'}`}>{f.name}</button>
+          ))}
+        </div>
+        <pre className="flex-1 overflow-auto scroll py-3 font-mono text-[12.5px] leading-6 bg-[#090a10]">
+          {current ? current.content.split('\n').map((ln, k) => (
+            <div key={k} className="code-line flex">
+              <span className="select-none w-10 shrink-0 text-right pr-4 text-slate-600">{k + 1}</span>
+              <span className="whitespace-pre pr-4" dangerouslySetInnerHTML={{ __html: highlight(ln, current.lang) || ' ' }} />
+            </div>
+          )) : <div className="px-4 text-slate-500">Dosyalar oluşturuluyor...</div>}
+        </pre>
+        <div className="h-28 border-t border-line bg-[#07080c] font-mono text-[12px] p-3 overflow-auto scroll text-slate-400">
+          <div className="flex items-center gap-2 text-slate-500 mb-1"><Icon n="terminal" className="w-3.5 h-3.5" />Terminal</div>
+          {logs.map((l, k) => <div key={k} className={l.startsWith('✓') ? 'text-emerald-400/90' : l.startsWith('➜') ? 'text-neo-400' : ''}>{l}</div>)}
+        </div>
+      </div>
+    </div>
+  );
+
+  const Preview = (
+    <div className="h-full flex flex-col min-h-0">
+      <div className="flex items-center gap-2 px-3 h-11 border-b border-line">
+        <div className="flex gap-1.5"><span className="w-3 h-3 rounded-full bg-[#ff5f57]" /><span className="w-3 h-3 rounded-full bg-[#febc2e]" /><span className="w-3 h-3 rounded-full bg-[#28c840]" /></div>
+        <div className="flex-1 mx-2 h-7 rounded-md bg-white/5 text-xs text-slate-400 flex items-center px-3 font-mono truncate">localhost:5173</div>
+        <button onClick={() => setPreview((p) => p + ' ')} className="w-8 h-8 grid place-items-center rounded-md hover:bg-white/5" title="Yenile"><Icon n="refresh" className="w-4 h-4" /></button>
+        <button onClick={download} disabled={!files.length} className="w-8 h-8 grid place-items-center rounded-md hover:bg-white/5 disabled:opacity-40" title="İndir"><Icon n="download" className="w-4 h-4" /></button>
+      </div>
+      <div className="flex-1 bg-white/[.02] relative">
+        {preview ? (
+          <iframe title="Önizleme" srcDoc={preview} sandbox="allow-scripts allow-forms allow-modals" className="absolute inset-0 w-full h-full bg-[#07080d]" />
+        ) : (
+          <div className="absolute inset-0 grid place-items-center text-center">
+            <div>
+              <div className="w-14 h-14 mx-auto rounded-2xl border-2 border-neo-400 border-t-transparent animate-spin" />
+              <p className="mt-4 text-sm shimmer animate-shimmer">Önizleme hazırlanıyor...</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="h-[calc(100dvh-4rem)] flex flex-col">
+      {/* Masaüstü: sohbet | kod/önizleme */}
+      <div className="hidden lg:flex flex-1 min-h-0">
+        <section className="w-[400px] border-r border-line glass">{Chat}</section>
+        <section className="flex-1 min-w-0 flex flex-col bg-panel/90">
+          <div className="flex items-center gap-1 p-2 border-b border-line">
+            {[['code', 'Kod'], ['preview', 'Önizleme']].map(([k, t]) => (
+              <button key={k} onClick={() => setTab(k)} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${tab === k ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}>
+                <Icon n={k === 'code' ? 'code' : 'eye'} className="w-4 h-4" />{t}
+              </button>
+            ))}
+          </div>
+          <div className="flex-1 min-h-0">{tab === 'code' ? Code : Preview}</div>
+        </section>
+      </div>
+      {/* Mobil: sekmeler */}
+      <div className="lg:hidden flex-1 min-h-0 flex flex-col">
+        <div className="flex-1 min-h-0 bg-panel/90">{mobileTab === 'chat' ? Chat : mobileTab === 'code' ? Code : Preview}</div>
+        <nav className="grid grid-cols-3 border-t border-line glass pb-[env(safe-area-inset-bottom)]">
+          {[['chat', 'chat', 'Sohbet'], ['code', 'code', 'Kod'], ['preview', 'eye', 'Önizleme']].map(([k, n, t]) => (
+            <button key={k} onClick={() => setMobileTab(k)} className={`flex flex-col items-center gap-1 py-2.5 text-xs ${mobileTab === k ? 'text-neo-400' : 'text-slate-400'}`}>
+              <Icon n={n} />{t}
+            </button>
+          ))}
+        </nav>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------
+   Uygulama
+---------------------------------------------------------------- */
+function App() {
+  const [job, setJob] = useState(null);
+  const [title, setTitle] = useState('');
+  const home = () => { setJob(null); setTitle(''); };
+  return (
+    <>
+      <NeoScene calm={!!job} />
+      <TopBar onHome={home} inWorkspace={!!job} title={title} />
+      {job ? <Workspace key={job.id} prompt={job.prompt} mode={job.mode} onTitle={setTitle} />
+           : <Home onStart={(prompt, mode) => setJob({ prompt, mode, id: Date.now() })} />}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
