@@ -51,7 +51,7 @@
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
 /* ---------------------------------------------------------------
-   WebGL arka plan: Three.js shader (akan mavi aurora) + Neo çekirdeği
+   WebGL arka plan: Three.js shader (akan mavi aurora)
 ---------------------------------------------------------------- */
 function NeoScene({ calm }) {
   const ref = useRef(null);
@@ -112,29 +112,6 @@ function NeoScene({ calm }) {
     bg.frustumCulled = false; bg.renderOrder = -1;
     scene.add(bg);
 
-    // Neo çekirdeği: tel kafes ikosahedron + parçacık halkası
-    const core = new THREE.Group();
-    const ico = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(1, 1),
-      new THREE.MeshBasicMaterial({ color: 0x7fb8ff, wireframe: true, transparent: true, opacity: 0.28 })
-    );
-    const inner = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(0.55, 2),
-      new THREE.MeshBasicMaterial({ color: 0x2f7bff, transparent: true, opacity: 0.18 })
-    );
-    core.add(ico, inner);
-    const N = 900, pos = new Float32Array(N * 3);
-    for (let i = 0; i < N; i++) {
-      const a = Math.random() * Math.PI * 2, r = 1.6 + Math.random() * 1.4, y = (Math.random() - 0.5) * 0.35;
-      pos[i * 3] = Math.cos(a) * r; pos[i * 3 + 1] = y; pos[i * 3 + 2] = Math.sin(a) * r;
-    }
-    const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    const ring = new THREE.Points(pg, new THREE.PointsMaterial({ color: 0xa9d0ff, size: 0.018, transparent: true, opacity: 0.8 }));
-    ring.rotation.x = 0.35;
-    core.add(ring);
-    core.position.set(0, 1.55, -2);
-    scene.add(core);
-
     const mouse = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5 };
     const onMove = (e) => { const pt = e.touches ? e.touches[0] : e; mouse.tx = pt.clientX / innerWidth; mouse.ty = 1 - pt.clientY / innerHeight; };
     window.addEventListener('pointermove', onMove, { passive: true });
@@ -145,7 +122,6 @@ function NeoScene({ calm }) {
       renderer.domElement.style.width = '100%'; renderer.domElement.style.height = '100%';
       camera.aspect = w / h; camera.updateProjectionMatrix();
       bgUniforms.uRes.value.set(w, h);
-      core.scale.setScalar(w < 640 ? 0.7 : 1);
     };
     resize();
     window.addEventListener('resize', resize);
@@ -161,12 +137,6 @@ function NeoScene({ calm }) {
       bgUniforms.uTime.value += dt;
       bgUniforms.uMouse.value.set(mouse.x, mouse.y);
       bgUniforms.uCalm.value += ((calmRef.current ? 1 : 0) - bgUniforms.uCalm.value) * 0.04;
-      ico.rotation.y += dt * 0.25; ico.rotation.x += dt * 0.1;
-      inner.rotation.y -= dt * 0.4;
-      ring.rotation.y += dt * 0.08;
-      core.rotation.z = (mouse.x - 0.5) * 0.3;
-      core.rotation.x = (mouse.y - 0.5) * 0.3;
-      const s = 1 + Math.sin(now / 900) * 0.03; inner.scale.setScalar(s);
       renderer.render(scene, camera);
     };
     raf = requestAnimationFrame(tick);
